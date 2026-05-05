@@ -1,0 +1,73 @@
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+
+# AI & Claude artifacts — never expose AI tooling to public
+CLAUDE.md
+.claude/
+tasks/
+tasks/todo.md
+tasks/lessons.md
+skills/
+.cursorrules
+.aider*
+*.ai.md
+
+# AI-generated scripts — never expose to public repositories
+*.generated.ts
+*.generated.js
+*.generated.py
+*.generated.sh
+generated/
+ai-output/
+ai_output/
+scripts/generated/
+
+# OS & editor
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+
+# Logs & debug
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node
+node_modules/
+.next/
+.turbo/
+dist/
+build/
+out/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Alembic
+apps/api/alembic/versions/*.pyc
+
+# Docker volumes (local data)
+.docker-data/
+postgres-data/
+redis-data/
+minio-data/
+
+# graph.html — AI-generated artifact
+graph.html
