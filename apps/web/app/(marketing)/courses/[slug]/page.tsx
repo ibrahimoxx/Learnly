@@ -1,0 +1,283 @@
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import type { Metadata } from "next";
+import {
+  Clock, Users, Award, Globe, CheckCircle, PlayCircle, FileText, BarChart,
+} from "lucide-react";
+import { StarRating } from "@/components/features/courses/star-rating";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
+import { EnrollButton } from "./enroll-button";
+import { apiFetch } from "@/lib/api";
+import type { Course, Section, Lesson } from "@/types";
+
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+async function getCourse(slug: string) {
+  try {
+    return await apiFetch<Course>(`/api/v1/courses/${slug}`);
+  } catch {
+    return null;
+  }
+}
+
+async function getSections(courseId: string) {
+  try {
+    return await apiFetch<Section[]>(`/api/v1/courses/${courseId}/sections`);
+  } catch {
+    return [];
+  }
+}
+
+async function getLessons(sectionId: string) {
+  try {
+    return await apiFetch<Lesson[]>(`/api/v1/sections/${sectionId}/lessons`);
+  } catch {
+    return [];
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const course = await getCourse(slug);
+  if (!course) return { title: "Course not found" };
+  return { title: course.title, description: course.description };
+}
+
+const levelLabels: Record<string, string> = {
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  advanced: "Advanced",
+  all_levels: "All Levels",
+};
+
+function formatDuration(seconds: number) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+export default async function CourseDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const course = await getCourse(slug);
+  if (!course || course.status !== "published") notFound();
+
+  const sections = await getSections(course.id);
+  const sectionsWithLessons = await Promise.all(
+    sections.map(async (section) => ({
+      ...section,
+      lessons: await getLessons(section.id),
+    }))
+  );
+
+  const totalLessons = sectionsWithLessons.reduce((acc, s) => acc + s.lessons.length, 0);
+  const price = course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
+
+  return (
+    <div className="min-h-screen">
+      {/* Course hero — dark bg */}
+      <div className="bg-[oklch(14%_0.03_295)] text-white">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <div className="max-w-2xl">
+            {/* Breadcrumb */}
+            <nav className="mb-4 flex items-center gap-2 text-xs text-white/50">
+              <Link href="/courses" className="hover:text-white/80">Courses</Link>
+              <span>/</span>
+              <span className="text-white/70">{course.title}</span>
+            </nav>
+
+            <h1 className="text-2xl font-bold leading-snug sm:text-3xl">{course.title}</h1>
+
+            {course.description && (
+              <p className="mt-3 text-white/70 text-sm leading-relaxed line-clamp-3">
+                {course.description}
+              </p>
+            )}
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Badge variant="default" className="bg-[--color-star] text-white">
+                {levelLabels[course.level] ?? course.level}
+              </Badge>
+              {course.rating_count > 0 && (
+                <StarRating rating={course.rating} count={course.rating_count} />
+              )}
+              <span className="flex items-center gap-1 text-xs text-white/60">
+                <Users className="h-3 w-3" />
+                {course.enrollment_count.toLocaleString()} students
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-4 text-xs text-white/60">
+              <span className="flex items-center gap-1">
+                <Globe className="h-3 w-3" />
+                {course.language}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {formatDuration(course.duration_seconds)} total
+              </span>
+              <span className="flex items-center gap-1">
+                <PlayCircle className="h-3 w-3" />
+                {totalLessons} lessons
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+        <div className="flex flex-col gap-8 lg:flex-row">
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {/* What you'll learn */}
+            <section>
+              <h2 className="text-lg font-bold text-[--color-text-primary]">What you&apos;ll learn</h2>
+              <div className="mt-4 grid grid-cols-1 gap-2 rounded-[--radius-md] border border-[--color-border] p-5 sm:grid-cols-2">
+                {[
+                  "Build real-world projects from scratch",
+                  "Master core concepts and best practices",
+                  "Gain hands-on experience through exercises",
+                  "Earn a certificate upon completion",
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-2">
+                    <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
+                    <span className="text-sm text-[--color-text-secondary]">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Course includes */}
+            <section className="mt-8">
+              <h2 className="text-lg font-bold text-[--color-text-primary]">This course includes</h2>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {[
+                  { icon: PlayCircle, text: `${formatDuration(course.duration_seconds)} on-demand video` },
+                  { icon: FileText, text: `${sections.length} sections, ${totalLessons} lessons` },
+                  { icon: BarChart, text: levelLabels[course.level] ?? course.level },
+                  { icon: Award, text: "Certificate of completion" },
+                ].map(({ icon: Icon, text }) => (
+                  <div key={text} className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
+                    <Icon className="h-4 w-4 text-[--color-text-muted]" />
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <Separator className="my-8" />
+
+            {/* Curriculum */}
+            <section>
+              <h2 className="text-lg font-bold text-[--color-text-primary]">Course curriculum</h2>
+              <p className="mt-1 text-sm text-[--color-text-muted]">
+                {sections.length} sections • {totalLessons} lessons •{" "}
+                {formatDuration(course.duration_seconds)} total length
+              </p>
+
+              {sectionsWithLessons.length > 0 ? (
+                <Accordion type="multiple" className="mt-4">
+                  {sectionsWithLessons.map((section) => (
+                    <AccordionItem key={section.id} value={section.id}>
+                      <AccordionTrigger className="font-semibold text-[--color-text-primary]">
+                        <span className="flex-1 text-left">{section.title}</span>
+                        <span className="mr-4 text-xs font-normal text-[--color-text-muted]">
+                          {section.lessons.length} lessons
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="divide-y divide-[--color-border]">
+                          {section.lessons.map((lesson) => (
+                            <li key={lesson.id} className="flex items-center gap-3 py-2.5">
+                              {lesson.lesson_type === "video" ? (
+                                <PlayCircle className="h-4 w-4 shrink-0 text-[--color-text-muted]" />
+                              ) : (
+                                <FileText className="h-4 w-4 shrink-0 text-[--color-text-muted]" />
+                              )}
+                              <span className="flex-1 text-sm text-[--color-text-secondary]">
+                                {lesson.title}
+                              </span>
+                              {lesson.is_free_preview && (
+                                <Badge variant="success" className="text-xs">Preview</Badge>
+                              )}
+                              {lesson.duration_seconds > 0 && (
+                                <span className="text-xs text-[--color-text-muted]">
+                                  {formatDuration(lesson.duration_seconds)}
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                <p className="mt-4 text-sm text-[--color-text-muted]">
+                  Curriculum will be published soon.
+                </p>
+              )}
+            </section>
+          </div>
+
+          {/* Sticky sidebar */}
+          <aside className="lg:w-80 shrink-0">
+            <div className="sticky top-24 rounded-[--radius-md] border border-[--color-border] bg-white shadow-[0_4px_20px_rgba(0,0,0,.1)] overflow-hidden">
+              {/* Preview thumbnail */}
+              <div className="relative aspect-video bg-[--color-surface]">
+                {course.thumbnail_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={course.thumbnail_url}
+                    alt={course.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <PlayCircle className="h-12 w-12 text-[--color-border]" />
+                  </div>
+                )}
+              </div>
+
+              <div className="p-5">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-3xl font-bold text-[--color-text-primary]">{price}</span>
+                </div>
+
+                <EnrollButton courseId={course.id} isFree={course.is_free} />
+
+                <p className="mt-3 text-center text-xs text-[--color-text-muted]">
+                  30-Day Money-Back Guarantee
+                </p>
+
+                <Separator className="my-4" />
+
+                <div className="space-y-2 text-sm">
+                  {[
+                    { label: "Level", value: levelLabels[course.level] ?? course.level },
+                    { label: "Language", value: course.language },
+                    { label: "Duration", value: formatDuration(course.duration_seconds) },
+                    { label: "Lessons", value: totalLessons.toString() },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex justify-between">
+                      <span className="text-[--color-text-muted]">{label}</span>
+                      <span className="font-medium text-[--color-text-secondary]">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
