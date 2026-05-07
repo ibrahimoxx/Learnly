@@ -23,7 +23,10 @@ async def _get_jwks() -> dict:
     if _jwks_cache:
         return _jwks_cache
     async with httpx.AsyncClient() as client:
-        resp = await client.get("https://api.clerk.com/v1/jwks")
+        resp = await client.get(
+            "https://api.clerk.com/v1/jwks",
+            headers={"Authorization": f"Bearer {settings.clerk_secret_key}"},
+        )
         resp.raise_for_status()
         _jwks_cache = resp.json()
     return _jwks_cache
