@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth, useSignIn } from "@clerk/nextjs";
+import { useAuth, SignInButton } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
@@ -15,15 +15,20 @@ interface Props {
 
 export function EnrollButton({ courseId, isFree }: Props) {
   const { isSignedIn, getToken } = useAuth();
-  const { openSignIn } = useSignIn() ?? {};
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  if (!isSignedIn) {
+    return (
+      <SignInButton mode="modal">
+        <Button className="mt-4 w-full text-sm font-semibold" size="lg">
+          {isFree ? "Enroll for free" : "Buy now"}
+        </Button>
+      </SignInButton>
+    );
+  }
+
   async function handleEnroll() {
-    if (!isSignedIn) {
-      openSignIn?.();
-      return;
-    }
 
     setLoading(true);
     try {

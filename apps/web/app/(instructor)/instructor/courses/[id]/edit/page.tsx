@@ -61,7 +61,7 @@ export default function CourseEditorPage() {
       setSections(
         sectionsData.map((s, i) => ({
           ...s,
-          lessons: lessonsPerSection[i],
+          lessons: lessonsPerSection[i] ?? [],
           expanded: true,
         }))
       );

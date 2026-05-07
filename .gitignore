@@ -47,6 +47,7 @@ node_modules/
 dist/
 build/
 out/
+*.tsbuildinfo
 
 # Python
 __pycache__/
