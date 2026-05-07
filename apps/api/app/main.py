@@ -2,6 +2,7 @@ import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import app.db.tables  # noqa: F401 — registers all models with SQLAlchemy mapper
 from app.api.v1.health import router as health_router
 from app.api.v1.webhooks import router as webhooks_router
 from app.api.v1.courses import router as courses_router

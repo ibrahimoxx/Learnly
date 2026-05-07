@@ -25,9 +25,9 @@ export function CourseCard({ course }: CourseCardProps) {
       <div className="overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-white transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,.12)]">
         {/* Thumbnail */}
         <div className="relative aspect-video w-full overflow-hidden bg-[--color-surface]">
-          {course.thumbnail_url ? (
+          {course.image_url ? (
             <Image
-              src={course.thumbnail_url}
+              src={course.image_url}
               alt={course.title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
@@ -51,16 +51,16 @@ export function CourseCard({ course }: CourseCardProps) {
             <Badge variant="secondary">{levelLabels[course.level] ?? course.level}</Badge>
           </div>
 
-          {course.rating_count > 0 && (
+          {course.review_count > 0 && (
             <div className="mt-2">
-              <StarRating rating={course.rating} count={course.rating_count} />
+              <StarRating rating={Number(course.rating)} count={course.review_count} />
             </div>
           )}
 
           <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-1 text-xs text-[--color-text-muted]">
               <Users className="h-3 w-3" />
-              <span>{course.enrollment_count.toLocaleString()} students</span>
+              <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
             </div>
             <span className="text-sm font-bold text-[--color-text-primary]">{price}</span>
           </div>

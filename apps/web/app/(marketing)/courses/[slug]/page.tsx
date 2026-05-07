@@ -105,8 +105,8 @@ export default async function CourseDetailPage({ params }: Props) {
               <Badge variant="default" className="bg-[--color-star] text-white">
                 {levelLabels[course.level] ?? course.level}
               </Badge>
-              {course.rating_count > 0 && (
-                <StarRating rating={course.rating} count={course.rating_count} />
+              {course.review_count > 0 && (
+                <StarRating rating={course.rating} count={course.review_count} />
               )}
               <span className="flex items-center gap-1 text-xs text-white/60">
                 <Users className="h-3 w-3" />
@@ -121,7 +121,7 @@ export default async function CourseDetailPage({ params }: Props) {
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {formatDuration(course.duration_seconds)} total
+                {formatDuration(course.total_duration_seconds)} total
               </span>
               <span className="flex items-center gap-1">
                 <PlayCircle className="h-3 w-3" />
@@ -160,7 +160,7 @@ export default async function CourseDetailPage({ params }: Props) {
               <h2 className="text-lg font-bold text-[--color-text-primary]">This course includes</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[
-                  { icon: PlayCircle, text: `${formatDuration(course.duration_seconds)} on-demand video` },
+                  { icon: PlayCircle, text: `${formatDuration(course.total_duration_seconds)} on-demand video` },
                   { icon: FileText, text: `${sections.length} sections, ${totalLessons} lessons` },
                   { icon: BarChart, text: levelLabels[course.level] ?? course.level },
                   { icon: Award, text: "Certificate of completion" },
@@ -180,7 +180,7 @@ export default async function CourseDetailPage({ params }: Props) {
               <h2 className="text-lg font-bold text-[--color-text-primary]">Course curriculum</h2>
               <p className="mt-1 text-sm text-[--color-text-muted]">
                 {sections.length} sections • {totalLessons} lessons •{" "}
-                {formatDuration(course.duration_seconds)} total length
+                {formatDuration(course.total_duration_seconds)} total length
               </p>
 
               {sectionsWithLessons.length > 0 ? (
@@ -233,10 +233,10 @@ export default async function CourseDetailPage({ params }: Props) {
             <div className="sticky top-24 rounded-[--radius-md] border border-[--color-border] bg-white shadow-[0_4px_20px_rgba(0,0,0,.1)] overflow-hidden">
               {/* Preview thumbnail */}
               <div className="relative aspect-video bg-[--color-surface]">
-                {course.thumbnail_url ? (
+                {course.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={course.thumbnail_url}
+                    src={course.image_url}
                     alt={course.title}
                     className="h-full w-full object-cover"
                   />
@@ -264,7 +264,7 @@ export default async function CourseDetailPage({ params }: Props) {
                   {[
                     { label: "Level", value: levelLabels[course.level] ?? course.level },
                     { label: "Language", value: course.language },
-                    { label: "Duration", value: formatDuration(course.duration_seconds) },
+                    { label: "Duration", value: formatDuration(course.total_duration_seconds) },
                     { label: "Lessons", value: totalLessons.toString() },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between">

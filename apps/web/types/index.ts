@@ -1,6 +1,6 @@
 export type UserRole = "student" | "instructor" | "admin";
-export type CourseStatus = "draft" | "published" | "archived";
-export type CourseLevel = "beginner" | "intermediate" | "advanced" | "all_levels";
+export type CourseStatus = "draft" | "in_review" | "published" | "archived";
+export type CourseLevel = "beginner" | "intermediate" | "expert" | "all";
 export type EnrollmentStatus = "active" | "completed" | "refunded";
 export type LessonType = "video" | "article" | "quiz";
 
@@ -8,18 +8,21 @@ export interface Course {
   id: string;
   title: string;
   slug: string;
+  subtitle?: string;
   description?: string;
-  thumbnail_url?: string;
-  preview_video_url?: string;
+  image_url?: string;
+  promo_video_url?: string;
   price_in_cents: number;
   is_free: boolean;
   status: CourseStatus;
   level: CourseLevel;
   language: string;
-  duration_seconds: number;
+  currency: string;
+  total_duration_seconds: number;
+  total_lessons: number;
   enrollment_count: number;
   rating: number;
-  rating_count: number;
+  review_count: number;
   instructor_id: string;
   category_id?: string;
   created_at: string;
@@ -68,5 +71,6 @@ export interface CourseListResponse {
   items: Course[];
   total: number;
   page: number;
-  per_page: number;
+  limit: number;
+  total_pages: number;
 }
