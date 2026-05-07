@@ -69,6 +69,15 @@ async def list_courses(
     )
 
 
+@router.get("/mine", response_model=list[CourseRead])
+async def my_courses(
+    instructor: User = Depends(require_instructor),
+    db: AsyncSession = Depends(get_db),
+) -> list[CourseRead]:
+    result = await db.execute(select(Course).where(Course.instructor_id == instructor.id))
+    return [CourseRead.model_validate(c) for c in result.scalars().all()]
+
+
 @router.post("", response_model=CourseRead, status_code=status.HTTP_201_CREATED)
 async def create_course(
     body: CourseCreate,

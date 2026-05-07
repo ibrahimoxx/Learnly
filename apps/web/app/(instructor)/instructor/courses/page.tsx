@@ -25,11 +25,11 @@ export default function InstructorCoursesPage() {
     async function load() {
       const token = await getToken();
       try {
-        const data = await apiFetch<{ items: Course[]; total: number }>(
-          "/api/v1/courses?per_page=50",
+        const data = await apiFetch<Course[]>(
+          "/api/v1/courses/mine",
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setCourses(data.items);
+        setCourses(data);
       } catch {
         setCourses([]);
       } finally {
