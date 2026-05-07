@@ -1,0 +1,181 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { Plus, Edit, BarChart2, BookOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { apiFetch } from "@/lib/api";
+import type { Course } from "@/types";
+
+const statusVariant: Record<string, "default" | "secondary" | "success" | "outline"> = {
+  published: "success",
+  draft: "secondary",
+  archived: "outline",
+};
+
+export default function InstructorCoursesPage() {
+  const { getToken } = useAuth();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const token = await getToken();
+      try {
+        const data = await apiFetch<{ items: Course[]; total: number }>(
+          "/api/v1/courses?per_page=50",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCourses(data.items);
+      } catch {
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [getToken]);
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-[--color-text-primary]">My Courses</h1>
+          <p className="mt-1 text-sm text-[--color-text-muted]">
+            Create and manage your courses
+          </p>
+        </div>
+        <CreateCourseButton token={null} onCreated={(c) => setCourses((prev) => [c, ...prev])} getToken={getToken} />
+      </div>
+
+      {loading ? (
+        <div className="mt-6 space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-[--radius-md]" />
+          ))}
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="mt-12 flex flex-col items-center rounded-[--radius-lg] border border-dashed border-[--color-border] bg-white py-16 text-center">
+          <BookOpen className="h-12 w-12 text-[--color-border]" />
+          <h3 className="mt-4 font-semibold text-[--color-text-secondary]">No courses yet</h3>
+          <p className="mt-1 text-sm text-[--color-text-muted]">
+            Create your first course and start sharing your knowledge.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-6 space-y-3">
+          {courses.map((course) => (
+            <div
+              key={course.id}
+              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-white p-4"
+            >
+              {/* Color swatch */}
+              <div className="hidden h-14 w-20 shrink-0 rounded-[--radius-sm] bg-gradient-to-br from-[--color-primary]/10 to-[--color-primary]/5 sm:block" />
+
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-semibold text-[--color-text-primary] truncate">{course.title}</h3>
+                  <Badge variant={statusVariant[course.status] ?? "secondary"}>
+                    {course.status}
+                  </Badge>
+                </div>
+                <div className="mt-1 flex flex-wrap gap-3 text-xs text-[--color-text-muted]">
+                  <span>{course.enrollment_count} students</span>
+                  <span>
+                    {course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`}
+                  </span>
+                  {course.rating_count > 0 && (
+                    <span>{course.rating.toFixed(1)}★ ({course.rating_count})</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">
+                <Link href={`/instructor/courses/${course.id}/edit`}>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Edit className="h-3 w-3" /> Edit
+                  </Button>
+                </Link>
+                <Link href={`/courses/${course.slug}`}>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <BarChart2 className="h-3 w-3" /> View
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CreateCourseButton({
+  onCreated,
+  getToken,
+}: {
+  token: null;
+  onCreated: (c: Course) => void;
+  getToken: () => Promise<string | null>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleCreate() {
+    if (!title.trim()) return;
+    setSubmitting(true);
+    const token = await getToken();
+    try {
+      const course = await apiFetch<Course>("/api/v1/courses", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          title: title.trim(),
+          level: "all_levels",
+          language: "English",
+          is_free: true,
+          price_in_cents: 0,
+        }),
+      });
+      onCreated(course);
+      setTitle("");
+      setOpen(false);
+    } catch {
+      // error handled by toast in production
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <Button onClick={() => setOpen(true)} className="gap-2">
+        <Plus className="h-4 w-4" /> New Course
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        autoFocus
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+        placeholder="Course title"
+        className="h-9 rounded-[--radius-sm] border border-[--color-border] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+      />
+      <Button onClick={handleCreate} disabled={submitting} size="sm">
+        {submitting ? "Creating…" : "Create"}
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => { setOpen(false); setTitle(""); }}>
+        Cancel
+      </Button>
+    </div>
+  );
+}
