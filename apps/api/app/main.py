@@ -23,6 +23,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.app_url],
+    allow_origin_regex=r"http://localhost:\d+" if settings.node_env == "development" else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

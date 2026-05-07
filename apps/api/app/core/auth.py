@@ -58,7 +58,27 @@ async def get_current_user(
     user = result.scalar_one_or_none()
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found in DB")
+        # Webhook may not have fired yet — auto-provision on first API call
+        email: str = (
+            payload.get("email")
+            or (payload.get("email_addresses") or [{}])[0].get("email_address", "")
+            or f"{clerk_id}@unknown.local"
+        )
+        first_name: str = payload.get("first_name") or ""
+        last_name: str = payload.get("last_name") or ""
+        user = User(
+            clerk_id=clerk_id,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            role="student",
+            is_active=True,
+        )
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+        log.info("user_auto_provisioned", clerk_id=clerk_id, email=email)
+
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account suspended")
     return user
