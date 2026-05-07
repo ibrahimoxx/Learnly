@@ -54,7 +54,7 @@ const levelLabels: Record<string, string> = {
   beginner: "Beginner",
   intermediate: "Intermediate",
   advanced: "Advanced",
-  all_levels: "All Levels",
+  all: "All Levels",
 };
 
 function formatDuration(seconds: number) {

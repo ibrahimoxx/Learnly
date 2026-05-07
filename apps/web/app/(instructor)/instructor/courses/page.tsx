@@ -88,8 +88,8 @@ export default function InstructorCoursesPage() {
                   <span>
                     {course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`}
                   </span>
-                  {course.rating_count > 0 && (
-                    <span>{course.rating.toFixed(1)}★ ({course.rating_count})</span>
+                  {course.review_count > 0 && (
+                    <span>{Number(course.rating).toFixed(1)}★ ({course.review_count})</span>
                   )}
                 </div>
               </div>
@@ -136,7 +136,7 @@ function CreateCourseButton({
         headers: { Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           title: title.trim(),
-          level: "all_levels",
+          level: "all",
           language: "English",
           is_free: true,
           price_in_cents: 0,
