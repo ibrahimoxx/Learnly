@@ -358,7 +358,7 @@ export default function CourseEditorPage() {
                               )
                             );
                           }}
-                          className="flex-1 text-sm text-[--color-text-secondary]"
+                          className="min-w-0 flex-1 text-sm text-[--color-text-secondary]"
                         />
                         <Badge variant="outline" className="shrink-0">{lesson.lesson_type}</Badge>
                         {lesson.lesson_type === "video" && (
