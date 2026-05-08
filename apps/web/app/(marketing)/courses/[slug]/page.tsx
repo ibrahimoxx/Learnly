@@ -197,7 +197,7 @@ export default async function CourseDetailPage({ params }: Props) {
                         <ul className="divide-y divide-[--color-border]">
                           {section.lessons.map((lesson) => (
                             <li key={lesson.id} className="flex items-center gap-3 py-2.5">
-                              {lesson.lesson_type === "video" ? (
+                              {lesson.type === "video" ? (
                                 <PlayCircle className="h-4 w-4 shrink-0 text-[--color-text-muted]" />
                               ) : (
                                 <FileText className="h-4 w-4 shrink-0 text-[--color-text-muted]" />

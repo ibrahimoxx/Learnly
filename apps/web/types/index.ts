@@ -41,11 +41,11 @@ export interface Lesson {
   section_id: string;
   title: string;
   position: number;
-  duration_seconds: number;
+  duration_seconds: number | null;
   is_free_preview: boolean;
   video_url?: string;
-  article_body?: string;
-  lesson_type: LessonType;
+  content?: string;
+  type: LessonType;
 }
 
 export interface Enrollment {

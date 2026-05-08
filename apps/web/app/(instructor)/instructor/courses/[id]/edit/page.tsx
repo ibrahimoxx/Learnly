@@ -166,7 +166,7 @@ export default function CourseEditorPage() {
         body: JSON.stringify({
           title: "New Lesson",
           position: section.lessons.length,
-          lesson_type: "video",
+          type: "video",
           is_free_preview: false,
           duration_seconds: 0,
         }),
@@ -360,8 +360,8 @@ export default function CourseEditorPage() {
                           }}
                           className="min-w-0 flex-1 text-sm text-[--color-text-secondary]"
                         />
-                        <Badge variant="outline" className="shrink-0">{lesson.lesson_type}</Badge>
-                        {lesson.lesson_type === "video" && (
+                        <Badge variant="outline" className="shrink-0">{lesson.type}</Badge>
+                        {lesson.type === "video" && (
                           <button
                             onClick={() => getUploadUrl(section.id, lesson.id)}
                             className="flex items-center gap-1 rounded-sm border border-[--color-border] px-2 py-1 text-xs text-[--color-text-muted] hover:border-[--color-primary] hover:text-[--color-primary] transition-colors shrink-0"
