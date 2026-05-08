@@ -90,7 +90,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       <div className="flex flex-1 overflow-hidden">
         {/* Video / content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          {currentLesson.lesson_type === "video" ? (
+          {currentLesson.type === "video" ? (
             <div className="relative flex-1 bg-black">
               {currentLesson.video_url ? (
                 <video
@@ -115,9 +115,9 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           ) : (
             <div className="flex-1 overflow-y-auto p-8">
               <h2 className="text-xl font-bold text-white">{currentLesson.title}</h2>
-              {currentLesson.article_body ? (
+              {currentLesson.content ? (
                 <div className="mt-4 prose prose-invert max-w-none text-white/80">
-                  {currentLesson.article_body}
+                  {currentLesson.content}
                 </div>
               ) : (
                 <p className="mt-4 text-white/50">Content coming soon.</p>
