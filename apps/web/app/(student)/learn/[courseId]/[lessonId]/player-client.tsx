@@ -168,7 +168,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                         <span className="mt-0.5 shrink-0">
                           {isCurrent ? (
                             <PlayCircle className="h-4 w-4 text-[--color-primary]" />
-                          ) : lesson.lesson_type === "video" ? (
+                          ) : lesson.type === "video" ? (
                             <Circle className="h-4 w-4 text-white/30" />
                           ) : (
                             <FileText className="h-4 w-4 text-white/30" />
