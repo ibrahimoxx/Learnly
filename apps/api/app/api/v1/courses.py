@@ -41,23 +41,26 @@ async def list_courses(
     status_filter: str | None = Query(None, alias="status"),
     level: str | None = None,
     language: str | None = None,
+    q: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ) -> PaginatedCourses:
-    q = select(Course)
+    query = select(Course)
     if status_filter:
-        q = q.where(Course.status == status_filter)
+        query = query.where(Course.status == status_filter)
     else:
-        q = q.where(Course.status == "published")
+        query = query.where(Course.status == "published")
     if level:
-        q = q.where(Course.level == level)
+        query = query.where(Course.level == level)
     if language:
-        q = q.where(Course.language == language)
+        query = query.where(Course.language == language)
+    if q:
+        query = query.where(Course.title.ilike(f"%{q}%"))
 
-    total_result = await db.execute(select(func.count()).select_from(q.subquery()))
+    total_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = total_result.scalar_one()
 
-    q = q.offset((page - 1) * limit).limit(limit)
-    result = await db.execute(q)
+    query = query.offset((page - 1) * limit).limit(limit)
+    result = await db.execute(query)
     courses = result.scalars().all()
 
     return PaginatedCourses(

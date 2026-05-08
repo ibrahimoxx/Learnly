@@ -206,7 +206,7 @@ export default function CourseEditorPage() {
     try {
       const { upload_url } = await apiFetch<{ upload_url: string; key: string }>(
         `/api/v1/sections/${sectionId}/lessons/${lessonId}/upload-url`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { method: "POST", headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Upload URL ready — copy it to upload your video.");
       await navigator.clipboard.writeText(upload_url).catch(() => null);

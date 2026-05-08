@@ -10,7 +10,7 @@ interface Props {
 }
 
 async function getCourses(params: { q?: string; category?: string; level?: string; page?: string }) {
-  const searchParams = new URLSearchParams({ status: "published", per_page: "24" });
+  const searchParams = new URLSearchParams({ status: "published", limit: "24" });
   if (params.q) searchParams.set("q", params.q);
   if (params.category) searchParams.set("category", params.category);
   if (params.level) searchParams.set("level", params.level);
