@@ -21,7 +21,7 @@ interface Props {
 
 async function getCourse(slug: string) {
   try {
-    return await apiFetch<Course>(`/api/v1/courses/${slug}`);
+    return await apiFetch<Course>(`/api/v1/courses/slug/${slug}`);
   } catch {
     return null;
   }
