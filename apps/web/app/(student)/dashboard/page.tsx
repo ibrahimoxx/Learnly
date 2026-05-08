@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { PlayCircle, Award, BookOpen } from "lucide-react";
+import { PlayCircle, Award, BookOpen, Download } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -104,7 +104,24 @@ function EnrollmentGrid({ enrollments }: { enrollments: Enrollment[] }) {
 }
 
 function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
+  const { getToken } = useAuth();
   const isCompleted = enrollment.status === "completed";
+
+  async function downloadCertificate() {
+    const token = await getToken();
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/enrollments/${enrollment.id}/certificate`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `certificate-${enrollment.id}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-white">
@@ -148,6 +165,14 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
         >
           {isCompleted ? "Review course" : "Continue learning"}
         </Link>
+        {isCompleted && (
+          <button
+            onClick={downloadCertificate}
+            className="mt-2 flex w-full items-center justify-center gap-1 rounded-[--radius-sm] border border-[--color-border] py-2 text-xs font-semibold text-[--color-text-secondary] hover:border-[--color-star] hover:text-[--color-star] transition-colors"
+          >
+            <Download className="h-3 w-3" /> Download Certificate
+          </button>
+        )}
       </div>
     </div>
   );
