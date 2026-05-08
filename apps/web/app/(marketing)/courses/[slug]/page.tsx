@@ -208,7 +208,7 @@ export default async function CourseDetailPage({ params }: Props) {
                               {lesson.is_free_preview && (
                                 <Badge variant="success" className="text-xs">Preview</Badge>
                               )}
-                              {lesson.duration_seconds > 0 && (
+                              {lesson.duration_seconds != null && lesson.duration_seconds > 0 && (
                                 <span className="text-xs text-[--color-text-muted]">
                                   {formatDuration(lesson.duration_seconds)}
                                 </span>
