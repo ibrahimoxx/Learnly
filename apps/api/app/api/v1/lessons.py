@@ -1,11 +1,13 @@
 import uuid
 
+import arq
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import require_instructor
+from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.lesson import Lesson
@@ -114,4 +116,10 @@ async def get_video_upload_url(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
     key = f"videos/{lesson_id}.mp4"
     upload_url = await get_upload_url(key)
+    try:
+        redis = await arq.create_pool(arq.connections.RedisSettings.from_dsn(settings.redis_url))
+        await redis.enqueue_job("encode_video", lesson_id=str(lesson_id), key=key)
+        await redis.aclose()
+    except Exception:
+        log.warning("arq_enqueue_failed", lesson_id=str(lesson_id))
     return VideoUploadURL(upload_url=upload_url, key=key)

@@ -3,8 +3,10 @@ from datetime import datetime, timezone
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.auth import get_current_user
 from app.db.session import get_db
@@ -15,6 +17,7 @@ from app.db.tables.lesson_progress import LessonProgress
 from app.db.tables.section import Section
 from app.db.tables.user import User
 from app.schemas.enrollment import EnrollmentCreate, EnrollmentRead, ProgressRead, ProgressUpdate
+from app.services.certificate import generate_certificate_pdf
 
 log = structlog.get_logger()
 router = APIRouter(tags=["enrollments"])
@@ -130,3 +133,53 @@ async def _check_course_completion(enrollment: Enrollment, db: AsyncSession) -> 
         enrollment.completed_at = datetime.now(timezone.utc)
         await db.commit()
         log.info("course_completed", enrollment_id=str(enrollment.id))
+
+
+@router.get("/enrollments/{enrollment_id}/certificate")
+async def download_certificate(
+    enrollment_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    result = await db.execute(
+        select(Enrollment)
+        .options(selectinload(Enrollment.course), selectinload(Enrollment.student))
+        .where(Enrollment.id == enrollment_id, Enrollment.student_id == user.id)
+    )
+    enrollment = result.scalar_one_or_none()
+    if not enrollment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+    if enrollment.status != "completed":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course not completed")
+
+    course_result = await db.execute(
+        select(Course).where(Course.id == enrollment.course_id)
+    )
+    course = course_result.scalar_one_or_none()
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+
+    instructor_result = await db.execute(
+        select(User).where(User.id == course.instructor_id)
+    )
+    instructor = instructor_result.scalar_one_or_none()
+
+    student_name = f"{user.first_name} {user.last_name}".strip() or user.email
+    instructor_name = (
+        f"{instructor.first_name} {instructor.last_name}".strip() if instructor else "Learnly"
+    )
+    completion_date = (enrollment.completed_at or datetime.now(timezone.utc)).date()
+
+    pdf = generate_certificate_pdf(
+        student_name=student_name,
+        course_title=course.title,
+        instructor_name=instructor_name,
+        completion_date=completion_date,
+        enrollment_id=str(enrollment_id),
+    )
+
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="certificate-{enrollment_id}.pdf"'},
+    )
