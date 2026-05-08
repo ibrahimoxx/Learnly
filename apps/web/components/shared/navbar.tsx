@@ -19,6 +19,8 @@ export function Navbar() {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/courses?q=${encodeURIComponent(query.trim())}`);
+    } else {
+      router.push("/courses");
     }
   }
 
