@@ -56,6 +56,9 @@ class Course(Base):
     category_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("categories.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    organization_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -63,6 +66,7 @@ class Course(Base):
     )
 
     instructor: Mapped["User"] = relationship("User", back_populates="courses")  # type: ignore[name-defined]
+    organization: Mapped["Organization | None"] = relationship("Organization", back_populates="courses")  # type: ignore[name-defined]
     category: Mapped["Category | None"] = relationship("Category", back_populates="courses")  # type: ignore[name-defined]
     sections: Mapped[list["Section"]] = relationship(  # type: ignore[name-defined]
         "Section", back_populates="course", cascade="all, delete-orphan", order_by="Section.position"
