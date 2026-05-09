@@ -14,6 +14,7 @@ from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
+from app.db.tables.organization import Organization
 from app.db.tables.user import User
 from app.email import service as email_service
 from app.integrations import stripe_client as _stripe_init  # noqa: F401 — sets api_key
@@ -69,6 +70,12 @@ async def clerk_webhook(
         await _upsert_user(db, data)
     elif event_type == "user.deleted":
         await _deactivate_user(db, data.get("id", ""))
+    elif event_type == "organization.created":
+        await _upsert_organization(db, data)
+    elif event_type == "organization.updated":
+        await _upsert_organization(db, data)
+    elif event_type == "organization.deleted":
+        await _deactivate_organization(db, data.get("id", ""))
 
     return {"received": True}
 
@@ -103,6 +110,48 @@ async def _upsert_user(db: AsyncSession, data: dict) -> None:
 
     await db.commit()
     log.info("user_upserted", clerk_id=clerk_id, role=role)
+
+
+async def _upsert_organization(db: AsyncSession, data: dict) -> None:
+    import re
+
+    clerk_org_id: str = data["id"]
+    name: str = data.get("name") or "Unnamed Org"
+    raw_slug: str = data.get("slug") or re.sub(r"[^\w\s-]", "", name.lower()).strip()
+    slug = re.sub(r"[\s_-]+", "-", raw_slug)[:100]
+    logo_url: str | None = data.get("image_url")
+
+    result = await db.execute(select(Organization).where(Organization.clerk_org_id == clerk_org_id))
+    org = result.scalar_one_or_none()
+
+    if org:
+        org.name = name
+        org.logo_url = logo_url
+    else:
+        # Ensure slug uniqueness
+        base = slug
+        i = 1
+        while True:
+            existing = await db.execute(select(Organization).where(Organization.slug == slug))
+            if not existing.scalar_one_or_none():
+                break
+            slug = f"{base}-{i}"
+            i += 1
+
+        org = Organization(clerk_org_id=clerk_org_id, name=name, slug=slug, logo_url=logo_url)
+        db.add(org)
+
+    await db.commit()
+    log.info("organization_upserted", clerk_org_id=clerk_org_id, slug=slug)
+
+
+async def _deactivate_organization(db: AsyncSession, clerk_org_id: str) -> None:
+    result = await db.execute(select(Organization).where(Organization.clerk_org_id == clerk_org_id))
+    org = result.scalar_one_or_none()
+    if org:
+        org.is_active = False
+        await db.commit()
+        log.info("organization_deactivated", clerk_org_id=clerk_org_id)
 
 
 async def _deactivate_user(db: AsyncSession, clerk_id: str) -> None:
