@@ -4,19 +4,35 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment } from "@/types";
 
 interface Props {
   courseId: string;
   isFree: boolean;
+  priceInCents: number;
 }
 
-export function EnrollButton({ courseId, isFree }: Props) {
+interface CouponResult {
+  valid: boolean;
+  discount_type: string;
+  discount_value: number;
+  original_price_cents: number;
+  discounted_price_cents: number;
+  message: string;
+}
+
+export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   const { isSignedIn, getToken } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showCoupon, setShowCoupon] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   if (!isSignedIn) {
     return (
@@ -26,6 +42,29 @@ export function EnrollButton({ courseId, isFree }: Props) {
         </Button>
       </SignInButton>
     );
+  }
+
+  async function applyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const result = await apiFetch<CouponResult>("/api/v1/coupons/validate", {
+        method: "POST",
+        body: JSON.stringify({ code: couponCode.trim(), course_id: courseId }),
+      });
+      setCouponResult(result);
+      if (!result.valid) toast.error(result.message);
+    } catch {
+      toast.error("Failed to validate coupon");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function clearCoupon() {
+    setCouponCode("");
+    setCouponResult(null);
+    setShowCoupon(false);
   }
 
   async function handleEnroll() {
@@ -39,7 +78,10 @@ export function EnrollButton({ courseId, isFree }: Props) {
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ course_id: courseId }),
+            body: JSON.stringify({
+              course_id: courseId,
+              coupon_code: couponResult?.valid ? couponCode.trim() : undefined,
+            }),
           }
         );
         window.location.href = checkout_url;
@@ -51,8 +93,9 @@ export function EnrollButton({ courseId, isFree }: Props) {
         headers: { Authorization: `Bearer ${token}` },
         body: JSON.stringify({ course_id: courseId }),
       });
+      void enrollment;
       toast.success("Enrolled successfully!");
-      router.push(`/learn/${courseId}/${enrollment.id}`);
+      router.push(`/learn/${courseId}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Enrollment failed";
       if (msg.includes("409")) {
@@ -65,14 +108,62 @@ export function EnrollButton({ courseId, isFree }: Props) {
     }
   }
 
+  const finalPrice = couponResult?.valid
+    ? couponResult.discounted_price_cents
+    : priceInCents;
+
   return (
-    <Button
-      className="mt-4 w-full text-sm font-semibold"
-      size="lg"
-      onClick={handleEnroll}
-      disabled={loading}
-    >
-      {loading ? "Processing…" : isFree ? "Enroll for free" : "Buy now"}
-    </Button>
+    <div className="mt-4 space-y-2">
+      <Button className="w-full text-sm font-semibold" size="lg" onClick={handleEnroll} disabled={loading}>
+        {loading
+          ? "Processing…"
+          : isFree
+          ? "Enroll for free"
+          : `Buy now — $${(finalPrice / 100).toFixed(2)}`}
+      </Button>
+
+      {!isFree && (
+        <>
+          {!showCoupon ? (
+            <button
+              onClick={() => setShowCoupon(true)}
+              className="flex items-center gap-1.5 text-xs text-[--color-text-muted] hover:text-[--color-primary] transition-colors w-full justify-center"
+            >
+              <Tag className="h-3 w-3" /> Have a coupon?
+            </button>
+          ) : (
+            <div className="space-y-1.5">
+              <div className="flex gap-1.5">
+                <Input
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value);
+                    setCouponResult(null);
+                  }}
+                  placeholder="Enter coupon code"
+                  className="h-8 text-xs uppercase"
+                  onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+                />
+                <button
+                  onClick={applyCoupon}
+                  disabled={couponLoading || !couponCode.trim()}
+                  className="rounded border border-[--color-border] px-3 text-xs font-semibold text-[--color-text-secondary] hover:bg-[--color-surface] disabled:opacity-50 transition-colors"
+                >
+                  {couponLoading ? "…" : "Apply"}
+                </button>
+                <button onClick={clearCoupon} className="text-[--color-text-muted] hover:text-[--color-text-primary]">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              {couponResult?.valid && (
+                <p className="text-xs text-green-600 font-medium">
+                  ✓ {couponResult.message} — ${(couponResult.discounted_price_cents / 100).toFixed(2)} (was ${(priceInCents / 100).toFixed(2)})
+                </p>
+              )}
+            </div>
+          )}
+        </>
+      )}
+    </div>
   );
 }

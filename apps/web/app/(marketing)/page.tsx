@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Search, ArrowRight, Award, Users, PlayCircle, TrendingUp } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { apiFetch } from "@/lib/api";
@@ -21,13 +22,6 @@ const CATEGORIES = [
   { label: "Health & Fitness", icon: "🏋️", href: "/courses?category=health" },
 ];
 
-const STATS = [
-  { icon: Users, value: "10K+", label: "Students enrolled" },
-  { icon: PlayCircle, value: "500+", label: "Expert-led courses" },
-  { icon: Award, value: "95%", label: "Completion rate" },
-  { icon: TrendingUp, value: "4.8★", label: "Average rating" },
-];
-
 async function getFeaturedCourses() {
   try {
     const data = await apiFetch<CourseListResponse>("/api/v1/courses?status=published&per_page=8");
@@ -38,19 +32,28 @@ async function getFeaturedCourses() {
 }
 
 export default async function HomePage() {
-  const featured = await getFeaturedCourses();
+  const [featured, t] = await Promise.all([
+    getFeaturedCourses(),
+    getTranslations("home"),
+  ]);
+
+  const STATS = [
+    { icon: Users, value: "10K+", label: t("statsStudents") },
+    { icon: PlayCircle, value: "500+", label: t("statsCourses") },
+    { icon: Award, value: "95%", label: t("statsCompletion") },
+    { icon: TrendingUp, value: "4.8★", label: t("statsRating") },
+  ];
 
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[oklch(20%_0.05_295)] via-[oklch(28%_0.12_295)] to-[oklch(22%_0.08_295)] px-4 py-20 text-white sm:px-6 sm:py-28">
+      <section className="relative overflow-hidden bg-linear-to-br from-[oklch(20%_0.05_295)] via-[oklch(28%_0.12_295)] to-[oklch(22%_0.08_295)] px-4 py-20 text-white sm:px-6 sm:py-28">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-            Learn Without Limits
+            {t("heroTitle")}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
-            Thousands of expert-led courses in web development, design, business, and more.
-            Start learning today — completely free.
+            {t("heroSubtitle")}
           </p>
 
           {/* Search */}
@@ -60,7 +63,7 @@ export default async function HomePage() {
               <input
                 name="q"
                 type="text"
-                placeholder="What do you want to learn?"
+                placeholder={t("heroSearchPlaceholder")}
                 className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/50 focus:outline-none"
               />
             </div>
@@ -68,13 +71,11 @@ export default async function HomePage() {
               type="submit"
               className="m-1 rounded-full bg-[--color-primary] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[--color-primary-hover]"
             >
-              Search
+              {t("heroSearchButton")}
             </button>
           </form>
 
-          <p className="mt-4 text-xs text-white/50">
-            Popular: Python, JavaScript, React, Machine Learning, UI Design
-          </p>
+          <p className="mt-4 text-xs text-white/50">{t("heroPopular")}</p>
         </div>
 
         {/* Decorative blobs */}
@@ -103,7 +104,7 @@ export default async function HomePage() {
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="text-2xl font-bold text-[--color-text-primary]">Browse by category</h2>
+        <h2 className="text-2xl font-bold text-[--color-text-primary]">{t("browseByCategory")}</h2>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
           {CATEGORIES.map((cat) => (
             <Link
@@ -124,12 +125,12 @@ export default async function HomePage() {
       <section className="bg-[--color-surface] px-4 py-14 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-[--color-text-primary]">Featured courses</h2>
+            <h2 className="text-2xl font-bold text-[--color-text-primary]">{t("featuredCourses")}</h2>
             <Link
               href="/courses"
               className="flex items-center gap-1 text-sm font-medium text-[--color-primary] hover:underline"
             >
-              View all <ArrowRight className="h-4 w-4" />
+              {t("viewAll")} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
@@ -142,10 +143,10 @@ export default async function HomePage() {
           ) : (
             <div className="mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] bg-white py-16 text-center">
               <PlayCircle className="h-12 w-12 text-[--color-border]" />
-              <h3 className="mt-4 text-base font-semibold text-[--color-text-secondary]">No courses yet</h3>
-              <p className="mt-1 text-sm text-[--color-text-muted]">Be the first instructor to publish a course.</p>
+              <h3 className="mt-4 text-base font-semibold text-[--color-text-secondary]">{t("noCoursesTitle")}</h3>
+              <p className="mt-1 text-sm text-[--color-text-muted]">{t("noCoursesDesc")}</p>
               <Link href="/instructor/courses" className="mt-4">
-                <Button>Start teaching</Button>
+                <Button>{t("startTeaching")}</Button>
               </Link>
             </div>
           )}
@@ -156,14 +157,11 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="rounded-[--radius-lg] bg-gradient-to-r from-[--color-primary] to-[oklch(42%_0.24_295)] p-10 text-white">
           <div className="max-w-xl">
-            <h2 className="text-2xl font-bold sm:text-3xl">Become an instructor</h2>
-            <p className="mt-3 text-white/80">
-              Share your knowledge, build your audience, and earn revenue teaching the skills
-              you love on Learnly.
-            </p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{t("becomeInstructor")}</h2>
+            <p className="mt-3 text-white/80">{t("becomeInstructorDesc")}</p>
             <Link href="/instructor/courses" className="mt-6 inline-block">
               <Button className="bg-white text-[--color-primary] hover:bg-white/90 font-semibold">
-                Start teaching today
+                {t("startTeachingToday")}
               </Button>
             </Link>
           </div>

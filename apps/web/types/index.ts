@@ -67,6 +67,17 @@ export interface LessonProgress {
   completed_at?: string;
 }
 
+export interface WishlistItem {
+  id: string;
+  course_id: string;
+  course_title: string;
+  course_slug: string;
+  course_price_in_cents: number;
+  course_is_free: boolean;
+  course_image_url?: string;
+  course_rating: number;
+}
+
 export interface Answer {
   id: string;
   question_id: string;

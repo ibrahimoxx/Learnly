@@ -3,15 +3,19 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Search, BookOpen, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/shared/notification-bell";
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 export function Navbar() {
   const { isSignedIn } = useAuth();
   const router = useRouter();
+  const t = useTranslations("nav");
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -40,7 +44,7 @@ export function Navbar() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for anything"
+              placeholder={t("searchPlaceholder")}
               className="pl-9 rounded-full border-[--color-border]"
             />
           </div>
@@ -52,7 +56,7 @@ export function Navbar() {
             href="/courses"
             className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
           >
-            Explore
+            {t("explore")}
           </Link>
           {isSignedIn && (
             <>
@@ -60,29 +64,37 @@ export function Navbar() {
                 href="/dashboard"
                 className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
               >
-                My Learning
+                {t("myLearning")}
+              </Link>
+              <Link
+                href="/wishlist"
+                className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
+              >
+                {t("wishlist")}
               </Link>
               <Link
                 href="/instructor/courses"
                 className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
               >
-                Teach
+                {t("teach")}
               </Link>
             </>
           )}
         </nav>
 
-        {/* Auth — desktop */}
+        {/* Auth + language — desktop */}
         <div className="ml-auto hidden items-center gap-2 lg:flex">
+          <LanguageSwitcher />
+          <NotificationBell />
           {isSignedIn ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
             <>
               <SignInButton mode="modal">
-                <Button variant="outline" size="sm">Log in</Button>
+                <Button variant="outline" size="sm">{t("login")}</Button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <Button size="sm">Sign up</Button>
+                <Button size="sm">{t("signup")}</Button>
               </SignUpButton>
             </>
           )}
@@ -107,39 +119,45 @@ export function Navbar() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search for anything"
+                placeholder={t("searchPlaceholder")}
                 className="pl-9 rounded-full"
               />
             </div>
           </form>
           <nav className="flex flex-col gap-1">
             <Link href="/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-              Explore
+              {t("explore")}
             </Link>
             {isSignedIn && (
               <>
                 <Link href="/dashboard" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-                  My Learning
+                  {t("myLearning")}
+                </Link>
+                <Link href="/wishlist" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
+                  {t("wishlist")}
                 </Link>
                 <Link href="/instructor/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-                  Teach
+                  {t("teach")}
                 </Link>
               </>
             )}
           </nav>
-          <div className={cn("mt-3 flex gap-2", isSignedIn && "justify-start")}>
-            {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
-            ) : (
-              <>
-                <SignInButton mode="modal">
-                  <Button variant="outline" size="sm" className="flex-1">Log in</Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button size="sm" className="flex-1">Sign up</Button>
-                </SignUpButton>
-              </>
-            )}
+          <div className="mt-3 flex items-center justify-between">
+            <LanguageSwitcher />
+            <div className={cn("flex gap-2", isSignedIn && "justify-start")}>
+              {isSignedIn ? (
+                <UserButton afterSignOutUrl="/" />
+              ) : (
+                <>
+                  <SignInButton mode="modal">
+                    <Button variant="outline" size="sm">{t("login")}</Button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <Button size="sm">{t("signup")}</Button>
+                  </SignUpButton>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "explore": "Explore",
+    "myLearning": "My Learning",
+    "wishlist": "Wishlist",
+    "teach": "Teach",
+    "login": "Log in",
+    "signup": "Sign up",
+    "searchPlaceholder": "Search for anything"
+  },
+  "home": {
+    "heroTitle": "Learn Without Limits",
+    "heroSubtitle": "Thousands of expert-led courses in web development, design, business, and more. Start learning today.",
+    "heroSearchPlaceholder": "What do you want to learn?",
+    "heroSearchButton": "Search",
+    "heroPopular": "Popular: Python, JavaScript, React, Machine Learning, UI Design",
+    "statsStudents": "Students enrolled",
+    "statsCourses": "Expert-led courses",
+    "statsCompletion": "Completion rate",
+    "statsRating": "Average rating",
+    "browseByCategory": "Browse by category",
+    "featuredCourses": "Featured courses",
+    "viewAll": "View all",
+    "noCoursesTitle": "No courses yet",
+    "noCoursesDesc": "Be the first instructor to publish a course.",
+    "startTeaching": "Start teaching",
+    "becomeInstructor": "Become an instructor",
+    "becomeInstructorDesc": "Share your knowledge, build your audience, and earn revenue teaching the skills you love on Learnly.",
+    "startTeachingToday": "Start teaching today"
+  },
+  "course": {
+    "students": "{count} students",
+    "free": "Free",
+    "whatYoullLearn": "What you'll learn",
+    "learnItem1": "Build real-world projects from scratch",
+    "learnItem2": "Master core concepts and best practices",
+    "learnItem3": "Gain hands-on experience through exercises",
+    "learnItem4": "Earn a certificate upon completion",
+    "includes": "This course includes",
+    "onDemandVideo": "on-demand video",
+    "certificateCompletion": "Certificate of completion",
+    "curriculum": "Course curriculum",
+    "curriculumMeta": "{sections} sections • {lessons} lessons • {duration} total length",
+    "noLessons": "Curriculum will be published soon.",
+    "moneyBack": "30-Day Money-Back Guarantee",
+    "level": "Level",
+    "language": "Language",
+    "duration": "Duration",
+    "lessons": "Lessons",
+    "enroll": "Enroll Now",
+    "goToCourse": "Go to Course",
+    "reviews": "Reviews",
+    "preview": "Preview",
+    "courses": "Courses"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "back": "Back"
+  }
+}

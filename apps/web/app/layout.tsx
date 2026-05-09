@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -16,13 +18,18 @@ export const metadata: Metadata = {
   description: "Online learning marketplace with thousands of expert-led courses.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <ClerkProvider>
-      <html lang="en" className={cn("font-sans", geist.variable)}>
+      <html lang={locale} className={cn("font-sans", geist.variable)}>
         <body>
-          <Providers>{children}</Providers>
-          <Toaster richColors position="bottom-right" />
+          <NextIntlClientProvider messages={messages}>
+            <Providers>{children}</Providers>
+            <Toaster richColors position="bottom-right" />
+          </NextIntlClientProvider>
         </body>
       </html>
     </ClerkProvider>

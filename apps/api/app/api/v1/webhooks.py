@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import hmac
 import time
@@ -14,6 +15,7 @@ from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.user import User
+from app.email import service as email_service
 from app.integrations import stripe_client as _stripe_init  # noqa: F401 — sets api_key
 
 log = structlog.get_logger()
@@ -57,6 +59,12 @@ async def clerk_webhook(
 
     if event_type == "user.created":
         await _upsert_user(db, data)
+        email = (data.get("email_addresses") or [{}])[0].get("email_address", "")
+        first_name = data.get("first_name") or "there"
+        if email:
+            asyncio.get_event_loop().run_in_executor(
+                None, email_service.send_welcome, email, first_name
+            )
     elif event_type == "user.updated":
         await _upsert_user(db, data)
     elif event_type == "user.deleted":

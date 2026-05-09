@@ -32,7 +32,7 @@ export default async function LearnCoursePage({ params }: Props) {
     for (const section of sections) {
       const lessons = await apiFetch<Lesson[]>(`/api/v1/sections/${section.id}/lessons`);
       if (lessons.length > 0) {
-        firstLessonId = lessons[0].id;
+        firstLessonId = lessons[0]!.id;
         break;
       }
     }

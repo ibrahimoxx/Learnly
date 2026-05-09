@@ -7,5 +7,8 @@ from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson_progress import LessonProgress
 from app.db.tables.review import Review
 from app.db.tables.question import Question, Answer
+from app.db.tables.wishlist import WishlistItem
+from app.db.tables.coupon import Coupon
+from app.db.tables.notification import Notification
 
-__all__ = ["User", "Category", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer"]
+__all__ = ["User", "Category", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification"]

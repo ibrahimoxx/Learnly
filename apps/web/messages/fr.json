@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "explore": "Explorer",
+    "myLearning": "Mon Apprentissage",
+    "wishlist": "Liste de souhaits",
+    "teach": "Enseigner",
+    "login": "Se connecter",
+    "signup": "S'inscrire",
+    "searchPlaceholder": "Rechercher n'importe quoi"
+  },
+  "home": {
+    "heroTitle": "Apprenez Sans Limites",
+    "heroSubtitle": "Des milliers de cours dispensés par des experts en développement web, design, business et plus encore. Commencez à apprendre aujourd'hui.",
+    "heroSearchPlaceholder": "Que voulez-vous apprendre ?",
+    "heroSearchButton": "Rechercher",
+    "heroPopular": "Populaire : Python, JavaScript, React, Machine Learning, Design UI",
+    "statsStudents": "Étudiants inscrits",
+    "statsCourses": "Cours par des experts",
+    "statsCompletion": "Taux de complétion",
+    "statsRating": "Note moyenne",
+    "browseByCategory": "Parcourir par catégorie",
+    "featuredCourses": "Cours en vedette",
+    "viewAll": "Voir tout",
+    "noCoursesTitle": "Aucun cours pour l'instant",
+    "noCoursesDesc": "Soyez le premier instructeur à publier un cours.",
+    "startTeaching": "Commencer à enseigner",
+    "becomeInstructor": "Devenez instructeur",
+    "becomeInstructorDesc": "Partagez vos connaissances, construisez votre audience et gagnez des revenus en enseignant vos compétences sur Learnly.",
+    "startTeachingToday": "Commencez à enseigner aujourd'hui"
+  },
+  "course": {
+    "students": "{count} étudiants",
+    "free": "Gratuit",
+    "whatYoullLearn": "Ce que vous apprendrez",
+    "learnItem1": "Construire des projets réels à partir de zéro",
+    "learnItem2": "Maîtriser les concepts fondamentaux et les bonnes pratiques",
+    "learnItem3": "Acquérir une expérience pratique grâce aux exercices",
+    "learnItem4": "Obtenir un certificat à la fin du cours",
+    "includes": "Ce cours comprend",
+    "onDemandVideo": "de vidéo à la demande",
+    "certificateCompletion": "Certificat de complétion",
+    "curriculum": "Programme du cours",
+    "curriculumMeta": "{sections} sections • {lessons} leçons • {duration} au total",
+    "noLessons": "Le programme sera publié prochainement.",
+    "moneyBack": "Garantie de remboursement 30 jours",
+    "level": "Niveau",
+    "language": "Langue",
+    "duration": "Durée",
+    "lessons": "Leçons",
+    "enroll": "S'inscrire maintenant",
+    "goToCourse": "Accéder au cours",
+    "reviews": "Avis",
+    "preview": "Aperçu",
+    "courses": "Cours"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "back": "Retour"
+  }
+}

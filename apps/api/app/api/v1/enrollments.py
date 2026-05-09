@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from datetime import datetime, timezone
 
@@ -16,6 +17,7 @@ from app.db.tables.lesson import Lesson
 from app.db.tables.lesson_progress import LessonProgress
 from app.db.tables.section import Section
 from app.db.tables.user import User
+from app.email import service as email_service
 from app.schemas.enrollment import EnrollmentCreate, EnrollmentRead, ProgressRead, ProgressUpdate
 from app.services.certificate import generate_certificate_pdf
 
@@ -50,6 +52,17 @@ async def enroll(
     await db.commit()
     await db.refresh(enrollment)
     log.info("enrollment_created", user_id=str(user.id), course_id=str(body.course_id))
+
+    # Send confirmation email in background (non-blocking)
+    asyncio.get_event_loop().run_in_executor(
+        None,
+        email_service.send_enrollment_confirmation,
+        user.email,
+        user.first_name or "there",
+        course.title,
+        str(body.course_id),
+    )
+
     return EnrollmentRead.model_validate(enrollment)
 
 

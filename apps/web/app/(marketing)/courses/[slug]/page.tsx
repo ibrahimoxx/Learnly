@@ -1,18 +1,19 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import {
   Clock, Users, Award, Globe, CheckCircle, PlayCircle, FileText, BarChart,
 } from "lucide-react";
 import { StarRating } from "@/components/features/courses/star-rating";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EnrollButton } from "./enroll-button";
 import { ReviewSection } from "@/components/features/courses/review-section";
+import { WishlistButton } from "@/components/features/courses/wishlist-button";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson, Review } from "@/types";
 
@@ -75,7 +76,11 @@ function formatDuration(seconds: number) {
 
 export default async function CourseDetailPage({ params }: Props) {
   const { slug } = await params;
-  const course = await getCourse(slug);
+  const [course, t] = await Promise.all([
+    getCourse(slug),
+    getTranslations("course"),
+  ]);
+
   if (!course || course.status !== "published") notFound();
 
   const [sections, initialReviews] = await Promise.all([
@@ -90,7 +95,14 @@ export default async function CourseDetailPage({ params }: Props) {
   );
 
   const totalLessons = sectionsWithLessons.reduce((acc, s) => acc + s.lessons.length, 0);
-  const price = course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
+  const price = course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
+
+  const learnItems = [
+    t("learnItem1"),
+    t("learnItem2"),
+    t("learnItem3"),
+    t("learnItem4"),
+  ];
 
   return (
     <div className="min-h-screen">
@@ -100,7 +112,7 @@ export default async function CourseDetailPage({ params }: Props) {
           <div className="max-w-2xl">
             {/* Breadcrumb */}
             <nav className="mb-4 flex items-center gap-2 text-xs text-white/50">
-              <Link href="/courses" className="hover:text-white/80">Courses</Link>
+              <Link href="/courses" className="hover:text-white/80">{t("courses")}</Link>
               <span>/</span>
               <span className="text-white/70">{course.title}</span>
             </nav>
@@ -122,7 +134,7 @@ export default async function CourseDetailPage({ params }: Props) {
               )}
               <span className="flex items-center gap-1 text-xs text-white/60">
                 <Users className="h-3 w-3" />
-                {course.enrollment_count.toLocaleString()} students
+                {t("students", { count: course.enrollment_count.toLocaleString() })}
               </span>
             </div>
 
@@ -137,7 +149,7 @@ export default async function CourseDetailPage({ params }: Props) {
               </span>
               <span className="flex items-center gap-1">
                 <PlayCircle className="h-3 w-3" />
-                {totalLessons} lessons
+                {totalLessons} {t("lessons").toLowerCase()}
               </span>
             </div>
           </div>
@@ -151,14 +163,9 @@ export default async function CourseDetailPage({ params }: Props) {
           <div className="flex-1 min-w-0">
             {/* What you'll learn */}
             <section>
-              <h2 className="text-lg font-bold text-[--color-text-primary]">What you&apos;ll learn</h2>
+              <h2 className="text-lg font-bold text-[--color-text-primary]">{t("whatYoullLearn")}</h2>
               <div className="mt-4 grid grid-cols-1 gap-2 rounded-[--radius-md] border border-[--color-border] p-5 sm:grid-cols-2">
-                {[
-                  "Build real-world projects from scratch",
-                  "Master core concepts and best practices",
-                  "Gain hands-on experience through exercises",
-                  "Earn a certificate upon completion",
-                ].map((item) => (
+                {learnItems.map((item) => (
                   <div key={item} className="flex items-start gap-2">
                     <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
                     <span className="text-sm text-[--color-text-secondary]">{item}</span>
@@ -169,13 +176,13 @@ export default async function CourseDetailPage({ params }: Props) {
 
             {/* Course includes */}
             <section className="mt-8">
-              <h2 className="text-lg font-bold text-[--color-text-primary]">This course includes</h2>
+              <h2 className="text-lg font-bold text-[--color-text-primary]">{t("includes")}</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[
-                  { icon: PlayCircle, text: `${formatDuration(course.total_duration_seconds)} on-demand video` },
+                  { icon: PlayCircle, text: `${formatDuration(course.total_duration_seconds)} ${t("onDemandVideo")}` },
                   { icon: FileText, text: `${sections.length} sections, ${totalLessons} lessons` },
                   { icon: BarChart, text: levelLabels[course.level] ?? course.level },
-                  { icon: Award, text: "Certificate of completion" },
+                  { icon: Award, text: t("certificateCompletion") },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
                     <Icon className="h-4 w-4 text-[--color-text-muted]" />
@@ -189,10 +196,13 @@ export default async function CourseDetailPage({ params }: Props) {
 
             {/* Curriculum */}
             <section>
-              <h2 className="text-lg font-bold text-[--color-text-primary]">Course curriculum</h2>
+              <h2 className="text-lg font-bold text-[--color-text-primary]">{t("curriculum")}</h2>
               <p className="mt-1 text-sm text-[--color-text-muted]">
-                {sections.length} sections • {totalLessons} lessons •{" "}
-                {formatDuration(course.total_duration_seconds)} total length
+                {t("curriculumMeta", {
+                  sections: sections.length,
+                  lessons: totalLessons,
+                  duration: formatDuration(course.total_duration_seconds),
+                })}
               </p>
 
               {sectionsWithLessons.length > 0 ? (
@@ -202,12 +212,12 @@ export default async function CourseDetailPage({ params }: Props) {
                       <AccordionTrigger className="font-semibold text-[--color-text-primary]">
                         <span className="flex-1 text-left">{section.title}</span>
                         <span className="mr-4 text-xs font-normal text-[--color-text-muted]">
-                          {section.lessons.length} lessons
+                          {section.lessons.length} {t("lessons").toLowerCase()}
                         </span>
                       </AccordionTrigger>
                       <AccordionContent>
                         <ul className="divide-y divide-[--color-border]">
-                          {section.lessons.map((lesson) => (
+                          {section.lessons.map((lesson: Lesson) => (
                             <li key={lesson.id} className="flex items-center gap-3 py-2.5">
                               {lesson.type === "video" ? (
                                 <PlayCircle className="h-4 w-4 shrink-0 text-[--color-text-muted]" />
@@ -218,7 +228,7 @@ export default async function CourseDetailPage({ params }: Props) {
                                 {lesson.title}
                               </span>
                               {lesson.is_free_preview && (
-                                <Badge variant="success" className="text-xs">Preview</Badge>
+                                <Badge variant="success" className="text-xs">{t("preview")}</Badge>
                               )}
                               {lesson.duration_seconds != null && lesson.duration_seconds > 0 && (
                                 <span className="text-xs text-[--color-text-muted]">
@@ -233,9 +243,7 @@ export default async function CourseDetailPage({ params }: Props) {
                   ))}
                 </Accordion>
               ) : (
-                <p className="mt-4 text-sm text-[--color-text-muted]">
-                  Curriculum will be published soon.
-                </p>
+                <p className="mt-4 text-sm text-[--color-text-muted]">{t("noLessons")}</p>
               )}
             </section>
 
@@ -268,20 +276,23 @@ export default async function CourseDetailPage({ params }: Props) {
                   <span className="text-3xl font-bold text-[--color-text-primary]">{price}</span>
                 </div>
 
-                <EnrollButton courseId={course.id} isFree={course.is_free} />
+                <EnrollButton courseId={course.id} isFree={course.is_free} priceInCents={course.price_in_cents} />
+                <div className="mt-2">
+                  <WishlistButton courseId={course.id} />
+                </div>
 
                 <p className="mt-3 text-center text-xs text-[--color-text-muted]">
-                  30-Day Money-Back Guarantee
+                  {t("moneyBack")}
                 </p>
 
                 <Separator className="my-4" />
 
                 <div className="space-y-2 text-sm">
                   {[
-                    { label: "Level", value: levelLabels[course.level] ?? course.level },
-                    { label: "Language", value: course.language },
-                    { label: "Duration", value: formatDuration(course.total_duration_seconds) },
-                    { label: "Lessons", value: totalLessons.toString() },
+                    { label: t("level"), value: levelLabels[course.level] ?? course.level },
+                    { label: t("language"), value: course.language },
+                    { label: t("duration"), value: formatDuration(course.total_duration_seconds) },
+                    { label: t("lessons"), value: totalLessons.toString() },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between">
                       <span className="text-[--color-text-muted]">{label}</span>
