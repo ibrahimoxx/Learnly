@@ -26,17 +26,21 @@ export default async function LearnCoursePage({ params }: Props) {
   }
 
   // Find first lesson
+  let firstLessonId: string | null = null;
   try {
     const sections = await apiFetch<Section[]>(`/api/v1/courses/${courseId}/sections`);
     for (const section of sections) {
       const lessons = await apiFetch<Lesson[]>(`/api/v1/sections/${section.id}/lessons`);
       if (lessons.length > 0) {
-        redirect(`/learn/${courseId}/${lessons[0].id}`);
+        firstLessonId = lessons[0].id;
+        break;
       }
     }
   } catch {
-    // fall through
+    // API error — fall through to no-content page
   }
+
+  if (firstLessonId) redirect(`/learn/${courseId}/${firstLessonId}`);
 
   // Enrolled but course has no lessons yet
   return (
