@@ -35,8 +35,17 @@ export default async function LearnCoursePage({ params }: Props) {
       }
     }
   } catch {
-    // fall through to notFound
+    // fall through
   }
 
-  notFound();
+  // Enrolled but course has no lessons yet
+  return (
+    <div className="flex h-screen flex-col items-center justify-center gap-4 bg-[oklch(10%_0.02_295)] text-white">
+      <p className="text-lg font-semibold">No lessons available yet</p>
+      <p className="text-sm text-white/50">The instructor hasn&apos;t added content to this course yet.</p>
+      <a href="/dashboard" className="mt-2 rounded bg-[--color-primary] px-5 py-2 text-sm font-semibold hover:bg-[--color-primary-hover] transition-colors">
+        Back to dashboard
+      </a>
+    </div>
+  );
 }
