@@ -243,6 +243,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -264,6 +265,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
     e.preventDefault();
     if (!newQuestion.trim()) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const q = await apiFetch<Question>(`/api/v1/lessons/${lessonId}/questions`, {
         method: "POST",
@@ -272,8 +274,8 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
       });
       setQuestions((prev) => [q, ...prev]);
       setNewQuestion("");
-    } catch {
-      // TODO: show error toast
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to post question");
     } finally {
       setSubmitting(false);
     }
@@ -333,6 +335,10 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
           </button>
         </div>
       </form>
+
+      {submitError && (
+        <p className="shrink-0 px-3 py-1 text-[10px] text-red-400">{submitError}</p>
+      )}
 
       {/* Questions list */}
       <div className="flex-1 overflow-y-auto divide-y divide-white/5">
