@@ -68,3 +68,4 @@ class Course(Base):
         "Section", back_populates="course", cascade="all, delete-orphan", order_by="Section.position"
     )
     enrollments: Mapped[list["Enrollment"]] = relationship("Enrollment", back_populates="course")  # type: ignore[name-defined]
+    reviews: Mapped[list["Review"]] = relationship("Review", back_populates="course", cascade="all, delete-orphan")  # type: ignore[name-defined]

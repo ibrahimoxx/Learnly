@@ -126,7 +126,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
   return (
     <div className="overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-white">
       {/* Placeholder thumbnail */}
-      <div className="relative aspect-video bg-gradient-to-br from-[--color-primary]/10 to-[--color-primary]/5 flex items-center justify-center">
+      <div className="relative aspect-video bg-linear-to-br from-[--color-primary]/10 to-[--color-primary]/5 flex items-center justify-center">
         {isCompleted ? (
           <Award className="h-12 w-12 text-[--color-star]" />
         ) : (
@@ -141,7 +141,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
 
       <div className="p-4">
         <p className="text-xs text-[--color-text-muted] mb-1">
-          Enrolled {new Date(enrollment.enrolled_at).toLocaleDateString()}
+          Enrolled {new Date(enrollment.created_at).toLocaleDateString()}
         </p>
 
         {!isCompleted && (
@@ -160,7 +160,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
         )}
 
         <Link
-          href={`/learn/${enrollment.course_id}/${enrollment.id}`}
+          href={`/learn/${enrollment.course_id}`}
           className="mt-3 block w-full rounded-[--radius-sm] border border-[--color-primary] py-2 text-center text-xs font-semibold text-[--color-primary] hover:bg-[--color-primary] hover:text-white transition-colors"
         >
           {isCompleted ? "Review course" : "Continue learning"}

@@ -1,16 +1,20 @@
 import hashlib
 import hmac
 import time
+import uuid
 
+import stripe
 import structlog
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends
 
 from app.core.config import settings
 from app.db.session import get_db
+from app.db.tables.course import Course
+from app.db.tables.enrollment import Enrollment
 from app.db.tables.user import User
+from app.integrations import stripe_client as _stripe_init  # noqa: F401 — sets api_key
 
 log = structlog.get_logger()
 router = APIRouter()
@@ -100,3 +104,63 @@ async def _deactivate_user(db: AsyncSession, clerk_id: str) -> None:
         user.is_active = False
         await db.commit()
         log.info("user_deactivated", clerk_id=clerk_id)
+
+
+@router.post("/webhooks/stripe")
+async def stripe_webhook(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    stripe_signature: str = Header(..., alias="stripe-signature"),
+) -> dict:
+    body = await request.body()
+
+    try:
+        if settings.stripe_webhook_secret and settings.stripe_webhook_secret != "whsec_":
+            event = stripe.Webhook.construct_event(body, stripe_signature, settings.stripe_webhook_secret)
+        else:
+            import json
+            event = json.loads(body)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Stripe signature")
+
+    event_type = event["type"] if isinstance(event, dict) else event.type
+    event_id = event.get("id", "") if isinstance(event, dict) else event.id
+    log.info("stripe_webhook_received", event_type=event_type, event_id=event_id)
+
+    if event_type == "checkout.session.completed":
+        data = event["data"]["object"] if isinstance(event, dict) else event.data.object
+        await _fulfill_checkout(db, data if isinstance(data, dict) else data.to_dict_recursive())
+
+    return {"received": True}
+
+
+async def _fulfill_checkout(db: AsyncSession, session: dict) -> None:
+    meta = session.get("metadata", {})
+    user_id = meta.get("user_id")
+    course_id = meta.get("course_id")
+    if not user_id or not course_id:
+        log.warning("stripe_webhook_missing_metadata", session_id=session.get("id"))
+        return
+
+    existing = await db.execute(
+        select(Enrollment).where(
+            Enrollment.student_id == uuid.UUID(user_id),
+            Enrollment.course_id == uuid.UUID(course_id),
+        )
+    )
+    if existing.scalar_one_or_none():
+        return
+
+    enrollment = Enrollment(
+        student_id=uuid.UUID(user_id),
+        course_id=uuid.UUID(course_id),
+    )
+    db.add(enrollment)
+
+    course_result = await db.execute(select(Course).where(Course.id == uuid.UUID(course_id)))
+    course = course_result.scalar_one_or_none()
+    if course:
+        course.enrollment_count = (course.enrollment_count or 0) + 1
+
+    await db.commit()
+    log.info("enrollment_created_via_stripe", user_id=user_id, course_id=course_id)

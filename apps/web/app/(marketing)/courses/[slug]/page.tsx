@@ -12,8 +12,9 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { EnrollButton } from "./enroll-button";
+import { ReviewSection } from "@/components/features/courses/review-section";
 import { apiFetch } from "@/lib/api";
-import type { Course, Section, Lesson } from "@/types";
+import type { Course, Section, Lesson, Review } from "@/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -38,6 +39,14 @@ async function getSections(courseId: string) {
 async function getLessons(sectionId: string) {
   try {
     return await apiFetch<Lesson[]>(`/api/v1/sections/${sectionId}/lessons`);
+  } catch {
+    return [];
+  }
+}
+
+async function getReviews(courseId: string) {
+  try {
+    return await apiFetch<Review[]>(`/api/v1/courses/${courseId}/reviews`);
   } catch {
     return [];
   }
@@ -69,7 +78,10 @@ export default async function CourseDetailPage({ params }: Props) {
   const course = await getCourse(slug);
   if (!course || course.status !== "published") notFound();
 
-  const sections = await getSections(course.id);
+  const [sections, initialReviews] = await Promise.all([
+    getSections(course.id),
+    getReviews(course.id),
+  ]);
   const sectionsWithLessons = await Promise.all(
     sections.map(async (section) => ({
       ...section,
@@ -226,6 +238,10 @@ export default async function CourseDetailPage({ params }: Props) {
                 </p>
               )}
             </section>
+
+            <Separator className="my-8" />
+
+            <ReviewSection courseId={course.id} initialReviews={initialReviews} />
           </div>
 
           {/* Sticky sidebar */}

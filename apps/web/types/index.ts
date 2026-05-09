@@ -53,7 +53,7 @@ export interface Enrollment {
   student_id: string;
   course_id: string;
   status: EnrollmentStatus;
-  enrolled_at: string;
+  created_at: string;
   completed_at?: string;
 }
 
@@ -65,6 +65,35 @@ export interface LessonProgress {
   last_position_seconds: number;
   is_completed: boolean;
   completed_at?: string;
+}
+
+export interface Answer {
+  id: string;
+  question_id: string;
+  user_id: string;
+  user_name: string;
+  body: string;
+  created_at: string;
+}
+
+export interface Question {
+  id: string;
+  lesson_id: string;
+  student_id: string;
+  student_name: string;
+  body: string;
+  created_at: string;
+  answers: Answer[];
+}
+
+export interface Review {
+  id: string;
+  course_id: string;
+  student_id: string;
+  rating: number;
+  comment?: string;
+  student_name: string;
+  created_at: string;
 }
 
 export interface CourseListResponse {

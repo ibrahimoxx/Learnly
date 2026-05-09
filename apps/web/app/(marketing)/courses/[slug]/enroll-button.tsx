@@ -29,10 +29,23 @@ export function EnrollButton({ courseId, isFree }: Props) {
   }
 
   async function handleEnroll() {
-
     setLoading(true);
     try {
       const token = await getToken();
+
+      if (!isFree) {
+        const { checkout_url } = await apiFetch<{ checkout_url: string; session_id: string }>(
+          "/api/v1/checkout/sessions",
+          {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ course_id: courseId }),
+          }
+        );
+        window.location.href = checkout_url;
+        return;
+      }
+
       const enrollment = await apiFetch<Enrollment>("/api/v1/enrollments", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -44,8 +57,6 @@ export function EnrollButton({ courseId, isFree }: Props) {
       const msg = err instanceof Error ? err.message : "Enrollment failed";
       if (msg.includes("409")) {
         router.push("/dashboard");
-      } else if (msg.includes("402")) {
-        toast.error("This is a paid course. Checkout coming soon.");
       } else {
         toast.error(msg);
       }

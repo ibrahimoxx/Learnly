@@ -9,6 +9,9 @@ from app.api.v1.courses import router as courses_router
 from app.api.v1.sections import router as sections_router
 from app.api.v1.lessons import router as lessons_router
 from app.api.v1.enrollments import router as enrollments_router
+from app.api.v1.checkout import router as checkout_router
+from app.api.v1.reviews import router as reviews_router
+from app.api.v1.questions import router as questions_router
 from app.core.config import settings
 
 log = structlog.get_logger()
@@ -35,6 +38,9 @@ app.include_router(courses_router, prefix="/api/v1")
 app.include_router(sections_router, prefix="/api/v1")
 app.include_router(lessons_router, prefix="/api/v1")
 app.include_router(enrollments_router, prefix="/api/v1")
+app.include_router(checkout_router, prefix="/api/v1")
+app.include_router(reviews_router, prefix="/api/v1")
+app.include_router(questions_router, prefix="/api/v1")
 
 
 @app.on_event("startup")

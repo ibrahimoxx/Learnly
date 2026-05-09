@@ -5,5 +5,7 @@ from app.db.tables.section import Section
 from app.db.tables.lesson import Lesson
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson_progress import LessonProgress
+from app.db.tables.review import Review
+from app.db.tables.question import Question, Answer
 
-__all__ = ["User", "Category", "Course", "Section", "Lesson", "Enrollment", "LessonProgress"]
+__all__ = ["User", "Category", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer"]
