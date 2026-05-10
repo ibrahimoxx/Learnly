@@ -157,11 +157,12 @@ export default function PromotionsPage() {
               className="mt-1 w-full rounded-[--radius-sm] border border-[--color-border] px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
             />
           </div>
-          <div className="flex items-end">
+          <div className="sm:col-span-2 flex justify-end pt-1">
             <button
               type="submit"
               disabled={creating}
-              className="flex items-center gap-2 rounded-[--radius-sm] bg-[--color-primary] px-5 py-2 text-sm font-semibold text-white hover:bg-[--color-primary-hover] disabled:opacity-50 transition-colors"
+              style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}
+              className="flex items-center gap-2 rounded-[--radius-sm] px-5 py-2 text-sm font-semibold disabled:opacity-50 transition-opacity"
             >
               <Plus className="h-4 w-4" />
               {creating ? "Creating…" : "Create coupon"}
