@@ -186,7 +186,7 @@ async def stripe_webhook(
 
     if event_type == "checkout.session.completed":
         data = event["data"]["object"] if isinstance(event, dict) else event.data.object
-        await _fulfill_checkout(db, data if isinstance(data, dict) else dict(data))
+        await _fulfill_checkout(db, data)
 
     return {"received": True}
 
