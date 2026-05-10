@@ -1,13 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { BookOpen, Users, LayoutDashboard, Tag } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { userId, sessionClaims } = await auth();
-  if (!userId) redirect("/sign-in");
+  const user = await currentUser();
+  if (!user) redirect("/sign-in");
 
-  const role = (sessionClaims?.metadata as { role?: string } | undefined)?.role;
+  const role = user.publicMetadata?.role as string | undefined;
   if (role !== "admin") redirect("/");
 
   return (

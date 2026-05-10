@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { BookOpen, Users, TrendingUp } from "lucide-react";
 import { apiFetch } from "@/lib/api";
@@ -25,11 +25,11 @@ async function getOrgStats(slug: string): Promise<OrgStats> {
 
 export default async function OrgAdminPage({ params }: Props) {
   const { slug } = await params;
-  const { sessionClaims } = await auth();
+  const user = await currentUser();
+  if (!user) redirect(`/orgs/${slug}`);
 
-  // Only org admins or platform admins
-  const role = (sessionClaims?.metadata as Record<string, unknown> | undefined)?.role as string | undefined;
-  const orgRole = (sessionClaims as Record<string, unknown> | undefined)?.org_role as string | undefined;
+  const role = user.publicMetadata?.role as string | undefined;
+  const orgRole = user.organizationMemberships?.[0]?.role;
 
   if (role !== "admin" && orgRole !== "org:admin") {
     redirect(`/orgs/${slug}`);
