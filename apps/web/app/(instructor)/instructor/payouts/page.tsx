@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { DollarSign, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
@@ -14,17 +14,20 @@ interface ConnectStatus {
   payouts_enabled: boolean;
 }
 
-export default function PayoutsPage() {
-  const { getToken } = useAuth();
+function SearchParamsHandler() {
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<ConnectStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [onboarding, setOnboarding] = useState(false);
-
   useEffect(() => {
     if (searchParams.get("success") === "1") toast.success("Stripe account connected!");
     if (searchParams.get("refresh") === "1") toast.info("Onboarding incomplete — try again.");
   }, [searchParams]);
+  return null;
+}
+
+function PayoutsContent() {
+  const { getToken } = useAuth();
+  const [status, setStatus] = useState<ConnectStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [onboarding, setOnboarding] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -121,5 +124,16 @@ export default function PayoutsPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function PayoutsPage() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <SearchParamsHandler />
+      </Suspense>
+      <PayoutsContent />
+    </>
   );
 }
