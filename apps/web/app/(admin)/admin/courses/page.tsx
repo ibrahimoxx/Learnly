@@ -50,6 +50,9 @@ export default function AdminCoursesPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCourses(data);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to load courses";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
