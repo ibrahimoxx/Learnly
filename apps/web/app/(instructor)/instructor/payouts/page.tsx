@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { DollarSign, ExternalLink, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 
 interface ConnectStatus {
@@ -96,25 +97,17 @@ function PayoutsContent() {
               <span>Payouts: {status.payouts_enabled ? "✓ Enabled" : "✗ Disabled"}</span>
             </div>
             {(!status.charges_enabled || !status.payouts_enabled) && (
-              <button
-                onClick={startOnboarding}
-                disabled={onboarding}
-                className="flex items-center gap-2 rounded-[--radius-sm] border border-[--color-border] px-4 py-2 text-sm font-semibold text-[--color-text-secondary] hover:bg-[--color-surface] disabled:opacity-50 transition-colors"
-              >
+              <Button variant="outline" onClick={startOnboarding} disabled={onboarding}>
                 <ExternalLink className="h-4 w-4" />
                 {onboarding ? "Redirecting…" : "Complete setup"}
-              </button>
+              </Button>
             )}
           </div>
         ) : (
-          <button
-            onClick={startOnboarding}
-            disabled={onboarding}
-            className="flex items-center gap-2 rounded-[--radius-sm] bg-[--color-primary] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[--color-primary-hover] disabled:opacity-50 transition-colors"
-          >
+          <Button onClick={startOnboarding} disabled={onboarding}>
             <ExternalLink className="h-4 w-4" />
             {onboarding ? "Redirecting to Stripe…" : "Connect Stripe account"}
-          </button>
+          </Button>
         )}
       </div>
 
