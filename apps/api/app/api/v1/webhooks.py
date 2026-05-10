@@ -186,17 +186,23 @@ async def stripe_webhook(
 
     if event_type == "checkout.session.completed":
         data = event["data"]["object"] if isinstance(event, dict) else event.data.object
-        await _fulfill_checkout(db, data if isinstance(data, dict) else data.to_dict_recursive())
+        await _fulfill_checkout(db, data if isinstance(data, dict) else dict(data))
 
     return {"received": True}
 
 
-async def _fulfill_checkout(db: AsyncSession, session: dict) -> None:
-    meta = session.get("metadata", {})
-    user_id = meta.get("user_id")
-    course_id = meta.get("course_id")
+async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
+    def _get(obj: object, key: str, default: object = None) -> object:
+        if isinstance(obj, dict):
+            return obj.get(key, default)
+        return getattr(obj, key, default)
+
+    meta = _get(session, "metadata") or {}
+    user_id = meta.get("user_id") if isinstance(meta, dict) else getattr(meta, "user_id", None)
+    course_id = meta.get("course_id") if isinstance(meta, dict) else getattr(meta, "course_id", None)
+    session_id = _get(session, "id")
     if not user_id or not course_id:
-        log.warning("stripe_webhook_missing_metadata", session_id=session.get("id"))
+        log.warning("stripe_webhook_missing_metadata", session_id=session_id)
         return
 
     existing = await db.execute(
