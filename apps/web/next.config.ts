@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "*.cloudflare.com" },
     ],
   },
-  experimental: {},
 };
 
 export default withNextIntl(nextConfig);
