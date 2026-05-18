@@ -5,13 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
-  ChevronLeft, Plus, Trash2, GripVertical, Upload, Eye, EyeOff,
+  ChevronLeft, Plus, Trash2, GripVertical, Upload, Eye, EyeOff, Tag, X,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson } from "@/types";
 
@@ -30,6 +31,18 @@ export default function CourseEditorPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Coupon state
+  interface CouponRead {
+    id: string; code: string; discount_type: string; discount_value: number;
+    max_uses: number | null; uses_count: number; expires_at: string | null; is_active: boolean;
+  }
+  const [coupons, setCoupons] = useState<CouponRead[]>([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponType, setCouponType] = useState<"percent" | "fixed">("percent");
+  const [couponValue, setCouponValue] = useState("");
+  const [couponMaxUses, setCouponMaxUses] = useState("");
+  const [creatingCoupon, setCreatingCoupon] = useState(false);
+
   // Course title draft
   const [draftTitle, setDraftTitle] = useState("");
   const [draftDescription, setDraftDescription] = useState("");
@@ -37,18 +50,22 @@ export default function CourseEditorPage() {
   const load = useCallback(async () => {
     const token = await getToken();
     try {
-      const [courseData, sectionsData] = await Promise.all([
+      const [courseData, sectionsData, couponsData] = await Promise.all([
         apiFetch<Course>(`/api/v1/courses/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
         apiFetch<Section[]>(`/api/v1/courses/${id}/sections`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        apiFetch<CouponRead[]>(`/api/v1/coupons`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => [] as CouponRead[]),
       ]);
 
       setCourse(courseData);
       setDraftTitle(courseData.title);
       setDraftDescription(courseData.description ?? "");
+      setCoupons((couponsData as CouponRead[]).filter((c) => c.is_active));
 
       const lessonsPerSection = await Promise.all(
         sectionsData.map((s) =>
@@ -213,6 +230,47 @@ export default function CourseEditorPage() {
       toast("URL copied to clipboard", { description: upload_url.slice(0, 60) + "…" });
     } catch {
       toast.error("Failed to get upload URL.");
+    }
+  }
+
+  async function createCoupon() {
+    if (!couponCode.trim() || !couponValue) return;
+    const token = await getToken();
+    setCreatingCoupon(true);
+    try {
+      const created = await apiFetch<CouponRead>(`/api/v1/coupons`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          course_id: id,
+          code: couponCode.trim().toUpperCase(),
+          discount_type: couponType,
+          discount_value: couponType === "percent" ? parseInt(couponValue) : Math.round(parseFloat(couponValue) * 100),
+          max_uses: couponMaxUses ? parseInt(couponMaxUses) : null,
+        }),
+      });
+      setCoupons((prev) => [created, ...prev]);
+      setCouponCode(""); setCouponValue(""); setCouponMaxUses("");
+      toast.success(`Coupon ${created.code} created.`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed";
+      toast.error(msg.includes("409") ? "Code already exists" : "Failed to create coupon");
+    } finally {
+      setCreatingCoupon(false);
+    }
+  }
+
+  async function deactivateCoupon(code: string) {
+    const token = await getToken();
+    try {
+      await apiFetch(`/api/v1/coupons/${code}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCoupons((prev) => prev.filter((c) => c.code !== code));
+      toast.success("Coupon deactivated.");
+    } catch {
+      toast.error("Failed to deactivate coupon.");
     }
   }
 
