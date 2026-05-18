@@ -452,6 +452,76 @@ export default function CourseEditorPage() {
           </div>
         )}
       </section>
+
+      <Separator className="my-8" />
+
+      {/* Promotions */}
+      <section>
+        <div className="flex items-center gap-2 mb-4">
+          <Tag className="h-4 w-4 text-[--color-text-muted]" />
+          <h2 className="font-semibold text-[--color-text-primary]">Promotions</h2>
+        </div>
+
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-6 space-y-4">
+          <p className="text-sm text-[--color-text-muted]">Create coupon codes for this course.</p>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Input
+              placeholder="Code (e.g. SAVE20)"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            />
+            <Select value={couponType} onValueChange={(v) => setCouponType(v as "percent" | "fixed")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="percent">% Off</SelectItem>
+                <SelectItem value="fixed">$ Fixed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Input
+              placeholder={couponType === "percent" ? "e.g. 20" : "e.g. 5.00"}
+              value={couponValue}
+              onChange={(e) => setCouponValue(e.target.value)}
+              type="number"
+              min="1"
+            />
+            <Input
+              placeholder="Max uses (optional)"
+              value={couponMaxUses}
+              onChange={(e) => setCouponMaxUses(e.target.value)}
+              type="number"
+              min="1"
+            />
+          </div>
+
+          <Button onClick={createCoupon} disabled={creatingCoupon || !couponCode || !couponValue} size="sm">
+            <Plus className="h-4 w-4" />
+            {creatingCoupon ? "Creating…" : "Create coupon"}
+          </Button>
+
+          {coupons.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-medium text-[--color-text-secondary]">Active coupons</p>
+              {coupons.map((c) => (
+                <div key={c.id} className="flex items-center justify-between rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface] px-3 py-2">
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-sm font-semibold text-[--color-text-primary]">{c.code}</span>
+                    <Badge variant="outline" className="text-xs">
+                      {c.discount_type === "percent" ? `${c.discount_value}% off` : `$${(c.discount_value / 100).toFixed(2)} off`}
+                    </Badge>
+                    {c.max_uses && (
+                      <span className="text-xs text-[--color-text-muted]">{c.uses_count}/{c.max_uses} uses</span>
+                    )}
+                  </div>
+                  <button onClick={() => deactivateCoupon(c.code)} className="p-1 text-[--color-text-muted] hover:text-[--color-error]">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
