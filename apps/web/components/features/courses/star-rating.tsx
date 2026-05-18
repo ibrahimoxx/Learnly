@@ -14,7 +14,7 @@ export function StarRating({ rating, count, size = "sm", showCount = true }: Sta
   return (
     <div className="flex items-center gap-1">
       <span className={cn("font-semibold text-[--color-star]", size === "sm" ? "text-xs" : "text-sm")}>
-        {rating.toFixed(1)}
+        {Number(rating).toFixed(1)}
       </span>
       <div className="flex items-center">
         {stars.map((star) => (

@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson } from "@/types";
 
@@ -42,6 +41,7 @@ export default function CourseEditorPage() {
   const [couponValue, setCouponValue] = useState("");
   const [couponMaxUses, setCouponMaxUses] = useState("");
   const [creatingCoupon, setCreatingCoupon] = useState(false);
+  const [couponGlobal, setCouponGlobal] = useState(false);
 
   // Course title draft
   const [draftTitle, setDraftTitle] = useState("");
@@ -242,7 +242,7 @@ export default function CourseEditorPage() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          course_id: id,
+          course_id: couponGlobal ? null : id,
           code: couponCode.trim().toUpperCase(),
           discount_type: couponType,
           discount_value: couponType === "percent" ? parseInt(couponValue) : Math.round(parseFloat(couponValue) * 100),
@@ -471,13 +471,14 @@ export default function CourseEditorPage() {
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
             />
-            <Select value={couponType} onValueChange={(v) => setCouponType(v as "percent" | "fixed")}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="percent">% Off</SelectItem>
-                <SelectItem value="fixed">$ Fixed</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={couponType}
+              onChange={(e) => setCouponType(e.target.value as "percent" | "fixed")}
+              className="rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            >
+              <option value="percent">% Off</option>
+              <option value="fixed">$ Fixed</option>
+            </select>
             <Input
               placeholder={couponType === "percent" ? "e.g. 20" : "e.g. 5.00"}
               value={couponValue}
@@ -493,6 +494,16 @@ export default function CourseEditorPage() {
               min="1"
             />
           </div>
+
+          <label className="flex items-center gap-2 text-sm text-[--color-text-secondary] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={couponGlobal}
+              onChange={(e) => setCouponGlobal(e.target.checked)}
+              className="rounded"
+            />
+            Apply to all courses
+          </label>
 
           <Button onClick={createCoupon} disabled={creatingCoupon || !couponCode || !couponValue} size="sm">
             <Plus className="h-4 w-4" />
