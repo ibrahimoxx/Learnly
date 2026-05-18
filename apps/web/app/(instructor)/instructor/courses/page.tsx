@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Plus, Edit, BarChart2, BookOpen } from "lucide-react";
+import { Plus, Edit, BarChart2, BookOpen, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,7 +49,14 @@ export default function InstructorCoursesPage() {
             Create and manage your courses
           </p>
         </div>
-        <CreateCourseButton token={null} onCreated={(c) => setCourses((prev) => [c, ...prev])} getToken={getToken} />
+        <div className="flex items-center gap-2">
+          <Link href="/instructor/promotions">
+            <Button variant="outline" size="sm" className="gap-1">
+              <Tag className="h-3 w-3" /> Promotions
+            </Button>
+          </Link>
+          <CreateCourseButton token={null} onCreated={(c) => setCourses((prev) => [c, ...prev])} getToken={getToken} />
+        </div>
       </div>
 
       {loading ? (
