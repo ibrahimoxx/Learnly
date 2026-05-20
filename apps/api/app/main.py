@@ -18,6 +18,7 @@ from app.api.v1.payouts import router as payouts_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.organizations import router as organizations_router
+from app.api.v1.quiz import router as quiz_router
 from app.core.config import settings
 
 log = structlog.get_logger()
@@ -53,6 +54,7 @@ app.include_router(payouts_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(notifications_router, prefix="/api/v1")
 app.include_router(organizations_router, prefix="/api/v1")
+app.include_router(quiz_router, prefix="/api/v1")
 
 
 @app.on_event("startup")

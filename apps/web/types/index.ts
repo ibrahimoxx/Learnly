@@ -107,6 +107,36 @@ export interface Review {
   created_at: string;
 }
 
+export interface QuizQuestion {
+  id: string;
+  lesson_id: string;
+  question_text: string;
+  options: string[];
+  explanation: string | null;
+  position: number;
+  created_at: string;
+  correct_index?: number;
+}
+
+export interface QuizQuestionResult {
+  question_id: string;
+  selected_index: number | null;
+  correct_index: number;
+  is_correct: boolean;
+  explanation: string | null;
+}
+
+export interface QuizAttemptRead {
+  id: string;
+  lesson_id: string;
+  score: number;
+  total: number;
+  passed: boolean;
+  answers: (number | null)[];
+  results: QuizQuestionResult[];
+  created_at: string;
+}
+
 export interface CourseListResponse {
   items: Course[];
   total: number;

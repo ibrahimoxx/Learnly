@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson } from "@/types";
+import { QuizBuilder } from "@/components/features/quiz/quiz-builder";
 
 interface SectionWithLessons extends Section {
   lessons: Lesson[];
@@ -29,6 +30,8 @@ export default function CourseEditorPage() {
   const [sections, setSections] = useState<SectionWithLessons[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [newLessonType, setNewLessonType] = useState<Record<string, "video" | "article" | "quiz">>({});
+  const [expandedQuiz, setExpandedQuiz] = useState<string | null>(null);
 
   // Coupon state
   interface CouponRead {
@@ -176,6 +179,7 @@ export default function CourseEditorPage() {
     const token = await getToken();
     const section = sections.find((s) => s.id === sectionId);
     if (!section) return;
+    const type = newLessonType[sectionId] ?? "video";
     try {
       const lesson = await apiFetch<Lesson>(`/api/v1/sections/${sectionId}/lessons`, {
         method: "POST",
@@ -183,7 +187,7 @@ export default function CourseEditorPage() {
         body: JSON.stringify({
           title: "New Lesson",
           position: section.lessons.length,
-          type: "video",
+          type,
           is_free_preview: false,
           duration_seconds: 0,
         }),
@@ -193,6 +197,7 @@ export default function CourseEditorPage() {
           s.id === sectionId ? { ...s, lessons: [...s.lessons, lesson] } : s
         )
       );
+      if (type === "quiz") setExpandedQuiz(lesson.id);
     } catch {
       toast.error("Failed to add lesson.");
     }
@@ -394,50 +399,74 @@ export default function CourseEditorPage() {
                 {section.expanded && (
                   <div>
                     {section.lessons.map((lesson) => (
-                      <div
-                        key={lesson.id}
-                        className="flex items-center gap-2 border-t border-[--color-border] px-4 py-3"
-                      >
-                        <GripVertical className="h-4 w-4 text-[--color-text-muted] cursor-grab shrink-0" />
-                        <EditableTitle
-                          value={lesson.title}
-                          onSave={async (t) => {
-                            const token = await getToken();
-                            await apiFetch(`/api/v1/sections/${section.id}/lessons/${lesson.id}`, {
-                              method: "PATCH",
-                              headers: { Authorization: `Bearer ${token}` },
-                              body: JSON.stringify({ title: t }),
-                            }).catch(() => toast.error("Failed to update lesson."));
-                            setSections((prev) =>
-                              prev.map((s) =>
-                                s.id === section.id
-                                  ? { ...s, lessons: s.lessons.map((l) => l.id === lesson.id ? { ...l, title: t } : l) }
-                                  : s
-                              )
-                            );
-                          }}
-                          className="min-w-0 flex-1 text-sm text-[--color-text-secondary]"
-                        />
-                        <Badge variant="outline" className="shrink-0">{lesson.type}</Badge>
-                        {lesson.type === "video" && (
+                      <div key={lesson.id} className="border-t border-[--color-border]">
+                        <div className="flex items-center gap-2 px-4 py-3">
+                          <GripVertical className="h-4 w-4 text-[--color-text-muted] cursor-grab shrink-0" />
+                          <EditableTitle
+                            value={lesson.title}
+                            onSave={async (t) => {
+                              const token = await getToken();
+                              await apiFetch(`/api/v1/sections/${section.id}/lessons/${lesson.id}`, {
+                                method: "PATCH",
+                                headers: { Authorization: `Bearer ${token}` },
+                                body: JSON.stringify({ title: t }),
+                              }).catch(() => toast.error("Failed to update lesson."));
+                              setSections((prev) =>
+                                prev.map((s) =>
+                                  s.id === section.id
+                                    ? { ...s, lessons: s.lessons.map((l) => l.id === lesson.id ? { ...l, title: t } : l) }
+                                    : s
+                                )
+                              );
+                            }}
+                            className="min-w-0 flex-1 text-sm text-[--color-text-secondary]"
+                          />
+                          <Badge variant="outline" className="shrink-0">{lesson.type}</Badge>
+                          {lesson.type === "video" && (
+                            <button
+                              onClick={() => getUploadUrl(section.id, lesson.id)}
+                              className="flex items-center gap-1 rounded-sm border border-[--color-border] px-2 py-1 text-xs text-[--color-text-muted] hover:border-[--color-primary] hover:text-[--color-primary] transition-colors shrink-0"
+                            >
+                              <Upload className="h-3 w-3" /> Upload
+                            </button>
+                          )}
+                          {lesson.type === "quiz" && (
+                            <button
+                              onClick={() => setExpandedQuiz(expandedQuiz === lesson.id ? null : lesson.id)}
+                              className="flex items-center gap-1 rounded-sm border border-[--color-border] px-2 py-1 text-xs text-[--color-text-muted] hover:border-[--color-primary] hover:text-[--color-primary] transition-colors shrink-0"
+                            >
+                              {expandedQuiz === lesson.id ? "Hide" : "Edit quiz"}
+                            </button>
+                          )}
                           <button
-                            onClick={() => getUploadUrl(section.id, lesson.id)}
-                            className="flex items-center gap-1 rounded-sm border border-[--color-border] px-2 py-1 text-xs text-[--color-text-muted] hover:border-[--color-primary] hover:text-[--color-primary] transition-colors shrink-0"
+                            onClick={() => deleteLesson(section.id, lesson.id)}
+                            className="shrink-0 p-1 text-[--color-text-muted] hover:text-[--color-error]"
                           >
-                            <Upload className="h-3 w-3" /> Upload
+                            <Trash2 className="h-3 w-3" />
                           </button>
+                        </div>
+                        {lesson.type === "quiz" && expandedQuiz === lesson.id && (
+                          <QuizBuilderPanel lessonId={lesson.id} getToken={getToken} />
                         )}
-                        <button
-                          onClick={() => deleteLesson(section.id, lesson.id)}
-                          className="shrink-0 p-1 text-[--color-text-muted] hover:text-[--color-error]"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
                       </div>
                     ))}
 
                     {/* Add lesson */}
-                    <div className="border-t border-[--color-border] px-4 py-2">
+                    <div className="border-t border-[--color-border] px-4 py-2 flex items-center gap-3">
+                      <select
+                        value={newLessonType[section.id] ?? "video"}
+                        onChange={(e) =>
+                          setNewLessonType((prev) => ({
+                            ...prev,
+                            [section.id]: e.target.value as "video" | "article" | "quiz",
+                          }))
+                        }
+                        className="rounded border border-[--color-border] bg-white px-2 py-1 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                      >
+                        <option value="video">Video</option>
+                        <option value="article">Article</option>
+                        <option value="quiz">Quiz</option>
+                      </select>
                       <button
                         onClick={() => addLesson(section.id)}
                         className="flex items-center gap-1 text-xs font-medium text-[--color-primary] hover:underline"
@@ -535,6 +564,23 @@ export default function CourseEditorPage() {
       </section>
     </div>
   );
+}
+
+function QuizBuilderPanel({
+  lessonId,
+  getToken,
+}: {
+  lessonId: string;
+  getToken: () => Promise<string | null>;
+}) {
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    getToken().then(setToken);
+  }, [getToken]);
+
+  if (!token) return null;
+  return <QuizBuilder lessonId={lessonId} token={token} />;
 }
 
 function EditableTitle({

@@ -3,9 +3,10 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment, Lesson, Section, Question } from "@/types";
+import { QuizPlayer } from "@/components/features/quiz/quiz-player";
 
 interface SectionWithLessons extends Section {
   lessons: Lesson[];
@@ -112,6 +113,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 </div>
               )}
             </div>
+          ) : currentLesson.type === "quiz" ? (
+            <QuizPlayer lessonId={currentLesson.id} token={token} />
           ) : (
             <div className="flex-1 overflow-y-auto p-8">
               <h2 className="text-xl font-bold text-white">{currentLesson.title}</h2>
@@ -217,6 +220,8 @@ function ContentTab({
                         <PlayCircle className="h-4 w-4 text-[--color-primary]" />
                       ) : lesson.type === "video" ? (
                         <Circle className="h-4 w-4 text-white/30" />
+                      ) : lesson.type === "quiz" ? (
+                        <HelpCircle className="h-4 w-4 text-white/30" />
                       ) : (
                         <FileText className="h-4 w-4 text-white/30" />
                       )}
