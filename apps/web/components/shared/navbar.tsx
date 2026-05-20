@@ -141,9 +141,11 @@ export function Navbar() {
                 <Link href="/wishlist" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
                   {t("wishlist")}
                 </Link>
-                <Link href="/instructor/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-                  {t("teach")}
-                </Link>
+                {isInstructor && (
+                  <Link href="/instructor/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
+                    {t("teach")}
+                  </Link>
+                )}
               </>
             )}
           </nav>
