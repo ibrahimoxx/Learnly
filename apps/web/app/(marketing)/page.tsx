@@ -145,9 +145,6 @@ export default async function HomePage() {
               <PlayCircle className="h-12 w-12 text-[--color-border]" />
               <h3 className="mt-4 text-base font-semibold text-[--color-text-secondary]">{t("noCoursesTitle")}</h3>
               <p className="mt-1 text-sm text-[--color-text-muted]">{t("noCoursesDesc")}</p>
-              <Link href="/instructor/courses" className="mt-4">
-                <Button>{t("startTeaching")}</Button>
-              </Link>
             </div>
           )}
         </div>
