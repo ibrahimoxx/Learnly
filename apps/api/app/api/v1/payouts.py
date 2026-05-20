@@ -45,6 +45,7 @@ async def start_connect_onboarding(
                 type="express",
                 email=user.email,
                 metadata={"user_id": str(user.id)},
+                idempotency_key=f"connect-account-{user.id}",
             )
             account_id = account.id
             user.stripe_account_id = account_id

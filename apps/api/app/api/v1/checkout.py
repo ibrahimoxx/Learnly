@@ -74,6 +74,7 @@ async def create_checkout_session(
     if applied_coupon:
         metadata["coupon_id"] = str(applied_coupon.id)
 
+    idempotency_key = f"checkout-{user.id}-{course.id}"
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
         line_items=[{
@@ -88,6 +89,7 @@ async def create_checkout_session(
         success_url=f"{settings.app_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=f"{settings.app_url}/checkout/cancel?course={course.slug}",
         metadata=metadata,
+        idempotency_key=idempotency_key,
     )
 
     if applied_coupon:
