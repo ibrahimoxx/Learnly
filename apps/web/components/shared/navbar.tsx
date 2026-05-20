@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { Search, BookOpen, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,9 @@ import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
 export function Navbar() {
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const role = user?.publicMetadata?.role as string | undefined;
+  const isInstructor = role === "instructor" || role === "admin";
   const router = useRouter();
   const t = useTranslations("nav");
   const [query, setQuery] = useState("");
@@ -72,12 +75,14 @@ export function Navbar() {
               >
                 {t("wishlist")}
               </Link>
-              <Link
-                href="/instructor/courses"
-                className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
-              >
-                {t("teach")}
-              </Link>
+              {isInstructor && (
+                <Link
+                  href="/instructor/courses"
+                  className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
+                >
+                  {t("teach")}
+                </Link>
+              )}
             </>
           )}
         </nav>
