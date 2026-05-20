@@ -1,3 +1,4 @@
+import sentry_sdk
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +23,13 @@ from app.api.v1.quiz import router as quiz_router
 from app.core.config import settings
 
 log = structlog.get_logger()
+
+if settings.sentry_dsn_backend:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn_backend,
+        traces_sample_rate=0.1,
+        environment=settings.node_env,
+    )
 
 app = FastAPI(
     title="Learnly API",

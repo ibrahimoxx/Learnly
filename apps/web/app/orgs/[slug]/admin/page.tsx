@@ -29,7 +29,7 @@ export default async function OrgAdminPage({ params }: Props) {
   if (!user) redirect(`/orgs/${slug}`);
 
   const role = user.publicMetadata?.role as string | undefined;
-  const orgRole = user.organizationMemberships?.[0]?.role;
+  const orgRole = (user as unknown as { organizationMemberships?: Array<{ role: string }> }).organizationMemberships?.[0]?.role;
 
   if (role !== "admin" && orgRole !== "org:admin") {
     redirect(`/orgs/${slug}`);

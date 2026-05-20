@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     cf_stream_account_id: str = ""
     cf_stream_api_token: str = ""
 
+    # Monitoring
+    sentry_dsn_backend: str | None = None
+
+    # Analytics
+    posthog_key: str | None = None
+
     # Feature flags
     feature_live_sessions: bool = False
     feature_affiliate: bool = False
