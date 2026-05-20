@@ -8,9 +8,7 @@ import {
 import { StarRating } from "@/components/features/courses/star-rating";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
-} from "@/components/ui/accordion";
+import { PreviewCurriculum } from "@/components/features/courses/preview-curriculum";
 import { EnrollButton } from "./enroll-button";
 import { ReviewSection } from "@/components/features/courses/review-section";
 import { WishlistButton } from "@/components/features/courses/wishlist-button";
@@ -206,42 +204,11 @@ export default async function CourseDetailPage({ params }: Props) {
               </p>
 
               {sectionsWithLessons.length > 0 ? (
-                <Accordion type="multiple" className="mt-4">
-                  {sectionsWithLessons.map((section) => (
-                    <AccordionItem key={section.id} value={section.id}>
-                      <AccordionTrigger className="font-semibold text-[--color-text-primary]">
-                        <span className="flex-1 text-left">{section.title}</span>
-                        <span className="mr-4 text-xs font-normal text-[--color-text-muted]">
-                          {section.lessons.length} {t("lessons").toLowerCase()}
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <ul className="divide-y divide-[--color-border]">
-                          {section.lessons.map((lesson: Lesson) => (
-                            <li key={lesson.id} className="flex items-center gap-3 py-2.5">
-                              {lesson.type === "video" ? (
-                                <PlayCircle className="h-4 w-4 shrink-0 text-[--color-text-muted]" />
-                              ) : (
-                                <FileText className="h-4 w-4 shrink-0 text-[--color-text-muted]" />
-                              )}
-                              <span className="flex-1 text-sm text-[--color-text-secondary]">
-                                {lesson.title}
-                              </span>
-                              {lesson.is_free_preview && (
-                                <Badge variant="success" className="text-xs">{t("preview")}</Badge>
-                              )}
-                              {lesson.duration_seconds != null && lesson.duration_seconds > 0 && (
-                                <span className="text-xs text-[--color-text-muted]">
-                                  {formatDuration(lesson.duration_seconds)}
-                                </span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                <PreviewCurriculum
+                  sectionsWithLessons={sectionsWithLessons}
+                  lessonsLabel={t("lessons")}
+                  previewLabel={t("preview")}
+                />
               ) : (
                 <p className="mt-4 text-sm text-[--color-text-muted]">{t("noLessons")}</p>
               )}

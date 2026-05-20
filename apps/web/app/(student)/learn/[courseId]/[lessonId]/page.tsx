@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { PlayerClient } from "./player-client";
-import type { Section, Lesson, Enrollment } from "@/types";
+import { PreviewPlayer } from "./preview-player";
+import type { Section, Lesson, Enrollment, Course } from "@/types";
 
 interface Props {
   params: Promise<{ courseId: string; lessonId: string }>;
@@ -14,6 +15,14 @@ async function getEnrollment(courseId: string, token: string) {
       headers: { Authorization: `Bearer ${token}` },
     });
     return enrollments.find((e) => e.course_id === courseId) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function getCourse(courseId: string) {
+  try {
+    return await apiFetch<Course>(`/api/v1/courses/${courseId}`);
   } catch {
     return null;
   }
@@ -35,10 +44,27 @@ async function getLessons(sectionId: string) {
   }
 }
 
+async function findLesson(courseId: string, lessonId: string): Promise<Lesson | null> {
+  const sections = await getSections(courseId);
+  const allLessons = (
+    await Promise.all(sections.map((s) => getLessons(s.id)))
+  ).flat();
+  return allLessons.find((l) => l.id === lessonId) ?? allLessons[0] ?? null;
+}
+
 export default async function PlayerPage({ params }: Props) {
   const { courseId, lessonId } = await params;
   const { userId, getToken } = await auth();
-  if (!userId) redirect("/sign-in");
+
+  if (!userId) {
+    const [lesson, course] = await Promise.all([
+      findLesson(courseId, lessonId),
+      getCourse(courseId),
+    ]);
+    if (!lesson || !course) notFound();
+    if (!lesson.is_free_preview) redirect("/sign-in");
+    return <PreviewPlayer lesson={lesson} course={course} />;
+  }
 
   const token = (await getToken()) ?? "";
   const enrollment = await getEnrollment(courseId, token);
