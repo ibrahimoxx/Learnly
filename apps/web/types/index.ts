@@ -97,6 +97,27 @@ export interface Question {
   answers: Answer[];
 }
 
+export interface DiscussionReply {
+  id: string;
+  post_id: string;
+  author_id: string;
+  author_name: string;
+  body: string;
+  created_at: string;
+}
+
+export interface DiscussionPost {
+  id: string;
+  course_id: string;
+  author_id: string;
+  author_name: string;
+  title: string;
+  body: string;
+  is_pinned: boolean;
+  created_at: string;
+  replies: DiscussionReply[];
+}
+
 export interface Review {
   id: string;
   course_id: string;
