@@ -3,27 +3,34 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { PlayCircle, Award, BookOpen, Download } from "lucide-react";
+import { PlayCircle, Award, BookOpen, Download, Flame, Zap, Medal } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { apiFetch } from "@/lib/api";
-import type { Enrollment } from "@/types";
+import type { Enrollment, GamificationStats } from "@/types";
 
 export default function DashboardPage() {
   const { getToken } = useAuth();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<GamificationStats | null>(null);
 
   useEffect(() => {
     async function load() {
       const token = await getToken();
       try {
-        const data = await apiFetch<Enrollment[]>("/api/v1/enrollments", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const [data, gamification] = await Promise.all([
+          apiFetch<Enrollment[]>("/api/v1/enrollments", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          apiFetch<GamificationStats>("/api/v1/gamification/me", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
         setEnrollments(data);
+        setStats(gamification);
       } catch {
         setEnrollments([]);
       } finally {
