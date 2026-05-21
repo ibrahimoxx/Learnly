@@ -1,12 +1,12 @@
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
-from app.db.session import get_db
+from app.db.session import AsyncSessionLocal, get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson import Lesson
@@ -23,8 +23,15 @@ from app.schemas.quiz import (
     QuizSubmitRequest,
 )
 
+from app.services.gamification import process_quiz_pass
+
 log = structlog.get_logger()
 router = APIRouter(tags=["quiz"])
+
+
+async def _run_gamification_quiz(user_id: str) -> None:
+    async with AsyncSessionLocal() as db:
+        await process_quiz_pass(uuid.UUID(user_id), db)
 
 PASS_THRESHOLD = 0.7
 

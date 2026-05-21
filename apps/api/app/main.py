@@ -21,6 +21,7 @@ from app.api.v1.notifications import router as notifications_router
 from app.api.v1.organizations import router as organizations_router
 from app.api.v1.quiz import router as quiz_router
 from app.api.v1.discussions import router as discussions_router
+from app.api.v1.gamification import router as gamification_router
 from app.core.config import settings
 
 log = structlog.get_logger()
@@ -65,6 +66,7 @@ app.include_router(notifications_router, prefix="/api/v1")
 app.include_router(organizations_router, prefix="/api/v1")
 app.include_router(quiz_router, prefix="/api/v1")
 app.include_router(discussions_router, prefix="/api/v1")
+app.include_router(gamification_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
