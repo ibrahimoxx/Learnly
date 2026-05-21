@@ -13,5 +13,6 @@ from app.db.tables.coupon import Coupon
 from app.db.tables.notification import Notification
 from app.db.tables.quiz import QuizQuestion, QuizAttempt
 from app.db.tables.discussion import DiscussionPost, DiscussionReply
+from app.db.tables.gamification import Badge, UserBadge, UserGamification
 
-__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply"]
+__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge"]
