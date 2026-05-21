@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock } from "lucide-react";
+import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment, Lesson, LessonProgress, Section, Question, DiscussionPost, DiscussionReply } from "@/types";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
@@ -49,7 +50,11 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           }),
         });
         if (completed) {
-          setCompletedIds((prev) => new Set([...prev, currentLesson.id]));
+          setCompletedIds((prev) => {
+            if (prev.has(currentLesson.id)) return prev;
+            toast.success("Lesson complete! +10 XP", { duration: 3000 });
+            return new Set([...prev, currentLesson.id]);
+          });
         }
       } catch {
         // silent — non-blocking
