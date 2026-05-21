@@ -148,8 +148,17 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
           <div className="mt-2">
             <div className="flex justify-between text-xs text-[--color-text-muted] mb-1">
               <span>Progress</span>
+              <span>
+                {enrollment.completed_lessons ?? 0}/{enrollment.total_lessons ?? 0} lessons
+              </span>
             </div>
-            <Progress value={0} />
+            <Progress
+              value={
+                (enrollment.total_lessons ?? 0) > 0
+                  ? Math.round(((enrollment.completed_lessons ?? 0) / (enrollment.total_lessons ?? 1)) * 100)
+                  : 0
+              }
+            />
           </div>
         )}
 

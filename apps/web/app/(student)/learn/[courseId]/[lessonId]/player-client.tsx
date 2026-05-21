@@ -261,6 +261,8 @@ function ContentTab({
                         <Lock className="h-4 w-4 text-white/30" />
                       ) : isCurrent ? (
                         <PlayCircle className="h-4 w-4 text-[--color-primary]" />
+                      ) : completedIds.has(lesson.id) ? (
+                        <CheckCircle className="h-4 w-4 text-green-400" />
                       ) : lesson.type === "video" ? (
                         <Circle className="h-4 w-4 text-white/30" />
                       ) : lesson.type === "quiz" ? (
