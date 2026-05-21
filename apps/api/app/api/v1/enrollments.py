@@ -185,6 +185,8 @@ async def upsert_progress(
             "lesson_id": str(body.lesson_id),
             "is_completed": progress.is_completed,
             "watched_seconds": progress.watched_seconds,
+            "last_position_seconds": progress.last_position_seconds,
+            "completed_at": progress.completed_at.isoformat() if progress.completed_at else None,
         }))
         await r.aclose()
     except Exception:

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock } from "lucide-react";
@@ -23,8 +24,17 @@ interface Props {
 
 type SidebarTab = "content" | "qa" | "forums";
 
+interface ProgressSSEEvent {
+  lesson_id: string;
+  is_completed: boolean;
+  watched_seconds: number;
+  last_position_seconds: number;
+  completed_at: string | null;
+}
+
 export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, token, initialProgress }: Props) {
   const router = useRouter();
+  const posthog = usePostHog();
   const progressRef = useRef<number>(0);
   const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [activeTab, setActiveTab] = useState<SidebarTab>("content");
@@ -55,6 +65,10 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           setCompletedIds((prev) => {
             if (prev.has(currentLesson.id)) return prev;
             toast.success("Lesson complete! +10 XP", { duration: 3000 });
+            posthog?.capture("lesson_completed", {
+              lesson_id: currentLesson.id,
+              course_id: enrollment.course_id,
+            });
             return new Set([...prev, currentLesson.id]);
           });
         }
@@ -66,14 +80,38 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   );
 
   useEffect(() => {
-    const es = new EventSource(`/api/sse/${enrollment.id}`);
-    es.onmessage = (e: MessageEvent<string>) => {
-      const data = JSON.parse(e.data) as { lesson_id: string; is_completed: boolean };
-      if (data.is_completed) {
-        setCompletedIds((prev) => new Set([...prev, data.lesson_id]));
-      }
+    let retries = 0;
+    let es: EventSource | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    function connect() {
+      es = new EventSource(`/api/sse/${enrollment.id}`);
+      es.onmessage = (evt: MessageEvent<string>) => {
+        retries = 0;
+        try {
+          const data = JSON.parse(evt.data) as ProgressSSEEvent;
+          if (data.is_completed) {
+            setCompletedIds((prev) => new Set([...prev, data.lesson_id]));
+          }
+        } catch {
+          // malformed message — ignore
+        }
+      };
+      es.onerror = () => {
+        es?.close();
+        if (retries < 3) {
+          reconnectTimeout = setTimeout(connect, Math.pow(2, retries) * 2000);
+          retries++;
+        }
+        // after 3 retries fall back to existing 10-second polling silently
+      };
+    }
+
+    connect();
+    return () => {
+      es?.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
     };
-    return () => es.close();
   }, [enrollment.id]);
 
   useEffect(() => {

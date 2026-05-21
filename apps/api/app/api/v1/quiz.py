@@ -2,7 +2,7 @@ import uuid
 
 import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
@@ -90,6 +90,7 @@ def _attempt_to_read(attempt: QuizAttempt, questions: list[QuizQuestion]) -> Qui
         score=attempt.score,
         total=attempt.total,
         passed=attempt.passed,
+        attempt_number=attempt.attempt_number,
         answers=attempt.answers,
         results=results,
         created_at=attempt.created_at,
@@ -243,6 +244,14 @@ async def submit_quiz(
     )
     passed = (score / total) >= PASS_THRESHOLD
 
+    count_result = await db.execute(
+        select(func.count()).select_from(QuizAttempt).where(
+            QuizAttempt.student_id == user.id,
+            QuizAttempt.lesson_id == lesson_id,
+        )
+    )
+    attempt_number = (count_result.scalar() or 0) + 1
+
     attempt = QuizAttempt(
         student_id=user.id,
         lesson_id=lesson_id,
@@ -250,6 +259,7 @@ async def submit_quiz(
         score=score,
         total=total,
         passed=passed,
+        attempt_number=attempt_number,
     )
     db.add(attempt)
     await db.commit()
@@ -260,6 +270,31 @@ async def submit_quiz(
 
     log.info("quiz_submitted", lesson_id=str(lesson_id), student_id=str(user.id), score=score, total=total)
     return _attempt_to_read(attempt, list(questions))
+
+
+@router.get("/lessons/{lesson_id}/quiz/attempts", response_model=list[QuizAttemptRead])
+async def list_my_quiz_attempts(
+    lesson_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[QuizAttemptRead]:
+    _, course = await _get_lesson_course(lesson_id, db)
+    await _require_enrolled(course.id, user, db)
+
+    questions_result = await db.execute(
+        select(QuizQuestion)
+        .where(QuizQuestion.lesson_id == lesson_id)
+        .order_by(QuizQuestion.position, QuizQuestion.created_at)
+    )
+    questions = list(questions_result.scalars().all())
+
+    attempts_result = await db.execute(
+        select(QuizAttempt)
+        .where(QuizAttempt.student_id == user.id, QuizAttempt.lesson_id == lesson_id)
+        .order_by(QuizAttempt.attempt_number.desc())
+    )
+    attempts = attempts_result.scalars().all()
+    return [_attempt_to_read(a, questions) for a in attempts]
 
 
 @router.get("/lessons/{lesson_id}/quiz/my-attempt", response_model=QuizAttemptRead)

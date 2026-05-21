@@ -54,6 +54,7 @@ class QuizAttemptRead(BaseModel):
     score: int
     total: int
     passed: bool
+    attempt_number: int
     answers: list[int | None]
     results: list[QuizQuestionResult]
     created_at: datetime

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePostHog } from "posthog-js/react";
 import { CheckCircle2, XCircle, HelpCircle, RotateCcw, Trophy } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { QuizQuestion, QuizAttemptRead } from "@/types";
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function QuizPlayer({ lessonId, token }: Props) {
+  const posthog = usePostHog();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [attempt, setAttempt] = useState<QuizAttemptRead | null>(null);
   const [selected, setSelected] = useState<(number | null)[]>([]);
@@ -60,6 +62,13 @@ export function QuizPlayer({ lessonId, token }: Props) {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ answers: selected }),
+      });
+      posthog?.capture("quiz_submitted", {
+        lesson_id: lessonId,
+        score: result.score,
+        total: result.total,
+        passed: result.passed,
+        attempt_number: result.attempt_number,
       });
       setAttempt(result);
     } catch (err: unknown) {
@@ -192,11 +201,14 @@ function QuizResults({
           <p className="mt-1 text-sm text-white/60">
             {attempt.score} / {attempt.total} correct
           </p>
-          <span className={`mt-3 inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-            attempt.passed ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"
-          }`}>
-            {attempt.passed ? "Passed" : "Try again — need 70% to pass"}
-          </span>
+          <div className="mt-3 flex items-center justify-center gap-3">
+            <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
+              attempt.passed ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"
+            }`}>
+              {attempt.passed ? "Passed" : "Try again — need 70% to pass"}
+            </span>
+            <span className="text-xs text-white/30">Attempt {attempt.attempt_number}</span>
+          </div>
         </div>
 
         {/* Per-question breakdown */}

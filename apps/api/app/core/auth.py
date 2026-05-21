@@ -14,6 +14,7 @@ from app.db.tables.user import User
 
 log = structlog.get_logger()
 bearer = HTTPBearer()
+optional_bearer = HTTPBearer(auto_error=False)
 
 _jwks_cache: dict | None = None
 
@@ -85,6 +86,28 @@ async def get_current_user(
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account suspended")
     return user
+
+
+async def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer),
+    db: AsyncSession = Depends(get_db),
+) -> User | None:
+    if not credentials:
+        return None
+    try:
+        jwks = await _get_jwks()
+        header = jwt.get_unverified_header(credentials.credentials)
+        key = next((k for k in jwks["keys"] if k["kid"] == header["kid"]), None)
+        if not key:
+            return None
+        payload = jwt.decode(credentials.credentials, key, algorithms=["RS256"])
+        clerk_id = payload.get("sub")
+        if not clerk_id:
+            return None
+        result = await db.execute(select(User).where(User.clerk_id == clerk_id))
+        return result.scalar_one_or_none()
+    except Exception:
+        return None
 
 
 async def require_instructor(user: User = Depends(get_current_user)) -> User:

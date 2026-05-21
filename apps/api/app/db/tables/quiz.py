@@ -37,4 +37,5 @@ class QuizAttempt(Base):
     score: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     total: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     passed: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    attempt_number: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=1)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -156,6 +156,7 @@ export interface QuizAttemptRead {
   score: number;
   total: number;
   passed: boolean;
+  attempt_number: number;
   answers: (number | null)[];
   results: QuizQuestionResult[];
   created_at: string;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePostHog } from "posthog-js/react";
 import { useRouter } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ interface CouponResult {
 export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   const { isSignedIn, getToken } = useAuth();
   const router = useRouter();
+  const posthog = usePostHog();
   const [loading, setLoading] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
   const [couponCode, setCouponCode] = useState("");
@@ -94,6 +96,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
         body: JSON.stringify({ course_id: courseId }),
       });
       void enrollment;
+      posthog?.capture("course_enrolled", { course_id: courseId, is_free: true });
       toast.success("Enrolled successfully!");
       router.push(`/learn/${courseId}`);
     } catch (err: unknown) {

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime, timezone
 
 import arq
 import structlog
@@ -6,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import require_instructor
+from app.core.auth import get_optional_user, require_instructor
 from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.course import Course
@@ -37,12 +38,22 @@ async def _verify_section_ownership(
 @router.get("", response_model=list[LessonRead])
 async def list_lessons(
     section_id: uuid.UUID,
+    user: User | None = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[LessonRead]:
     result = await db.execute(
         select(Lesson).where(Lesson.section_id == section_id).order_by(Lesson.position)
     )
-    return [LessonRead.model_validate(l) for l in result.scalars().all()]
+    is_instructor = user is not None and user.role in ("instructor", "admin")
+    now = datetime.now(timezone.utc)
+    lessons = []
+    for lesson in result.scalars().all():
+        read = LessonRead.model_validate(lesson)
+        if not is_instructor and lesson.unlock_at and lesson.unlock_at > now:
+            read.video_url = None
+            read.content = None
+        lessons.append(read)
+    return lessons
 
 
 @router.post("", response_model=LessonRead, status_code=status.HTTP_201_CREATED)
