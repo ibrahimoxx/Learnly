@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-BadgeRarity = Enum("common", "uncommon", "rare", "epic", "legendary", name="badge_rarity")
+BadgeRarity = Enum("common", "uncommon", "rare", "epic", "legendary", name="badge_rarity", create_type=False)
 
 
 class UserGamification(Base):

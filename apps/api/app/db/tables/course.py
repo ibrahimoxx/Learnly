@@ -13,6 +13,7 @@ from sqlalchemy import (
     Text,
     func,
 )
+from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,6 +50,10 @@ class Course(Base):
     rating: Mapped[Decimal] = mapped_column(Numeric(3, 2), nullable=False, default=Decimal("0.00"))
     review_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     enrollment_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    # Phase 3: 768 dims (nomic-embed-text via Ollama)
+    # Phase 4: change to Vector(1536) for OpenAI text-embedding-3-small
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(768), nullable=True)
 
     instructor_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True

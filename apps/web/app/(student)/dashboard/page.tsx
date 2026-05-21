@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { apiFetch } from "@/lib/api";
+import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
 import type { Enrollment, GamificationStats } from "@/types";
 
 export default function DashboardPage() {
@@ -79,6 +80,8 @@ export default function DashboardPage() {
           )}
         </div>
       )}
+
+      <RecommendationsSection />
 
       <Tabs defaultValue="all" className="mt-6">
         <TabsList>

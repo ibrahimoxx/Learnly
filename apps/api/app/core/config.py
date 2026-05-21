@@ -54,6 +54,20 @@ class Settings(BaseSettings):
     # Analytics
     posthog_key: str | None = None
 
+    # Ollama — local embeddings (Phase 3)
+    # Phase 4: comment these out and uncomment OpenAI block below
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_embed_model: str = "nomic-embed-text"
+
+    # OpenAI embeddings — Phase 4 production only
+    # Uncomment + set OPENAI_API_KEY in prod env when deploying
+    # openai_api_key: str = ""
+
+    # Web Push (VAPID)
+    vapid_public_key: str = ""
+    vapid_private_key: str = ""
+    vapid_claims_subject: str = "mailto:noreply@learnly.dev"
+
     # Feature flags
     feature_live_sessions: bool = False
     feature_affiliate: bool = False

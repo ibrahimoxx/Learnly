@@ -28,6 +28,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   const progressRef = useRef<number>(0);
   const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [activeTab, setActiveTab] = useState<SidebarTab>("content");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<SidebarTab>("content");
   const [completedIds, setCompletedIds] = useState<Set<string>>(
     () => new Set(initialProgress.filter((p) => p.is_completed).map((p) => p.lesson_id))
   );
@@ -97,7 +99,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[oklch(10%_0.02_295)]">
+    <div className="flex h-screen flex-col overflow-hidden bg-[oklch(10%_0.02_295)] pb-13 lg:pb-0">
       {/* Top bar */}
       <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[oklch(12%_0.03_295)] px-4">
         <Link
@@ -164,7 +166,64 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Mobile bottom bar */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex border-t border-white/10 bg-[oklch(12%_0.03_295)]">
+          {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
+            const labels: Record<SidebarTab, string> = { content: "Content", qa: "Q&A", forums: "Forums" };
+            const icons: Record<SidebarTab, React.ReactNode> = {
+              content: <BookOpen className="h-4 w-4" />,
+              qa: <MessageCircle className="h-4 w-4" />,
+              forums: <MessagesSquare className="h-4 w-4" />,
+            };
+            return (
+              <button
+                key={tab}
+                onClick={() => { setMobileTab(tab); setMobileDrawerOpen(true); }}
+                className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium text-white/50 hover:text-white/80 transition-colors"
+              >
+                {icons[tab]}
+                {labels[tab]}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile drawer overlay */}
+        {mobileDrawerOpen && (
+          <div className="lg:hidden fixed inset-0 z-40 flex flex-col justify-end">
+            <div className="absolute inset-0 bg-black/70" onClick={() => setMobileDrawerOpen(false)} />
+            <div className="relative flex flex-col rounded-t-2xl bg-[oklch(12%_0.03_295)] overflow-hidden" style={{ height: "75dvh" }}>
+              <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
+                <div className="flex gap-4">
+                  {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
+                    const labels: Record<SidebarTab, string> = { content: "Course Content", qa: "Q&A", forums: "Forums" };
+                    return (
+                      <button
+                        key={tab}
+                        onClick={() => setMobileTab(tab)}
+                        className={`text-xs font-medium transition-colors ${mobileTab === tab ? "text-white border-b-2 border-[--color-primary] pb-0.5" : "text-white/40 hover:text-white/70"}`}
+                      >
+                        {labels[tab]}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button onClick={() => setMobileDrawerOpen(false)} className="text-white/50 hover:text-white transition-colors text-lg leading-none">✕</button>
+              </div>
+              <div className="flex-1 overflow-y-auto">
+                {mobileTab === "content" ? (
+                  <ContentTab sectionsWithLessons={sectionsWithLessons} currentLessonId={currentLesson.id} onNavigate={(id) => { setMobileDrawerOpen(false); navigateTo(id); }} completedIds={completedIds} />
+                ) : mobileTab === "qa" ? (
+                  <QATab lessonId={currentLesson.id} token={token} />
+                ) : (
+                  <ForumsTab courseId={enrollment.course_id} token={token} />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Desktop sidebar */}
         <aside className="hidden w-80 shrink-0 flex-col border-l border-white/10 bg-[oklch(12%_0.03_295)] lg:flex overflow-hidden">
           {/* Tab bar */}
           <div className="flex shrink-0 border-b border-white/10">

@@ -46,8 +46,25 @@ export default async function CoursesPage({ searchParams }: Props) {
         </p>
       </div>
 
+      {/* Mobile level chips */}
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden" style={{ scrollbarWidth: "none" }}>
+        {LEVELS.map((level) => (
+          <a
+            key={level.value}
+            href={`/courses?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), ...(level.value ? { level: level.value } : {}) })}`}
+            className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+              (params.level ?? "") === level.value
+                ? "border-[--color-primary] bg-[--color-primary] text-white"
+                : "border-[--color-border] text-[--color-text-secondary] hover:border-[--color-primary] hover:text-[--color-primary]"
+            }`}
+          >
+            {level.label}
+          </a>
+        ))}
+      </div>
+
       <div className="flex gap-8">
-        {/* Filters sidebar */}
+        {/* Filters sidebar — desktop only */}
         <aside className="hidden w-56 shrink-0 lg:block">
           <div className="sticky top-24">
             <h2 className="mb-3 text-sm font-semibold text-[--color-text-primary]">Level</h2>

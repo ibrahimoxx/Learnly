@@ -50,7 +50,9 @@ def _award_xp(stats: UserGamification, amount: int) -> None:
     stats.xp_total += amount
 
 
-async def _check_and_award_badges(user_id: uuid.UUID, stats: UserGamification, db: AsyncSession) -> None:
+async def _check_and_award_badges(
+    user_id: uuid.UUID, stats: UserGamification, db: AsyncSession
+) -> list[tuple[str, str]]:
     earned_result = await db.execute(
         select(UserBadge.badge_id).where(UserBadge.user_id == user_id)
     )
@@ -93,6 +95,8 @@ async def _check_and_award_badges(user_id: uuid.UUID, stats: UserGamification, d
         "quiz_ace":          has_perfect_quiz,
     }
 
+    new_badges: list[tuple[str, str]] = []
+
     for badge in all_badges:
         if badge.id in earned_badge_ids:
             continue
@@ -113,31 +117,46 @@ async def _check_and_award_badges(user_id: uuid.UUID, stats: UserGamification, d
         if badge.xp_reward > 0:
             _award_xp(stats, badge.xp_reward)
 
+        new_badges.append((badge.name, badge.description))
         log.info("badge_earned", user_id=str(user_id), badge_code=badge.code)
+
+    return new_badges
 
 
 async def process_lesson_completion(user_id: uuid.UUID, db: AsyncSession) -> None:
+    from app.services.push import schedule_push  # local import avoids circular dep
+
     stats = await get_or_create_stats(user_id, db)
     _update_streak(stats)
     _award_xp(stats, 10)
-    await _check_and_award_badges(user_id, stats, db)
+    new_badges = await _check_and_award_badges(user_id, stats, db)
     await db.commit()
+    for badge_name, badge_desc in new_badges:
+        schedule_push(user_id, f"Badge unlocked: {badge_name}", badge_desc, "/achievements")
 
 
 async def process_course_completion(user_id: uuid.UUID, db: AsyncSession) -> None:
+    from app.services.push import schedule_push
+
     stats = await get_or_create_stats(user_id, db)
     _update_streak(stats)
     _award_xp(stats, 100)
-    await _check_and_award_badges(user_id, stats, db)
+    new_badges = await _check_and_award_badges(user_id, stats, db)
     await db.commit()
+    for badge_name, badge_desc in new_badges:
+        schedule_push(user_id, f"Badge unlocked: {badge_name}", badge_desc, "/achievements")
 
 
 async def process_quiz_pass(user_id: uuid.UUID, db: AsyncSession) -> None:
+    from app.services.push import schedule_push
+
     stats = await get_or_create_stats(user_id, db)
     _update_streak(stats)
     _award_xp(stats, 25)
-    await _check_and_award_badges(user_id, stats, db)
+    new_badges = await _check_and_award_badges(user_id, stats, db)
     await db.commit()
+    for badge_name, badge_desc in new_badges:
+        schedule_push(user_id, f"Badge unlocked: {badge_name}", badge_desc, "/achievements")
 
 
 async def get_user_gamification(user_id: uuid.UUID, db: AsyncSession) -> GamificationStats:

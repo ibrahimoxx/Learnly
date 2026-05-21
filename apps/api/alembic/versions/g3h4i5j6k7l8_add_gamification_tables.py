@@ -15,7 +15,12 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE badge_rarity AS ENUM ('common', 'uncommon', 'rare', 'epic', 'legendary')")
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE badge_rarity AS ENUM ('common', 'uncommon', 'rare', 'epic', 'legendary');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$;
+    """)
 
     op.create_table(
         "user_gamification",
@@ -37,9 +42,12 @@ def upgrade() -> None:
         sa.Column("description", sa.Text, nullable=False),
         sa.Column("icon", sa.String(10), nullable=False),
         sa.Column("color", sa.String(30), nullable=False, server_default="gray"),
-        sa.Column("rarity", sa.Enum("common", "uncommon", "rare", "epic", "legendary", name="badge_rarity", create_type=False), nullable=False, server_default="common"),
+        sa.Column("rarity", sa.Text, nullable=False, server_default="common"),
         sa.Column("xp_reward", sa.Integer, nullable=False, server_default="0"),
     )
+    op.execute("ALTER TABLE badges ALTER COLUMN rarity DROP DEFAULT")
+    op.execute("ALTER TABLE badges ALTER COLUMN rarity TYPE badge_rarity USING rarity::badge_rarity")
+    op.execute("ALTER TABLE badges ALTER COLUMN rarity SET DEFAULT 'common'::badge_rarity")
     op.create_index("ix_badges_code", "badges", ["code"])
 
     op.create_table(
@@ -70,4 +78,4 @@ def downgrade() -> None:
     op.drop_table("user_badges")
     op.drop_table("badges")
     op.drop_table("user_gamification")
-    op.execute("DROP TYPE badge_rarity")
+    op.execute("DROP TYPE IF EXISTS badge_rarity")

@@ -3,7 +3,7 @@ import re
 import uuid
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -124,10 +124,16 @@ async def get_course_by_slug(
     return CourseRead.model_validate(course)
 
 
+async def _run_embed_bg(course_id: str) -> None:
+    from app.services.embeddings import _run_embed
+    await _run_embed(course_id)
+
+
 @router.patch("/{course_id}", response_model=CourseRead)
 async def update_course(
     course_id: uuid.UUID,
     body: CourseUpdate,
+    background_tasks: BackgroundTasks,
     instructor: User = Depends(require_instructor),
     db: AsyncSession = Depends(get_db),
 ) -> CourseRead:
@@ -143,6 +149,10 @@ async def update_course(
 
     await db.commit()
     await db.refresh(course)
+
+    if body.status == "published":
+        background_tasks.add_task(_run_embed_bg, str(course.id))
+
     return CourseRead.model_validate(course)
 
 

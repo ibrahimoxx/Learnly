@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Bell } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
+import { PushSubscriptionManager } from "@/components/shared/push-subscription-manager";
 
 interface Notification {
   id: string;
@@ -44,7 +45,11 @@ export default function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-[--color-text-primary] mb-6">Notifications</h1>
+      <h1 className="text-2xl font-bold text-[--color-text-primary] mb-4">Notifications</h1>
+
+      <div className="mb-6">
+        <PushSubscriptionManager />
+      </div>
 
       {loading ? (
         <div className="space-y-3">
