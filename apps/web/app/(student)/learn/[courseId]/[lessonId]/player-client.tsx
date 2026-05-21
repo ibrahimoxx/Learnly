@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api";
-import type { Enrollment, Lesson, Section, Question, DiscussionPost, DiscussionReply } from "@/types";
+import type { Enrollment, Lesson, LessonProgress, Section, Question, DiscussionPost, DiscussionReply } from "@/types";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
 
 interface SectionWithLessons extends Section {
@@ -17,15 +17,19 @@ interface Props {
   sectionsWithLessons: SectionWithLessons[];
   currentLesson: Lesson;
   token: string;
+  initialProgress: LessonProgress[];
 }
 
 type SidebarTab = "content" | "qa" | "forums";
 
-export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, token }: Props) {
+export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, token, initialProgress }: Props) {
   const router = useRouter();
   const progressRef = useRef<number>(0);
   const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [activeTab, setActiveTab] = useState<SidebarTab>("content");
+  const [completedIds, setCompletedIds] = useState<Set<string>>(
+    () => new Set(initialProgress.filter((p) => p.is_completed).map((p) => p.lesson_id))
+  );
 
   const allLessons = sectionsWithLessons.flatMap((s) => s.lessons);
   const currentIndex = allLessons.findIndex((l) => l.id === currentLesson.id);
@@ -44,12 +48,26 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             is_completed: completed,
           }),
         });
+        if (completed) {
+          setCompletedIds((prev) => new Set([...prev, currentLesson.id]));
+        }
       } catch {
         // silent — non-blocking
       }
     },
     [enrollment.id, currentLesson.id, token]
   );
+
+  useEffect(() => {
+    const es = new EventSource(`/api/sse/${enrollment.id}`);
+    es.onmessage = (e: MessageEvent<string>) => {
+      const data = JSON.parse(e.data) as { lesson_id: string; is_completed: boolean };
+      if (data.is_completed) {
+        setCompletedIds((prev) => new Set([...prev, data.lesson_id]));
+      }
+    };
+    return () => es.close();
+  }, [enrollment.id]);
 
   useEffect(() => {
     saveIntervalRef.current = setInterval(() => {
@@ -187,6 +205,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 sectionsWithLessons={sectionsWithLessons}
                 currentLessonId={currentLesson.id}
                 onNavigate={navigateTo}
+                completedIds={completedIds}
               />
             ) : activeTab === "qa" ? (
               <QATab lessonId={currentLesson.id} token={token} />
@@ -204,10 +223,12 @@ function ContentTab({
   sectionsWithLessons,
   currentLessonId,
   onNavigate,
+  completedIds,
 }: {
   sectionsWithLessons: SectionWithLessons[];
   currentLessonId: string;
   onNavigate: (id: string) => void;
+  completedIds: Set<string>;
 }) {
   return (
     <>

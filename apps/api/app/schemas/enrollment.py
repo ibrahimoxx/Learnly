@@ -15,6 +15,8 @@ class EnrollmentRead(BaseModel):
     status: str
     completed_at: datetime | None
     created_at: datetime
+    completed_lessons: int = 0
+    total_lessons: int = 0
 
     model_config = {"from_attributes": True}
 

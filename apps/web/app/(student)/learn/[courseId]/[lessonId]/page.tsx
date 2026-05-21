@@ -4,7 +4,7 @@ import { apiFetch } from "@/lib/api";
 import { PlayerClient } from "./player-client";
 import { PreviewPlayer } from "./preview-player";
 import { LockedLesson } from "./locked-lesson";
-import type { Section, Lesson, Enrollment, Course } from "@/types";
+import type { Section, Lesson, Enrollment, Course, LessonProgress } from "@/types";
 
 interface Props {
   params: Promise<{ courseId: string; lessonId: string }>;
@@ -32,6 +32,16 @@ async function getCourse(courseId: string) {
 async function getSections(courseId: string) {
   try {
     return await apiFetch<Section[]>(`/api/v1/courses/${courseId}/sections`);
+  } catch {
+    return [];
+  }
+}
+
+async function getProgress(enrollmentId: string, token: string) {
+  try {
+    return await apiFetch<LessonProgress[]>(`/api/v1/enrollments/${enrollmentId}/progress`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   } catch {
     return [];
   }
@@ -71,7 +81,10 @@ export default async function PlayerPage({ params }: Props) {
   const enrollment = await getEnrollment(courseId, token);
   if (!enrollment) redirect(`/courses`);
 
-  const sections = await getSections(courseId);
+  const [sections, initialProgress] = await Promise.all([
+    getSections(courseId),
+    getProgress(enrollment.id, token),
+  ]);
   const sectionsWithLessons = await Promise.all(
     sections.map(async (section) => ({
       ...section,
@@ -95,6 +108,7 @@ export default async function PlayerPage({ params }: Props) {
       sectionsWithLessons={sectionsWithLessons}
       currentLesson={currentLesson}
       token={token}
+      initialProgress={initialProgress}
     />
   );
 }

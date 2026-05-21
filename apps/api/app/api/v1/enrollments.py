@@ -1,15 +1,18 @@
 import asyncio
+import json
 import uuid
 from datetime import datetime, timezone
 
+import redis.asyncio as aioredis
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.auth import get_current_user
+from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
@@ -72,7 +75,44 @@ async def my_enrollments(
     db: AsyncSession = Depends(get_db),
 ) -> list[EnrollmentRead]:
     result = await db.execute(select(Enrollment).where(Enrollment.student_id == user.id))
-    return [EnrollmentRead.model_validate(e) for e in result.scalars().all()]
+    enrollments = result.scalars().all()
+    if not enrollments:
+        return []
+
+    enrollment_ids = [e.id for e in enrollments]
+    course_ids = list({e.course_id for e in enrollments})
+
+    total_result = await db.execute(
+        select(Section.course_id, func.count(Lesson.id).label("cnt"))
+        .join(Lesson, Lesson.section_id == Section.id)
+        .where(Section.course_id.in_(course_ids))
+        .group_by(Section.course_id)
+    )
+    total_by_course = {row.course_id: row.cnt for row in total_result}
+
+    completed_result = await db.execute(
+        select(LessonProgress.enrollment_id, func.count(LessonProgress.id).label("cnt"))
+        .where(
+            LessonProgress.enrollment_id.in_(enrollment_ids),
+            LessonProgress.is_completed == True,  # noqa: E712
+        )
+        .group_by(LessonProgress.enrollment_id)
+    )
+    completed_by_enrollment = {row.enrollment_id: row.cnt for row in completed_result}
+
+    return [
+        EnrollmentRead(
+            id=e.id,
+            student_id=e.student_id,
+            course_id=e.course_id,
+            status=e.status,
+            completed_at=e.completed_at,
+            created_at=e.created_at,
+            total_lessons=total_by_course.get(e.course_id, 0),
+            completed_lessons=completed_by_enrollment.get(e.id, 0),
+        )
+        for e in enrollments
+    ]
 
 
 @router.post("/enrollments/{enrollment_id}/progress", response_model=ProgressRead)
@@ -120,7 +160,67 @@ async def upsert_progress(
     await _check_course_completion(enrollment, db)
 
     await db.refresh(progress)
+
+    try:
+        r = aioredis.from_url(settings.redis_url, decode_responses=True)
+        await r.publish(f"progress:{enrollment_id}", json.dumps({
+            "lesson_id": str(body.lesson_id),
+            "is_completed": progress.is_completed,
+            "watched_seconds": progress.watched_seconds,
+        }))
+        await r.aclose()
+    except Exception:
+        pass  # Redis failure must not break progress save
+
     return ProgressRead.model_validate(progress)
+
+
+@router.get("/enrollments/{enrollment_id}/progress", response_model=list[ProgressRead])
+async def list_progress(
+    enrollment_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> list[ProgressRead]:
+    enrollment_result = await db.execute(
+        select(Enrollment).where(Enrollment.id == enrollment_id, Enrollment.student_id == user.id)
+    )
+    if not enrollment_result.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+    result = await db.execute(
+        select(LessonProgress).where(LessonProgress.enrollment_id == enrollment_id)
+    )
+    return [ProgressRead.model_validate(p) for p in result.scalars().all()]
+
+
+@router.get("/enrollments/{enrollment_id}/progress/stream")
+async def stream_progress(
+    enrollment_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> StreamingResponse:
+    enrollment_result = await db.execute(
+        select(Enrollment).where(Enrollment.id == enrollment_id, Enrollment.student_id == user.id)
+    )
+    if not enrollment_result.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Enrollment not found")
+
+    async def event_generator():
+        r = aioredis.from_url(settings.redis_url, decode_responses=True)
+        pubsub = r.pubsub()
+        await pubsub.subscribe(f"progress:{enrollment_id}")
+        try:
+            async for message in pubsub.listen():
+                if message["type"] == "message":
+                    yield f"data: {message['data']}\n\n"
+        finally:
+            await pubsub.unsubscribe(f"progress:{enrollment_id}")
+            await r.aclose()
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 async def _check_course_completion(enrollment: Enrollment, db: AsyncSession) -> None:
