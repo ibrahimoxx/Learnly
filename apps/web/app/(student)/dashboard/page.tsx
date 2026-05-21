@@ -47,6 +47,39 @@ export default function DashboardPage() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <h1 className="text-2xl font-bold text-[--color-text-primary]">My Learning</h1>
 
+      {stats && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold ${stats.current_streak > 0 ? "border-orange-200 bg-orange-50 text-orange-700" : "border-[--color-border] bg-[--color-surface] text-[--color-text-muted]"}`}>
+            <Flame className="h-4 w-4" />
+            {stats.current_streak} day streak
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm font-semibold text-[--color-text-secondary]">
+            <Zap className="h-4 w-4 text-[--color-primary]" />
+            <span>Lv.{stats.level}</span>
+            <div className="w-20">
+              <Progress value={((100 - stats.xp_to_next_level) / 100) * 100} className="h-1.5" />
+            </div>
+            <span className="text-xs text-[--color-text-muted]">{stats.xp_total} XP</span>
+          </div>
+          <Link
+            href="/achievements"
+            className="flex items-center gap-1.5 rounded-full border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm font-semibold text-[--color-text-secondary] hover:border-[--color-primary] transition-colors"
+          >
+            <Medal className="h-4 w-4 text-[--color-star]" />
+            {stats.badges.length} badges
+          </Link>
+          {stats.badges.length > 0 && (
+            <div className="flex items-center gap-1">
+              {stats.badges.slice(0, 4).map((ub) => (
+                <span key={ub.badge.id} title={ub.badge.name} className="flex h-7 w-7 items-center justify-center rounded-full border border-[--color-border] bg-white text-sm">
+                  {ub.badge.icon}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <Tabs defaultValue="all" className="mt-6">
         <TabsList>
           <TabsTrigger value="all">All ({enrollments.length})</TabsTrigger>
