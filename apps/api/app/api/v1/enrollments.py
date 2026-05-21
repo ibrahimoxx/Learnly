@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 import redis.asyncio as aioredis
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import Response, StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,7 +13,8 @@ from sqlalchemy.orm import selectinload
 
 from app.core.auth import get_current_user
 from app.core.config import settings
-from app.db.session import get_db
+from app.db.session import AsyncSessionLocal, get_db
+from app.services.gamification import process_course_completion, process_lesson_completion
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson import Lesson
@@ -26,6 +27,16 @@ from app.services.certificate import generate_certificate_pdf
 
 log = structlog.get_logger()
 router = APIRouter(tags=["enrollments"])
+
+
+async def _run_gamification_lesson(user_id: str) -> None:
+    async with AsyncSessionLocal() as db:
+        await process_lesson_completion(uuid.UUID(user_id), db)
+
+
+async def _run_gamification_course(user_id: str) -> None:
+    async with AsyncSessionLocal() as db:
+        await process_course_completion(uuid.UUID(user_id), db)
 
 
 @router.post("/enrollments", response_model=EnrollmentRead, status_code=status.HTTP_201_CREATED)
@@ -119,6 +130,7 @@ async def my_enrollments(
 async def upsert_progress(
     enrollment_id: uuid.UUID,
     body: ProgressUpdate,
+    background_tasks: BackgroundTasks,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> ProgressRead:
@@ -137,12 +149,14 @@ async def upsert_progress(
     )
     progress = progress_result.scalar_one_or_none()
 
+    newly_completed = False
     if progress:
         progress.watched_seconds = max(progress.watched_seconds, body.watched_seconds)
         progress.last_position_seconds = body.last_position_seconds
         if body.is_completed and not progress.is_completed:
             progress.is_completed = True
             progress.completed_at = datetime.now(timezone.utc)
+            newly_completed = True
     else:
         progress = LessonProgress(
             enrollment_id=enrollment_id,
@@ -153,11 +167,15 @@ async def upsert_progress(
             completed_at=datetime.now(timezone.utc) if body.is_completed else None,
         )
         db.add(progress)
+        newly_completed = body.is_completed
 
     await db.commit()
 
+    if newly_completed:
+        background_tasks.add_task(_run_gamification_lesson, str(user.id))
+
     # Check 100% completion
-    await _check_course_completion(enrollment, db)
+    await _check_course_completion(enrollment, db, background_tasks)
 
     await db.refresh(progress)
 
@@ -223,7 +241,7 @@ async def stream_progress(
     )
 
 
-async def _check_course_completion(enrollment: Enrollment, db: AsyncSession) -> None:
+async def _check_course_completion(enrollment: Enrollment, db: AsyncSession, background_tasks: BackgroundTasks | None = None) -> None:
     total_result = await db.execute(
         select(func.count(Lesson.id))
         .join(Section, Lesson.section_id == Section.id)
@@ -246,6 +264,8 @@ async def _check_course_completion(enrollment: Enrollment, db: AsyncSession) -> 
         enrollment.completed_at = datetime.now(timezone.utc)
         await db.commit()
         log.info("course_completed", enrollment_id=str(enrollment.id))
+        if background_tasks:
+            background_tasks.add_task(_run_gamification_course, str(enrollment.student_id))
 
 
 @router.get("/enrollments/{enrollment_id}/certificate")

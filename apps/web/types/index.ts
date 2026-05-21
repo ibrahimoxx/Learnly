@@ -161,6 +161,31 @@ export interface QuizAttemptRead {
   created_at: string;
 }
 
+export interface BadgeRead {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  rarity: string;
+  xp_reward: number;
+}
+
+export interface UserBadgeRead {
+  badge: BadgeRead;
+  earned_at: string;
+}
+
+export interface GamificationStats {
+  xp_total: number;
+  level: number;
+  xp_to_next_level: number;
+  current_streak: number;
+  longest_streak: number;
+  badges: UserBadgeRead[];
+}
+
 export interface CourseListResponse {
   items: Course[];
   total: number;

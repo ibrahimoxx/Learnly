@@ -216,6 +216,7 @@ async def delete_quiz_question(
 async def submit_quiz(
     lesson_id: uuid.UUID,
     body: QuizSubmitRequest,
+    background_tasks: BackgroundTasks,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> QuizAttemptRead:
@@ -253,6 +254,9 @@ async def submit_quiz(
     db.add(attempt)
     await db.commit()
     await db.refresh(attempt)
+
+    if passed:
+        background_tasks.add_task(_run_gamification_quiz, str(user.id))
 
     log.info("quiz_submitted", lesson_id=str(lesson_id), student_id=str(user.id), score=score, total=total)
     return _attempt_to_read(attempt, list(questions))
