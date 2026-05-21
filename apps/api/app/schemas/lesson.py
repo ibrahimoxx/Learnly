@@ -13,6 +13,7 @@ class LessonCreate(BaseModel):
     position: int = Field(0, ge=0)
     is_free_preview: bool = False
     is_downloadable: bool = False
+    unlock_at: datetime | None = None
 
 
 class LessonUpdate(BaseModel):
@@ -23,6 +24,7 @@ class LessonUpdate(BaseModel):
     position: int | None = Field(None, ge=0)
     is_free_preview: bool | None = None
     is_downloadable: bool | None = None
+    unlock_at: datetime | None = None
 
 
 class LessonRead(BaseModel):
@@ -36,6 +38,7 @@ class LessonRead(BaseModel):
     position: int
     is_free_preview: bool
     is_downloadable: bool
+    unlock_at: datetime | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

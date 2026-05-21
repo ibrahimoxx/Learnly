@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { PlayerClient } from "./player-client";
 import { PreviewPlayer } from "./preview-player";
+import { LockedLesson } from "./locked-lesson";
 import type { Section, Lesson, Enrollment, Course } from "@/types";
 
 interface Props {
@@ -83,6 +84,10 @@ export default async function PlayerPage({ params }: Props) {
     allLessons.find((l) => l.id === lessonId) ?? allLessons[0];
 
   if (!currentLesson) notFound();
+
+  if (currentLesson.unlock_at && new Date() < new Date(currentLesson.unlock_at)) {
+    return <LockedLesson lesson={currentLesson} />;
+  }
 
   return (
     <PlayerClient

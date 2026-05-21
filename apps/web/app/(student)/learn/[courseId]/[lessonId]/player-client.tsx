@@ -3,7 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment, Lesson, Section, Question, DiscussionPost, DiscussionReply } from "@/types";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
@@ -220,16 +220,25 @@ function ContentTab({
           <ul>
             {section.lessons.map((lesson) => {
               const isCurrent = lesson.id === currentLessonId;
+              const isLocked = !!(lesson.unlock_at && new Date() < new Date(lesson.unlock_at));
+              const unlockLabel = isLocked
+                ? `Unlocks ${new Date(lesson.unlock_at!).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+                : null;
               return (
                 <li key={lesson.id}>
                   <button
-                    onClick={() => onNavigate(lesson.id)}
-                    className={`flex w-full items-start gap-3 px-4 py-3 text-left text-xs transition-colors hover:bg-white/5 ${
-                      isCurrent ? "bg-[--color-primary]/20" : ""
+                    onClick={() => !isLocked && onNavigate(lesson.id)}
+                    disabled={isLocked}
+                    className={`flex w-full items-start gap-3 px-4 py-3 text-left text-xs transition-colors ${
+                      isLocked
+                        ? "cursor-not-allowed opacity-50"
+                        : `hover:bg-white/5 ${isCurrent ? "bg-[--color-primary]/20" : ""}`
                     }`}
                   >
                     <span className="mt-0.5 shrink-0">
-                      {isCurrent ? (
+                      {isLocked ? (
+                        <Lock className="h-4 w-4 text-white/30" />
+                      ) : isCurrent ? (
                         <PlayCircle className="h-4 w-4 text-[--color-primary]" />
                       ) : lesson.type === "video" ? (
                         <Circle className="h-4 w-4 text-white/30" />
@@ -239,8 +248,13 @@ function ContentTab({
                         <FileText className="h-4 w-4 text-white/30" />
                       )}
                     </span>
-                    <span className={`leading-snug ${isCurrent ? "text-white font-medium" : "text-white/60"}`}>
-                      {lesson.title}
+                    <span className="flex flex-col gap-0.5">
+                      <span className={`leading-snug ${isCurrent ? "text-white font-medium" : "text-white/60"}`}>
+                        {lesson.title}
+                      </span>
+                      {unlockLabel && (
+                        <span className="text-[10px] text-white/35">{unlockLabel}</span>
+                      )}
                     </span>
                   </button>
                 </li>

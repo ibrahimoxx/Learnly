@@ -46,6 +46,7 @@ export interface Lesson {
   video_url?: string;
   content?: string;
   type: LessonType;
+  unlock_at?: string | null;
 }
 
 export interface Enrollment {

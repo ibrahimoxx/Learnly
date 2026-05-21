@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
-  ChevronLeft, Plus, Trash2, GripVertical, Upload, Eye, EyeOff, Tag, X,
+  ChevronLeft, Plus, Trash2, GripVertical, Upload, Eye, EyeOff, Tag, X, Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -422,6 +422,11 @@ export default function CourseEditorPage() {
                             className="min-w-0 flex-1 text-sm text-[--color-text-secondary]"
                           />
                           <Badge variant="outline" className="shrink-0">{lesson.type}</Badge>
+                          {lesson.unlock_at && (
+                            <Badge variant="outline" className="shrink-0 gap-1 text-xs">
+                              <Lock className="h-3 w-3" /> Drip
+                            </Badge>
+                          )}
                           {lesson.type === "video" && (
                             <button
                               onClick={() => getUploadUrl(section.id, lesson.id)}
@@ -444,6 +449,54 @@ export default function CourseEditorPage() {
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
+                        </div>
+                        <div className="flex items-center gap-2 border-t border-[--color-border] px-4 py-2 bg-[--color-surface]">
+                          <Lock className="h-3 w-3 shrink-0 text-[--color-text-muted]" />
+                          <span className="text-xs text-[--color-text-muted] shrink-0">Unlock on</span>
+                          <input
+                            type="datetime-local"
+                            value={lesson.unlock_at ? lesson.unlock_at.slice(0, 16) : ""}
+                            onChange={async (e) => {
+                              const val = e.target.value;
+                              const unlock_at = val ? new Date(val).toISOString() : null;
+                              const token = await getToken();
+                              await apiFetch(`/api/v1/sections/${section.id}/lessons/${lesson.id}`, {
+                                method: "PATCH",
+                                headers: { Authorization: `Bearer ${token}` },
+                                body: JSON.stringify({ unlock_at }),
+                              }).catch(() => toast.error("Failed to update unlock date."));
+                              setSections((prev) =>
+                                prev.map((s) =>
+                                  s.id === section.id
+                                    ? { ...s, lessons: s.lessons.map((l) => l.id === lesson.id ? { ...l, unlock_at } : l) }
+                                    : s
+                                )
+                              );
+                            }}
+                            className="rounded border border-[--color-border] bg-white px-2 py-0.5 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                          />
+                          {lesson.unlock_at && (
+                            <button
+                              onClick={async () => {
+                                const token = await getToken();
+                                await apiFetch(`/api/v1/sections/${section.id}/lessons/${lesson.id}`, {
+                                  method: "PATCH",
+                                  headers: { Authorization: `Bearer ${token}` },
+                                  body: JSON.stringify({ unlock_at: null }),
+                                }).catch(() => toast.error("Failed to clear unlock date."));
+                                setSections((prev) =>
+                                  prev.map((s) =>
+                                    s.id === section.id
+                                      ? { ...s, lessons: s.lessons.map((l) => l.id === lesson.id ? { ...l, unlock_at: null } : l) }
+                                      : s
+                                  )
+                                );
+                              }}
+                              className="text-xs text-[--color-text-muted] hover:text-[--color-error] transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
                         </div>
                         {lesson.type === "quiz" && expandedQuiz === lesson.id && (
                           <QuizBuilderPanel lessonId={lesson.id} getToken={getToken} />
