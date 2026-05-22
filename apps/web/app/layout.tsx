@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
 import { Providers } from "@/components/providers";
+import { InstallPrompt } from "@/components/shared/install-prompt";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -30,8 +31,14 @@ export const metadata: Metadata = {
     title: "Learnly",
   },
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
   },
 };
 
@@ -46,6 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <NextIntlClientProvider messages={messages}>
             <Providers>{children}</Providers>
             <Toaster richColors position="bottom-right" />
+            <InstallPrompt />
           </NextIntlClientProvider>
         </body>
       </html>

@@ -11,6 +11,7 @@ from app.core.auth import get_optional_user, require_instructor
 from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.course import Course
+from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson import Lesson
 from app.db.tables.section import Section
 from app.db.tables.user import User
@@ -41,20 +42,38 @@ async def list_lessons(
     user: User | None = Depends(get_optional_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[LessonRead]:
+    section_result = await db.execute(select(Section).where(Section.id == section_id))
+    section = section_result.scalar_one_or_none()
+    if not section:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section not found")
+
     result = await db.execute(
         select(Lesson).where(Lesson.section_id == section_id).order_by(Lesson.position)
     )
     is_instructor = user is not None and user.role in ("instructor", "admin")
+
+    is_enrolled = False
+    if user is not None and not is_instructor:
+        enroll_result = await db.execute(
+            select(Enrollment).where(
+                Enrollment.course_id == section.course_id,
+                Enrollment.student_id == user.id,
+                Enrollment.status.in_(["active", "completed"]),
+            )
+        )
+        is_enrolled = enroll_result.scalar_one_or_none() is not None
+
     now = datetime.now(timezone.utc)
     lessons = []
     for lesson in result.scalars().all():
         read = LessonRead.model_validate(lesson)
-        if not is_instructor and lesson.unlock_at and lesson.unlock_at > now:
-            read.video_url = None
-            read.content = None
-        if user is None and not lesson.is_free_preview:
-            read.video_url = None
-            read.content = None
+        if not is_instructor:
+            if not is_enrolled and not lesson.is_free_preview:
+                read.video_url = None
+                read.content = None
+            elif is_enrolled and lesson.unlock_at and lesson.unlock_at > now:
+                read.video_url = None
+                read.content = None
         lessons.append(read)
     return lessons
 

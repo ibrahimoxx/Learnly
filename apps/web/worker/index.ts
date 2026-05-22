@@ -11,8 +11,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title ?? "Learnly", {
       body: data.body ?? "",
-      icon: "/icon.svg",
-      badge: "/icon.svg",
+      icon: "/icons/icon-192x192.png",
+      badge: "/icons/icon-96x96.png",
       data: { url: data.url ?? "/notifications" },
     })
   );
@@ -20,7 +20,17 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url: string }).url;
+  const raw = (event.notification.data as { url: string }).url;
+  // Only navigate within the same origin to prevent open-redirect
+  let url = "/notifications";
+  try {
+    const parsed = new URL(raw, self.location.origin);
+    if (parsed.origin === self.location.origin) {
+      url = parsed.pathname + parsed.search;
+    }
+  } catch {
+    // malformed url — fall back to /notifications
+  }
   event.waitUntil(
     self.clients.matchAll({ type: "window" }).then((clients) => {
       const existing = clients.find((c) => c.url.includes(url));
