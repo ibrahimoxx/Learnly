@@ -3,35 +3,40 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { PlayCircle, Award, BookOpen, Download, Flame, Zap, Medal } from "lucide-react";
+import { PlayCircle, Award, BookOpen, Download, Flame, Zap, Medal, GraduationCap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { apiFetch } from "@/lib/api";
 import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
-import type { Enrollment, GamificationStats } from "@/types";
+import type { Enrollment, GamificationStats, LearningPathDetail } from "@/types";
 
 export default function DashboardPage() {
   const { getToken } = useAuth();
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<GamificationStats | null>(null);
+  const [myPaths, setMyPaths] = useState<LearningPathDetail[]>([]);
 
   useEffect(() => {
     async function load() {
       const token = await getToken();
       try {
-        const [data, gamification] = await Promise.all([
+        const [data, gamification, paths] = await Promise.all([
           apiFetch<Enrollment[]>("/api/v1/enrollments", {
             headers: { Authorization: `Bearer ${token}` },
           }),
           apiFetch<GamificationStats>("/api/v1/gamification/me", {
             headers: { Authorization: `Bearer ${token}` },
           }),
+          apiFetch<LearningPathDetail[]>("/api/v1/learning-paths/my-paths", {
+            headers: { Authorization: `Bearer ${token}` },
+          }).catch(() => [] as LearningPathDetail[]),
         ]);
         setEnrollments(data);
         setStats(gamification);
+        setMyPaths(paths);
       } catch {
         setEnrollments([]);
       } finally {
@@ -82,6 +87,45 @@ export default function DashboardPage() {
       )}
 
       <RecommendationsSection />
+
+      {myPaths.length > 0 && (
+        <div className="mt-8">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-[--color-text-primary] flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-[--color-primary]" />
+              My Learning Paths
+            </h2>
+            <Link href="/paths" className="text-xs text-[--color-primary] hover:underline">Browse paths</Link>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {myPaths.map((path) => {
+              const enrolledCourseIds = new Set(enrollments.map((e) => e.course_id));
+              const completedInPath = path.courses.filter(
+                (c) => enrollments.find((e) => e.course_id === c.id && e.status === "completed")
+              ).length;
+              const total = path.courses.length;
+              const pct = total > 0 ? Math.round((completedInPath / total) * 100) : 0;
+              return (
+                <Link
+                  key={path.id}
+                  href={`/paths/${path.slug}`}
+                  className="flex items-start gap-3 rounded-[--radius-md] border border-[--color-border] bg-white p-4 hover:border-[--color-primary] transition-colors"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary]/10">
+                    <GraduationCap className="h-5 w-5 text-[--color-primary]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="truncate text-sm font-semibold text-[--color-text-primary]">{path.title}</p>
+                    <p className="mt-0.5 text-xs text-[--color-text-muted]">{completedInPath}/{total} courses completed</p>
+                    <Progress value={pct} className="mt-2 h-1.5" />
+                  </div>
+                </Link>
+              );
+              void enrolledCourseIds;
+            })}
+          </div>
+        </div>
+      )}
 
       <Tabs defaultValue="all" className="mt-6">
         <TabsList>

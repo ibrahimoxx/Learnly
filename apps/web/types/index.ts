@@ -194,3 +194,29 @@ export interface CourseListResponse {
   limit: number;
   total_pages: number;
 }
+
+export type LearningPathStatus = "draft" | "published";
+
+export interface LearningPath {
+  id: string;
+  instructor_id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  status: LearningPathStatus;
+  course_count: number;
+  created_at: string;
+}
+
+export interface LearningPathDetail extends LearningPath {
+  courses: Course[];
+  enrolled_count: number;
+}
+
+export interface LearningPathProgress {
+  path_id: string;
+  completed_courses: number;
+  total_courses: number;
+  enrolled: boolean;
+}

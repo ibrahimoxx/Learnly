@@ -15,5 +15,6 @@ from app.db.tables.quiz import QuizQuestion, QuizAttempt
 from app.db.tables.discussion import DiscussionPost, DiscussionReply
 from app.db.tables.gamification import Badge, UserBadge, UserGamification
 from app.db.tables.push_subscription import PushSubscription
+from app.db.tables.learning_path import LearningPath, LearningPathCourse, LearningPathEnrollment
 
-__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription"]
+__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment"]
