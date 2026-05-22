@@ -433,8 +433,8 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
       });
       setQuestions((prev) => [q, ...prev]);
       setNewQuestion("");
-    } catch (err: unknown) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to post question");
+    } catch {
+      setSubmitError("Failed to post question. Please try again.");
     } finally {
       setSubmitting(false);
     }

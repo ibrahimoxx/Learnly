@@ -65,6 +65,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
   }
 
   async function submitReply(postId: string) {
+    if (!isSignedIn) return;
     const replyBody = replyTexts[postId]?.trim();
     if (!replyBody) return;
     const token = await getToken();
