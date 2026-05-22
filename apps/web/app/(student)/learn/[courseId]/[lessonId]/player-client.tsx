@@ -313,7 +313,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             ) : activeTab === "qa" ? (
               <QATab lessonId={currentLesson.id} token={token} />
             ) : (
-              <ForumsTab courseId={enrollment.course_id} token={token} />
+              <DiscussionSection courseId={enrollment.course_id} theme="dark" />
             )}
           </div>
         </aside>
