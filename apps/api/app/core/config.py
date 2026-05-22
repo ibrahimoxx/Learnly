@@ -68,8 +68,16 @@ class Settings(BaseSettings):
     vapid_private_key: str = ""
     vapid_claims_subject: str = "mailto:noreply@learnly.dev"
 
+    # Judge0 — self-hosted code execution sandbox
+    judge0_url: str = "http://localhost:2358"
+
+    # LiveKit — self-hosted WebRTC
+    livekit_url: str = "http://localhost:7880"
+    livekit_api_key: str = "devkey"
+    livekit_api_secret: str = "devsecret123456789012345678901234"
+
     # Feature flags
-    feature_live_sessions: bool = False
+    feature_live_sessions: bool = True
     feature_affiliate: bool = False
 
 

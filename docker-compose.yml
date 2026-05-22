@@ -74,3 +74,57 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    container_name: learnly_judge0_server
+    restart: unless-stopped
+    ports:
+      - "2358:2358"
+    environment:
+      RAILS_ENV: production
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-learnly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-learnly_dev}
+      POSTGRES_DB: judge0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      WORKERS_NUMBER: 2
+      ENABLE_WAIT_RESULT: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    privileged: true
+
+  judge0-worker:
+    image: judge0/judge0:1.13.1
+    container_name: learnly_judge0_worker
+    restart: unless-stopped
+    command: ["./scripts/workers"]
+    environment:
+      RAILS_ENV: production
+      POSTGRES_HOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-learnly}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-learnly_dev}
+      POSTGRES_DB: judge0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      WORKERS_NUMBER: 2
+    depends_on:
+      - judge0-server
+    privileged: true
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: learnly_livekit
+    restart: unless-stopped
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+    environment:
+      LIVEKIT_KEYS: "${LIVEKIT_API_KEY:-devkey}: ${LIVEKIT_API_SECRET:-devsecret123456789012345678901234}"
+    command: ["--dev", "--bind", "0.0.0.0"]

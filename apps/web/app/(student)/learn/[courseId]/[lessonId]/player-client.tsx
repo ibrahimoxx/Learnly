@@ -4,11 +4,13 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock, Code } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
-import type { Enrollment, Lesson, LessonProgress, Section, Question } from "@/types";
+import type { Enrollment, Lesson, LessonProgress, Section, Question, LiveSession } from "@/types";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
+import { CodingExercisePlayer } from "@/components/features/coding/coding-exercise-player";
+import { LiveRoom } from "@/components/features/live/live-room";
 import DiscussionSection from "@/components/features/courses/discussion-section";
 
 interface SectionWithLessons extends Section {
@@ -44,6 +46,32 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   const [completedIds, setCompletedIds] = useState<Set<string>>(
     () => new Set(initialProgress.filter((p) => p.is_completed).map((p) => p.lesson_id))
   );
+  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
+  const [showLiveRoom, setShowLiveRoom] = useState(false);
+
+  useEffect(() => {
+    apiFetch<LiveSession[]>(`/api/v1/courses/${enrollment.course_id}/live-sessions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((sessions) => {
+        const live = sessions.find((s) => s.status === "live") ?? null;
+        setLiveSession(live);
+      })
+      .catch(() => {/* non-critical */});
+
+    const interval = setInterval(() => {
+      apiFetch<LiveSession[]>(`/api/v1/courses/${enrollment.course_id}/live-sessions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((sessions) => {
+          const live = sessions.find((s) => s.status === "live") ?? null;
+          setLiveSession(live);
+        })
+        .catch(() => {});
+    }, 30_000);
+
+    return () => clearInterval(interval);
+  }, [enrollment.course_id, token]);
 
   const allLessons = sectionsWithLessons.flatMap((s) => s.lessons);
   const currentIndex = allLessons.findIndex((l) => l.id === currentLesson.id);
@@ -155,6 +183,22 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       <div className="flex flex-1 overflow-hidden">
         {/* Video / content area */}
         <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Live session banner */}
+          {liveSession && (
+            <div className="shrink-0 flex items-center justify-between bg-red-600/90 px-4 py-2">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+                <span className="text-xs font-semibold text-white">Live session in progress: {liveSession.title}</span>
+              </div>
+              <button
+                onClick={() => setShowLiveRoom(true)}
+                className="rounded bg-white/20 px-3 py-1 text-xs font-bold text-white hover:bg-white/30 transition-colors"
+              >
+                Join →
+              </button>
+            </div>
+          )}
+
           {currentLesson.type === "video" ? (
             <div className="relative flex-1 bg-black">
               {currentLesson.video_url ? (
@@ -179,6 +223,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             </div>
           ) : currentLesson.type === "quiz" ? (
             <QuizPlayer lessonId={currentLesson.id} token={token} />
+          ) : currentLesson.type === "coding_exercise" ? (
+            <CodingExercisePlayer lessonId={currentLesson.id} token={token} />
           ) : (
             <div className="flex-1 overflow-y-auto p-8">
               <h2 className="text-xl font-bold text-white">{currentLesson.title}</h2>
@@ -318,6 +364,14 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           </div>
         </aside>
       </div>
+
+      {showLiveRoom && liveSession && (
+        <LiveRoom
+          sessionId={liveSession.id}
+          token={token}
+          onClose={() => setShowLiveRoom(false)}
+        />
+      )}
     </div>
   );
 }
@@ -370,6 +424,8 @@ function ContentTab({
                         <Circle className="h-4 w-4 text-white/30" />
                       ) : lesson.type === "quiz" ? (
                         <HelpCircle className="h-4 w-4 text-white/30" />
+                      ) : lesson.type === "coding_exercise" ? (
+                        <Code className="h-4 w-4 text-white/30" />
                       ) : (
                         <FileText className="h-4 w-4 text-white/30" />
                       )}

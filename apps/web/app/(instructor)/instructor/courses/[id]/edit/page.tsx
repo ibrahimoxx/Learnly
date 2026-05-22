@@ -30,8 +30,9 @@ export default function CourseEditorPage() {
   const [sections, setSections] = useState<SectionWithLessons[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [newLessonType, setNewLessonType] = useState<Record<string, "video" | "article" | "quiz">>({});
+  const [newLessonType, setNewLessonType] = useState<Record<string, "video" | "article" | "quiz" | "coding_exercise">>({});
   const [expandedQuiz, setExpandedQuiz] = useState<string | null>(null);
+  const [expandedExercise, setExpandedExercise] = useState<string | null>(null);
 
   // Coupon state
   interface CouponRead {
@@ -198,6 +199,7 @@ export default function CourseEditorPage() {
         )
       );
       if (type === "quiz") setExpandedQuiz(lesson.id);
+      if (type === "coding_exercise") setExpandedExercise(lesson.id);
     } catch {
       toast.error("Failed to add lesson.");
     }
@@ -303,6 +305,9 @@ export default function CourseEditorPage() {
           </Badge>
         </div>
         <div className="flex gap-2">
+          <Link href={`/instructor/courses/${id}/live`}>
+            <Button variant="outline" size="sm">Live</Button>
+          </Link>
           <Link href={`/instructor/courses/${id}/discussions`}>
             <Button variant="outline" size="sm">Discussions</Button>
           </Link>
@@ -446,6 +451,14 @@ export default function CourseEditorPage() {
                               {expandedQuiz === lesson.id ? "Hide" : "Edit quiz"}
                             </button>
                           )}
+                          {lesson.type === "coding_exercise" && (
+                            <button
+                              onClick={() => setExpandedExercise(expandedExercise === lesson.id ? null : lesson.id)}
+                              className="flex items-center gap-1 rounded-sm border border-[--color-border] px-2 py-1 text-xs text-[--color-text-muted] hover:border-[--color-primary] hover:text-[--color-primary] transition-colors shrink-0"
+                            >
+                              {expandedExercise === lesson.id ? "Hide" : "Edit exercise"}
+                            </button>
+                          )}
                           <button
                             onClick={() => deleteLesson(section.id, lesson.id)}
                             className="shrink-0 p-1 text-[--color-text-muted] hover:text-[--color-error]"
@@ -531,6 +544,9 @@ export default function CourseEditorPage() {
                         {lesson.type === "quiz" && expandedQuiz === lesson.id && (
                           <QuizBuilderPanel lessonId={lesson.id} getToken={getToken} />
                         )}
+                        {lesson.type === "coding_exercise" && expandedExercise === lesson.id && (
+                          <ExerciseBuilderPanel lessonId={lesson.id} getToken={getToken} />
+                        )}
                       </div>
                     ))}
 
@@ -549,6 +565,7 @@ export default function CourseEditorPage() {
                         <option value="video">Video</option>
                         <option value="article">Article</option>
                         <option value="quiz">Quiz</option>
+                        <option value="coding_exercise">Coding Exercise</option>
                       </select>
                       <button
                         onClick={() => addLesson(section.id)}
@@ -664,6 +681,138 @@ function QuizBuilderPanel({
 
   if (!token) return null;
   return <QuizBuilder lessonId={lessonId} token={token} />;
+}
+
+function ExerciseBuilderPanel({
+  lessonId,
+  getToken,
+}: {
+  lessonId: string;
+  getToken: () => Promise<string | null>;
+}) {
+  const [token, setToken] = useState<string | null>(null);
+  const [languageId, setLanguageId] = useState(71);
+  const [problemStatement, setProblemStatement] = useState("");
+  const [starterCode, setStarterCode] = useState("");
+  const [testCases, setTestCases] = useState([{ input: "", expected_output: "" }]);
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    getToken().then(async (t) => {
+      setToken(t);
+      if (!t) return;
+      try {
+        const ex = await apiFetch<{ language_id: number; problem_statement: string; starter_code: string; test_cases?: { input: string; expected_output: string }[] }>(
+          `/api/v1/lessons/${lessonId}/exercise`,
+          { headers: { Authorization: `Bearer ${t}` } }
+        );
+        setLanguageId(ex.language_id);
+        setProblemStatement(ex.problem_statement);
+        setStarterCode(ex.starter_code ?? "");
+        setTestCases(ex.test_cases?.length ? ex.test_cases : [{ input: "", expected_output: "" }]);
+      } catch {
+        // no exercise yet — use defaults
+      } finally {
+        setLoaded(true);
+      }
+    });
+  }, [lessonId, getToken]);
+
+  async function save() {
+    if (!token) return;
+    setSaving(true);
+    try {
+      await apiFetch(`/api/v1/lessons/${lessonId}/exercise`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ language_id: languageId, problem_statement: problemStatement, starter_code: starterCode, test_cases: testCases }),
+      });
+      toast.success("Exercise saved.");
+    } catch {
+      toast.error("Failed to save exercise.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!loaded) return <div className="border-t border-[--color-border] px-4 py-3 text-xs text-[--color-text-muted] animate-pulse">Loading exercise…</div>;
+
+  return (
+    <div className="border-t border-[--color-border] bg-[--color-surface] px-4 py-4 space-y-3">
+      <p className="text-xs font-semibold text-[--color-text-secondary]">Coding Exercise</p>
+      <div>
+        <label className="text-xs text-[--color-text-muted] mb-1 block">Language</label>
+        <select
+          value={languageId}
+          onChange={(e) => setLanguageId(Number(e.target.value))}
+          className="rounded border border-[--color-border] bg-white px-2 py-1 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+        >
+          <option value={71}>Python</option>
+          <option value={63}>JavaScript</option>
+          <option value={54}>C++</option>
+          <option value={62}>Java</option>
+        </select>
+      </div>
+      <div>
+        <label className="text-xs text-[--color-text-muted] mb-1 block">Problem statement</label>
+        <textarea
+          value={problemStatement}
+          onChange={(e) => setProblemStatement(e.target.value)}
+          rows={5}
+          placeholder="Describe the problem…"
+          className="w-full rounded border border-[--color-border] bg-white px-2 py-1.5 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary] resize-y"
+        />
+      </div>
+      <div>
+        <label className="text-xs text-[--color-text-muted] mb-1 block">Starter code</label>
+        <textarea
+          value={starterCode}
+          onChange={(e) => setStarterCode(e.target.value)}
+          rows={4}
+          placeholder="# starter code here"
+          className="w-full rounded border border-[--color-border] bg-white px-2 py-1.5 font-mono text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary] resize-y"
+        />
+      </div>
+      <div>
+        <label className="text-xs text-[--color-text-muted] mb-1 block">Test cases</label>
+        <div className="space-y-2">
+          {testCases.map((tc, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <input
+                placeholder="Input"
+                value={tc.input}
+                onChange={(e) => setTestCases((prev) => prev.map((t, j) => j === i ? { ...t, input: e.target.value } : t))}
+                className="flex-1 rounded border border-[--color-border] bg-white px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+              />
+              <span className="mt-1 text-xs text-[--color-text-muted]">→</span>
+              <input
+                placeholder="Expected output"
+                value={tc.expected_output}
+                onChange={(e) => setTestCases((prev) => prev.map((t, j) => j === i ? { ...t, expected_output: e.target.value } : t))}
+                className="flex-1 rounded border border-[--color-border] bg-white px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+              />
+              <button
+                onClick={() => setTestCases((prev) => prev.filter((_, j) => j !== i))}
+                className="mt-0.5 p-1 text-[--color-text-muted] hover:text-[--color-error]"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={() => setTestCases((prev) => [...prev, { input: "", expected_output: "" }])}
+            className="flex items-center gap-1 text-xs text-[--color-primary] hover:underline"
+          >
+            <Plus className="h-3 w-3" /> Add test case
+          </button>
+        </div>
+      </div>
+      <Button onClick={save} disabled={saving} size="sm">
+        {saving ? "Saving…" : "Save exercise"}
+      </Button>
+    </div>
+  );
 }
 
 function EditableTitle({

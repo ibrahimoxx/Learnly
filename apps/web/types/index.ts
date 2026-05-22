@@ -2,7 +2,7 @@ export type UserRole = "student" | "instructor" | "admin";
 export type CourseStatus = "draft" | "in_review" | "published" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "expert" | "all";
 export type EnrollmentStatus = "active" | "completed" | "refunded";
-export type LessonType = "video" | "article" | "quiz";
+export type LessonType = "video" | "article" | "quiz" | "coding_exercise";
 
 export interface Course {
   id: string;
@@ -245,4 +245,63 @@ export interface AffiliateConversion {
   commission_cents: number;
   status: "pending" | "paid";
   created_at: string;
+}
+
+export interface TestCase {
+  input: string;
+  expected_output: string;
+}
+
+export interface TestCaseResult {
+  index: number;
+  passed: boolean;
+  stdout: string | null;
+  expected: string;
+  time_ms: number | null;
+  memory_kb: number | null;
+}
+
+export interface CodingExercise {
+  id: string;
+  lesson_id: string;
+  language_id: number;
+  problem_statement: string;
+  starter_code: string;
+  test_cases?: TestCase[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CodeSubmission {
+  id: string;
+  lesson_id: string;
+  status: "pending" | "running" | "accepted" | "wrong_answer" | "error";
+  tests_passed: number;
+  tests_total: number;
+  stdout: string | null;
+  stderr: string | null;
+  time_ms: number | null;
+  memory_kb: number | null;
+  attempt_number: number;
+  results: TestCaseResult[];
+  created_at: string;
+}
+
+export interface LiveSession {
+  id: string;
+  course_id: string;
+  instructor_id: string;
+  title: string;
+  room_name: string;
+  status: "scheduled" | "live" | "ended";
+  scheduled_at?: string;
+  started_at?: string;
+  ended_at?: string;
+  created_at: string;
+}
+
+export interface LiveSessionToken {
+  token: string;
+  url: string;
+  room_name: string;
 }
