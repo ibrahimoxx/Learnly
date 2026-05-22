@@ -13,6 +13,7 @@ import { EnrollButton } from "./enroll-button";
 import { ReviewSection } from "@/components/features/courses/review-section";
 import { WishlistButton } from "@/components/features/courses/wishlist-button";
 import AffiliateTracker from "@/components/shared/affiliate-tracker";
+import DiscussionSection from "@/components/features/courses/discussion-section";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson, Review } from "@/types";
 import { Suspense } from "react";
