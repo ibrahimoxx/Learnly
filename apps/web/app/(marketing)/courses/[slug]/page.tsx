@@ -224,6 +224,20 @@ export default async function CourseDetailPage({ params }: Props) {
             <Separator className="my-8" />
 
             <ReviewSection courseId={course.id} initialReviews={initialReviews} />
+
+            <Separator className="my-8" />
+
+            <section>
+              <h2 className="text-lg font-bold text-[--color-text-primary]">Discussion</h2>
+              <p className="mt-1 text-sm text-[--color-text-muted]">
+                Ask questions, share insights, or start a conversation with other students.
+              </p>
+              <div className="mt-6">
+                <Suspense fallback={<div className="h-24 rounded-[--radius-md] bg-[--color-surface] animate-pulse" />}>
+                  <DiscussionSection courseId={course.id} theme="light" />
+                </Suspense>
+              </div>
+            </section>
           </div>
 
           {/* Sticky sidebar */}
