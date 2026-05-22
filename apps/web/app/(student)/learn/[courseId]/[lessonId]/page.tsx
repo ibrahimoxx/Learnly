@@ -79,7 +79,15 @@ export default async function PlayerPage({ params }: Props) {
 
   const token = (await getToken()) ?? "";
   const enrollment = await getEnrollment(courseId, token);
-  if (!enrollment) redirect(`/courses`);
+  if (!enrollment) {
+    const [lesson, course] = await Promise.all([
+      findLesson(courseId, lessonId),
+      getCourse(courseId),
+    ]);
+    if (!lesson || !course) notFound();
+    if (!lesson.is_free_preview) redirect("/courses");
+    return <PreviewPlayer lesson={lesson} course={course} />;
+  }
 
   const [sections, initialProgress] = await Promise.all([
     getSections(courseId),

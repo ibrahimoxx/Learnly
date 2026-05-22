@@ -501,6 +501,33 @@ export default function CourseEditorPage() {
                             </button>
                           )}
                         </div>
+                        <div className="flex items-center gap-2 border-t border-[--color-border] px-4 py-2 bg-[--color-surface]">
+                          <Eye className="h-3 w-3 shrink-0 text-[--color-text-muted]" />
+                          <label className="flex items-center gap-2 text-xs text-[--color-text-muted] cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              checked={lesson.is_free_preview}
+                              onChange={async (e) => {
+                                const checked = e.target.checked;
+                                const token = await getToken();
+                                await apiFetch(`/api/v1/sections/${section.id}/lessons/${lesson.id}`, {
+                                  method: "PATCH",
+                                  headers: { Authorization: `Bearer ${token}` },
+                                  body: JSON.stringify({ is_free_preview: checked }),
+                                }).catch(() => toast.error("Failed to update free preview."));
+                                setSections((prev) =>
+                                  prev.map((s) =>
+                                    s.id === section.id
+                                      ? { ...s, lessons: s.lessons.map((l) => l.id === lesson.id ? { ...l, is_free_preview: checked } : l) }
+                                      : s
+                                  )
+                                );
+                              }}
+                              className="rounded"
+                            />
+                            Free preview (visible before enrollment)
+                          </label>
+                        </div>
                         {lesson.type === "quiz" && expandedQuiz === lesson.id && (
                           <QuizBuilderPanel lessonId={lesson.id} getToken={getToken} />
                         )}

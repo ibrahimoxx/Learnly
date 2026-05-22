@@ -52,6 +52,9 @@ async def list_lessons(
         if not is_instructor and lesson.unlock_at and lesson.unlock_at > now:
             read.video_url = None
             read.content = None
+        if user is None and not lesson.is_free_preview:
+            read.video_url = None
+            read.content = None
         lessons.append(read)
     return lessons
 
