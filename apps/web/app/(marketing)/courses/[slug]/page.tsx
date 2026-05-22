@@ -12,11 +12,14 @@ import { PreviewCurriculum } from "@/components/features/courses/preview-curricu
 import { EnrollButton } from "./enroll-button";
 import { ReviewSection } from "@/components/features/courses/review-section";
 import { WishlistButton } from "@/components/features/courses/wishlist-button";
+import AffiliateTracker from "@/components/shared/affiliate-tracker";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson, Review } from "@/types";
+import { Suspense } from "react";
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string>>;
 }
 
 async function getCourse(slug: string) {
@@ -104,6 +107,9 @@ export default async function CourseDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen">
+      <Suspense fallback={null}>
+        <AffiliateTracker />
+      </Suspense>
       {/* Course hero — dark bg */}
       <div className="bg-[oklch(14%_0.03_295)] text-white">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">

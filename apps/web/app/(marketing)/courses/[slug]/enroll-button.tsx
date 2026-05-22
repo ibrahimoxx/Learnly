@@ -26,6 +26,12 @@ interface CouponResult {
   message: string;
 }
 
+function getAffiliateCookie(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(/(?:^|;\s*)affiliate_ref=([^;]+)/);
+  return match ? match[1] : undefined;
+}
+
 export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   const { isSignedIn, getToken } = useAuth();
   const router = useRouter();
@@ -74,6 +80,8 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
     try {
       const token = await getToken();
 
+      const affiliateCode = getAffiliateCookie();
+
       if (!isFree) {
         const { checkout_url } = await apiFetch<{ checkout_url: string; session_id: string }>(
           "/api/v1/checkout/sessions",
@@ -83,6 +91,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
             body: JSON.stringify({
               course_id: courseId,
               coupon_code: couponResult?.valid ? couponCode.trim() : undefined,
+              affiliate_code: affiliateCode,
             }),
           }
         );
@@ -93,7 +102,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
       const enrollment = await apiFetch<Enrollment>("/api/v1/enrollments", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ course_id: courseId }),
+        body: JSON.stringify({ course_id: courseId, affiliate_code: affiliateCode }),
       });
       void enrollment;
       posthog?.capture("course_enrolled", { course_id: courseId, is_free: true });

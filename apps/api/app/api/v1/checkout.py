@@ -70,6 +70,7 @@ async def create_checkout_session(
     metadata: dict[str, str] = {
         "user_id": str(user.id),
         "course_id": str(course.id),
+        "affiliate_code": body.affiliate_code.upper() if body.affiliate_code else "",
     }
     if applied_coupon:
         metadata["coupon_id"] = str(applied_coupon.id)

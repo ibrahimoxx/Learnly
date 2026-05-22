@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import get_db
+from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.organization import Organization
@@ -227,3 +228,31 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
 
     await db.commit()
     log.info("enrollment_created_via_stripe", user_id=user_id, course_id=course_id)
+
+    raw_aff_code = meta.get("affiliate_code", "") if isinstance(meta, dict) else getattr(meta, "affiliate_code", "")
+    import re as _re
+    affiliate_code = raw_aff_code.upper() if raw_aff_code and _re.match(r'^[A-Z0-9]{1,20}$', raw_aff_code.upper()) else ""
+    if affiliate_code:
+        link_result = await db.execute(
+            select(AffiliateLink).where(
+                AffiliateLink.code == affiliate_code,
+                AffiliateLink.is_active == True,  # noqa: E712
+            )
+        )
+        aff_link = link_result.scalar_one_or_none()
+        if aff_link and aff_link.instructor_id != uuid.UUID(user_id):
+            from decimal import Decimal, ROUND_HALF_UP
+            amount = int(_get(session, "amount_total") or 0)
+            commission = int(
+                (Decimal(amount) * Decimal(aff_link.commission_pct) / Decimal(100))
+                .quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            )
+            db.add(AffiliateConversion(
+                link_id=aff_link.id,
+                enrollment_id=enrollment.id,
+                course_id=uuid.UUID(course_id),
+                student_id=uuid.UUID(user_id),
+                amount_cents=amount,
+                commission_cents=commission,
+            ))
+            await db.commit()

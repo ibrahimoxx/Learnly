@@ -1,11 +1,12 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class EnrollmentCreate(BaseModel):
     course_id: uuid.UUID
+    affiliate_code: str | None = Field(None, max_length=20, pattern=r"^[A-Z0-9]+$")
 
 
 class EnrollmentRead(BaseModel):

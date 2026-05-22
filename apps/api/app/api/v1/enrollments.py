@@ -15,6 +15,7 @@ from app.core.auth import get_current_user
 from app.core.config import settings
 from app.db.session import AsyncSessionLocal, get_db
 from app.services.gamification import process_course_completion, process_lesson_completion
+from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson import Lesson
@@ -66,6 +67,25 @@ async def enroll(
     await db.commit()
     await db.refresh(enrollment)
     log.info("enrollment_created", user_id=str(user.id), course_id=str(body.course_id))
+
+    if body.affiliate_code:
+        link_result = await db.execute(
+            select(AffiliateLink).where(
+                AffiliateLink.code == body.affiliate_code.upper(),
+                AffiliateLink.is_active == True,  # noqa: E712
+            )
+        )
+        aff_link = link_result.scalar_one_or_none()
+        if aff_link and aff_link.instructor_id != user.id:
+            db.add(AffiliateConversion(
+                link_id=aff_link.id,
+                enrollment_id=enrollment.id,
+                course_id=enrollment.course_id,
+                student_id=user.id,
+                amount_cents=0,
+                commission_cents=0,
+            ))
+            await db.commit()
 
     # Send confirmation email in background (non-blocking)
     asyncio.get_event_loop().run_in_executor(

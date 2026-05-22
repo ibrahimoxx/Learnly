@@ -220,3 +220,29 @@ export interface LearningPathProgress {
   total_courses: number;
   enrolled: boolean;
 }
+
+export interface AffiliateLink {
+  id: string;
+  code: string;
+  commission_pct: number;
+  click_count: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface AffiliateStats {
+  link: AffiliateLink;
+  total_conversions: number;
+  total_revenue_cents: number;
+  total_commission_cents: number;
+  pending_commission_cents: number;
+}
+
+export interface AffiliateConversion {
+  id: string;
+  course_id: string;
+  amount_cents: number;
+  commission_cents: number;
+  status: "pending" | "paid";
+  created_at: string;
+}

@@ -25,6 +25,7 @@ from app.api.v1.gamification import router as gamification_router
 from app.api.v1.push import router as push_router
 from app.api.v1.recommendations import router as recommendations_router
 from app.api.v1.learning_paths import router as learning_paths_router
+from app.api.v1.affiliate import router as affiliate_router
 from app.core.config import settings
 
 log = structlog.get_logger()
@@ -73,6 +74,7 @@ app.include_router(gamification_router, prefix="/api/v1")
 app.include_router(push_router, prefix="/api/v1")
 app.include_router(recommendations_router, prefix="/api/v1")
 app.include_router(learning_paths_router, prefix="/api/v1")
+app.include_router(affiliate_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
