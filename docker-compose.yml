@@ -97,6 +97,7 @@ services:
       redis:
         condition: service_healthy
     privileged: true
+    cgroup: host
 
   judge0-worker:
     image: judge0/judge0:1.13.1
@@ -115,6 +116,7 @@ services:
     depends_on:
       - judge0-server
     privileged: true
+    cgroup: host
 
   livekit:
     image: livekit/livekit-server:latest
