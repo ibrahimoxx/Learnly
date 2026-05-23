@@ -18,10 +18,12 @@ interface Notification {
 
 export function NotificationBell() {
   const { isSignedIn, getToken } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unread, setUnread] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { setMounted(true); }, []);
 
   async function loadNotifications() {
     const token = await getToken();
@@ -65,7 +67,7 @@ export function NotificationBell() {
     }
   }
 
-  if (!isSignedIn) return null;
+  if (!mounted || !isSignedIn) return null;
 
   return (
     <div ref={ref} className="relative">
