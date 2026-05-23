@@ -227,6 +227,9 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
       </div>
 
       <div className="p-4">
+        {enrollment.course_title && (
+          <p className="text-sm font-semibold text-[--color-text-primary] mb-1 line-clamp-2">{enrollment.course_title}</p>
+        )}
         <p className="text-xs text-[--color-text-muted] mb-1">
           Enrolled {new Date(enrollment.created_at).toLocaleDateString()}
         </p>

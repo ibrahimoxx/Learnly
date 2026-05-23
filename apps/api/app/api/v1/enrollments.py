@@ -113,6 +113,9 @@ async def my_enrollments(
     enrollment_ids = [e.id for e in enrollments]
     course_ids = list({e.course_id for e in enrollments})
 
+    courses_result = await db.execute(select(Course).where(Course.id.in_(course_ids)))
+    courses_by_id = {c.id: c for c in courses_result.scalars().all()}
+
     total_result = await db.execute(
         select(Section.course_id, func.count(Lesson.id).label("cnt"))
         .join(Lesson, Lesson.section_id == Section.id)
@@ -136,6 +139,8 @@ async def my_enrollments(
             id=e.id,
             student_id=e.student_id,
             course_id=e.course_id,
+            course_title=courses_by_id[e.course_id].title if e.course_id in courses_by_id else "",
+            course_slug=courses_by_id[e.course_id].slug if e.course_id in courses_by_id else "",
             status=e.status,
             completed_at=e.completed_at,
             created_at=e.created_at,
