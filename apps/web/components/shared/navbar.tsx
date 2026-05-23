@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { Search, BookOpen, Menu, X } from "lucide-react";
@@ -21,6 +21,9 @@ export function Navbar() {
   const t = useTranslations("nav");
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const signedIn = mounted && isSignedIn;
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -61,7 +64,7 @@ export function Navbar() {
           >
             {t("explore")}
           </Link>
-          {isSignedIn && (
+          {signedIn && (
             <>
               <Link
                 href="/dashboard"
@@ -91,7 +94,7 @@ export function Navbar() {
         <div className="ml-auto hidden items-center gap-2 lg:flex">
           <LanguageSwitcher />
           <NotificationBell />
-          {isSignedIn ? (
+          {signedIn ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
             <>
@@ -133,7 +136,7 @@ export function Navbar() {
             <Link href="/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
               {t("explore")}
             </Link>
-            {isSignedIn && (
+            {signedIn && (
               <>
                 <Link href="/dashboard" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
                   {t("myLearning")}
@@ -151,8 +154,8 @@ export function Navbar() {
           </nav>
           <div className="mt-3 flex items-center justify-between">
             <LanguageSwitcher />
-            <div className={cn("flex gap-2", isSignedIn && "justify-start")}>
-              {isSignedIn ? (
+            <div className={cn("flex gap-2", signedIn && "justify-start")}>
+              {signedIn ? (
                 <UserButton afterSignOutUrl="/" />
               ) : (
                 <>
