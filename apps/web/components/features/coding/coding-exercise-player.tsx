@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { CheckCircle2, XCircle, Play, ChevronDown, ChevronUp, Clock, MemoryStick } from "lucide-react";
 import { apiFetch } from "@/lib/api";
@@ -29,6 +29,16 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
   const [result, setResult] = useState<CodeSubmission | null>(null);
   const [showStatement, setShowStatement] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -139,17 +149,28 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Editor toolbar */}
         <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[oklch(12%_0.03_295)] px-3 py-2">
-          <select
-            value={languageId}
-            onChange={(e) => setLanguageId(Number(e.target.value))}
-            className="rounded bg-white/10 px-2 py-1 text-xs text-white focus:outline-none"
-          >
-            {Object.entries(LANGUAGES).map(([id, lang]) => (
-              <option key={id} value={id}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
+          <div ref={langRef} className="relative">
+            <button
+              onClick={() => setLangOpen((v) => !v)}
+              className="flex items-center gap-1.5 rounded bg-white/10 px-2.5 py-1.5 text-xs text-white hover:bg-white/20 transition-colors"
+            >
+              {LANGUAGES[languageId]?.name ?? "Language"}
+              <ChevronDown className="h-3 w-3 text-white/50" />
+            </button>
+            {langOpen && (
+              <div className="absolute left-0 top-8 z-50 min-w-30 rounded-md border border-white/15 bg-[oklch(18%_0.03_295)] shadow-xl">
+                {Object.entries(LANGUAGES).map(([id, lang]) => (
+                  <button
+                    key={id}
+                    onClick={() => { setLanguageId(Number(id)); setLangOpen(false); }}
+                    className={`flex w-full items-center px-3 py-2 text-xs transition-colors hover:bg-white/10 ${Number(id) === languageId ? "text-[--color-primary] font-semibold" : "text-white/80"}`}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             onClick={handleSubmit}
             disabled={submitting}
