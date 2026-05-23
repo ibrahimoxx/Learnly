@@ -56,15 +56,16 @@ export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
     }
     load();
     return () => { cancelled = true; };
-  }, [lessonId, token]);
+  }, [lessonId, getAuthToken]);
 
   async function submit() {
     setSubmitting(true);
     setError(null);
     try {
+      const tok = await getAuthToken();
       const result = await apiFetch<QuizAttemptRead>(`/api/v1/lessons/${lessonId}/quiz/submit`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
         body: JSON.stringify({ answers: selected }),
       });
       posthog?.capture("quiz_submitted", {
