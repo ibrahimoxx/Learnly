@@ -86,8 +86,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <RecommendationsSection />
-
       {myPaths.length > 0 && (
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
@@ -160,6 +158,10 @@ export default function DashboardPage() {
           </>
         )}
       </Tabs>
+
+      <div className="mt-10">
+        <RecommendationsSection />
+      </div>
     </div>
   );
 }
