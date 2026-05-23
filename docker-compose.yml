@@ -89,7 +89,6 @@ services:
       POSTGRES_DB: judge0
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
       WORKERS_NUMBER: 2
       ENABLE_WAIT_RESULT: "true"
     depends_on:
@@ -112,7 +111,6 @@ services:
       POSTGRES_DB: judge0
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
       WORKERS_NUMBER: 2
     depends_on:
       - judge0-server
