@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { CheckCircle2, XCircle, Play, ChevronDown, ChevronUp, Clock, MemoryStick } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { CodingExercise, CodeSubmission, TestCaseResult } from "@/types";
@@ -18,7 +19,9 @@ interface Props {
   token: string;
 }
 
-export function CodingExercisePlayer({ lessonId, token }: Props) {
+export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
+  const { getToken } = useAuth();
+  const getAuthToken = useCallback(async () => (await getToken()) ?? _serverToken, [getToken, _serverToken]);
   const [exercise, setExercise] = useState<CodingExercise | null>(null);
   const [loading, setLoading] = useState(true);
   const [code, setCode] = useState("");
@@ -41,9 +44,11 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
   useEffect(() => {
     setLoading(true);
     setResult(null);
-    apiFetch<CodingExercise>(`/api/v1/lessons/${lessonId}/exercise`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    getAuthToken().then((tok) =>
+      apiFetch<CodingExercise>(`/api/v1/lessons/${lessonId}/exercise`, {
+        headers: { Authorization: `Bearer ${tok}` },
+      })
+    )
       .then((ex) => {
         setExercise(ex);
         setCode(ex.starter_code || "");
@@ -51,18 +56,19 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
       })
       .catch(() => setError("Failed to load exercise"))
       .finally(() => setLoading(false));
-  }, [lessonId, token]);
+  }, [lessonId, getAuthToken]);
 
   async function handleSubmit() {
     if (!exercise) return;
     setSubmitting(true);
     setError(null);
     try {
+      const tok = await getAuthToken();
       const sub = await apiFetch<CodeSubmission>(
         `/api/v1/lessons/${lessonId}/exercise/submit`,
         {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
           body: JSON.stringify({ source_code: code, language_id: languageId }),
         }
       );
