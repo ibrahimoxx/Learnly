@@ -1,15 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import dynamic from "next/dynamic";
 import { CheckCircle2, XCircle, Play, ChevronDown, ChevronUp, Clock, MemoryStick } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { CodingExercise, CodeSubmission, TestCaseResult } from "@/types";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
-  ssr: false,
-  loading: () => <div className="h-full w-full bg-[#1e1e1e]" />,
-});
 
 const LANGUAGES: Record<number, { name: string; monaco: string }> = {
   71: { name: "Python", monaco: "python" },
@@ -185,30 +180,9 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
         </div>
 
         {/* Code editor */}
-        <div className="relative flex-1 overflow-hidden">
-          <MonacoEditor
-            height="100%"
-            language={LANGUAGES[languageId]?.monaco ?? "plaintext"}
-            value={code}
-            onChange={(v) => setCode(v ?? "")}
-            theme="vs-dark"
-            options={{
-              minimap: { enabled: false },
-              fontSize: 13,
-              lineNumbers: "on",
-              scrollBeyondLastLine: false,
-              padding: { top: 12 },
-            }}
-            onMount={(_editor, monaco) => {
-              if (monaco) {
-                const fallback = document.getElementById("code-fallback");
-                if (fallback) fallback.style.display = "none";
-              }
-            }}
-          />
+        <div className="flex-1 overflow-hidden">
           <textarea
-            id="code-fallback"
-            className="absolute inset-0 h-full w-full resize-none bg-[#1e1e1e] p-3 font-mono text-sm text-white/90 focus:outline-none"
+            className="h-full w-full resize-none bg-[#1e1e1e] p-3 font-mono text-sm text-white/90 focus:outline-none focus:ring-1 focus:ring-[--color-primary]/50"
             placeholder={`// Write your ${LANGUAGES[languageId]?.name ?? "code"} solution here…`}
             value={code}
             onChange={(e) => setCode(e.target.value)}
