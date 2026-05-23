@@ -259,7 +259,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
         )}
 
         <Link
-          href={`/learn/${enrollment.course_id}`}
+          href={`/learn/${enrollment.course_slug || enrollment.course_id}`}
           className="mt-3 block w-full rounded-[--radius-sm] border border-[--color-primary] py-2 text-center text-xs font-semibold text-[--color-primary] hover:bg-[--color-primary] hover:text-white transition-colors"
         >
           {isCompleted ? "Review course" : "Continue learning"}
