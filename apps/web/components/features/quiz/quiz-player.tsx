@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
 import { CheckCircle2, XCircle, HelpCircle, RotateCcw, Trophy } from "lucide-react";
 import { apiFetch } from "@/lib/api";
@@ -11,7 +12,9 @@ interface Props {
   token: string;
 }
 
-export function QuizPlayer({ lessonId, token }: Props) {
+export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
+  const { getToken } = useAuth();
+  const getAuthToken = useCallback(async () => (await getToken()) ?? _serverToken, [getToken, _serverToken]);
   const posthog = usePostHog();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [attempt, setAttempt] = useState<QuizAttemptRead | null>(null);
@@ -26,12 +29,13 @@ export function QuizPlayer({ lessonId, token }: Props) {
       setLoading(true);
       setError(null);
       try {
+        const tok = await getAuthToken();
         const [qs, att] = await Promise.allSettled([
           apiFetch<QuizQuestion[]>(`/api/v1/lessons/${lessonId}/quiz/questions`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${tok}` },
           }),
           apiFetch<QuizAttemptRead>(`/api/v1/lessons/${lessonId}/quiz/my-attempt`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${tok}` },
           }),
         ]);
 

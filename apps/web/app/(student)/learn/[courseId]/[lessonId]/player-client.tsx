@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -35,7 +36,9 @@ interface ProgressSSEEvent {
   completed_at: string | null;
 }
 
-export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, token, initialProgress }: Props) {
+export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, token: _serverToken, initialProgress }: Props) {
+  const { getToken } = useAuth();
+  const getAuthToken = useCallback(async () => (await getToken()) ?? _serverToken, [getToken, _serverToken]);
   const router = useRouter();
   const posthog = usePostHog();
   const progressRef = useRef<number>(0);
@@ -50,28 +53,21 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   const [showLiveRoom, setShowLiveRoom] = useState(false);
 
   useEffect(() => {
-    apiFetch<LiveSession[]>(`/api/v1/courses/${enrollment.course_id}/live-sessions`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((sessions) => {
-        const live = sessions.find((s) => s.status === "live") ?? null;
-        setLiveSession(live);
-      })
-      .catch(() => {/* non-critical */});
+    async function pollLiveSessions() {
+      try {
+        const tok = await getAuthToken();
+        const sessions = await apiFetch<LiveSession[]>(
+          `/api/v1/courses/${enrollment.course_id}/live-sessions`,
+          { headers: { Authorization: `Bearer ${tok}` } }
+        );
+        setLiveSession(sessions.find((s) => s.status === "live") ?? null);
+      } catch {/* non-critical */}
+    }
 
-    const interval = setInterval(() => {
-      apiFetch<LiveSession[]>(`/api/v1/courses/${enrollment.course_id}/live-sessions`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((sessions) => {
-          const live = sessions.find((s) => s.status === "live") ?? null;
-          setLiveSession(live);
-        })
-        .catch(() => {});
-    }, 30_000);
-
+    pollLiveSessions();
+    const interval = setInterval(pollLiveSessions, 30_000);
     return () => clearInterval(interval);
-  }, [enrollment.course_id, token]);
+  }, [enrollment.course_id, getAuthToken]);
 
   const allLessons = sectionsWithLessons.flatMap((s) => s.lessons);
   const currentIndex = allLessons.findIndex((l) => l.id === currentLesson.id);
@@ -80,9 +76,10 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   const saveProgress = useCallback(
     async (watched: number, position: number, completed: boolean) => {
       try {
+        const tok = await getAuthToken();
         await apiFetch(`/api/v1/enrollments/${enrollment.id}/progress`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${tok}` },
           body: JSON.stringify({
             lesson_id: currentLesson.id,
             watched_seconds: watched,
@@ -105,7 +102,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         // silent — non-blocking
       }
     },
-    [enrollment.id, currentLesson.id, token]
+    [enrollment.id, currentLesson.id, getAuthToken]
   );
 
   useEffect(() => {
