@@ -6,7 +6,10 @@ import { CheckCircle2, XCircle, Play, ChevronDown, ChevronUp, Clock, MemoryStick
 import { apiFetch } from "@/lib/api";
 import type { CodingExercise, CodeSubmission, TestCaseResult } from "@/types";
 
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
+const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-[#1e1e1e]" />,
+});
 
 const LANGUAGES: Record<number, { name: string; monaco: string }> = {
   71: { name: "Python", monaco: "python" },
@@ -181,8 +184,8 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
           </button>
         </div>
 
-        {/* Monaco editor */}
-        <div className="flex-1 overflow-hidden">
+        {/* Code editor */}
+        <div className="relative flex-1 overflow-hidden">
           <MonacoEditor
             height="100%"
             language={LANGUAGES[languageId]?.monaco ?? "plaintext"}
@@ -196,6 +199,20 @@ export function CodingExercisePlayer({ lessonId, token }: Props) {
               scrollBeyondLastLine: false,
               padding: { top: 12 },
             }}
+            onMount={(_editor, monaco) => {
+              if (monaco) {
+                const fallback = document.getElementById("code-fallback");
+                if (fallback) fallback.style.display = "none";
+              }
+            }}
+          />
+          <textarea
+            id="code-fallback"
+            className="absolute inset-0 h-full w-full resize-none bg-[#1e1e1e] p-3 font-mono text-sm text-white/90 focus:outline-none"
+            placeholder={`// Write your ${LANGUAGES[languageId]?.name ?? "code"} solution here…`}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            spellCheck={false}
           />
         </div>
 
