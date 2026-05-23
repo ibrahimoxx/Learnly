@@ -5,7 +5,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.deps import get_current_user, get_db
+from app.core.auth import get_current_user
+from app.db.session import get_db
 from app.db.tables.push_subscription import PushSubscription
 from app.db.tables.user import User
 from app.schemas.push import PushSubscribeRequest, VapidPublicKeyResponse
