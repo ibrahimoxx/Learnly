@@ -219,9 +219,9 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
               )}
             </div>
           ) : currentLesson.type === "quiz" ? (
-            <QuizPlayer lessonId={currentLesson.id} token={token} />
+            <QuizPlayer lessonId={currentLesson.id} token={_serverToken} />
           ) : currentLesson.type === "coding_exercise" ? (
-            <CodingExercisePlayer lessonId={currentLesson.id} token={token} />
+            <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
           ) : (
             <div className="flex-1 overflow-y-auto p-8">
               <h2 className="text-xl font-bold text-white">{currentLesson.title}</h2>
