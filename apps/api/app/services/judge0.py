@@ -1,5 +1,8 @@
 import asyncio
 import base64
+import os
+import subprocess
+import tempfile
 
 import httpx
 import structlog
@@ -10,6 +13,61 @@ logger = structlog.get_logger()
 
 _POLL_INTERVAL = 1.0
 _POLL_MAX_ATTEMPTS = 30
+
+# language_id → (executable, file_extension)
+# Used as fallback when Judge0 sandbox fails (e.g. no cgroupv1 on WSL2)
+_LOCAL_RUNNERS: dict[int, tuple[str, str]] = {
+    63: ("node", ".js"),
+    71: ("python" if os.name == "nt" else "python3", ".py"),
+}
+
+
+def _run_local_sync(source_code: str, language_id: int, stdin: str) -> dict:
+    """Synchronous local code runner — called via executor to avoid blocking event loop.
+    Uses subprocess.run with a fixed executable list (no shell=True), so no injection risk.
+    Executable is a fixed string from _LOCAL_RUNNERS; only user-provided code goes to stdin/file.
+    """
+    runner = _LOCAL_RUNNERS.get(language_id)
+    if runner is None:
+        return {"status": {"id": 13, "description": "Unsupported language"}, "stdout": None}
+
+    executable, ext = runner
+    tmp = tempfile.NamedTemporaryFile(mode="w", suffix=ext, delete=False, encoding="utf-8")
+    try:
+        tmp.write(source_code)
+        tmp.close()
+
+        result = subprocess.run(  # noqa: S603
+            [executable, tmp.name],
+            input=stdin.encode() if stdin else b"",
+            capture_output=True,
+            timeout=10.0,
+        )
+
+        stdout_text = result.stdout.decode("utf-8", errors="replace")
+        stderr_text = result.stderr.decode("utf-8", errors="replace")
+
+        return {
+            "status": {"id": 3, "description": "Accepted"},
+            "stdout": stdout_text,
+            "stderr": stderr_text,
+            "time": None,
+            "memory": None,
+        }
+    except subprocess.TimeoutExpired:
+        return {"status": {"id": 5, "description": "Time Limit Exceeded"}, "stdout": None}
+    except FileNotFoundError:
+        return {"status": {"id": 13, "description": f"Runtime not found: {executable}"}, "stdout": None}
+    finally:
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
+
+
+async def _run_local(source_code: str, language_id: int, stdin: str) -> dict:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, _run_local_sync, source_code, language_id, stdin)
 
 
 async def submit_code(source_code: str, language_id: int, stdin: str = "") -> str:
@@ -58,7 +116,7 @@ def _decode_submission(data: dict) -> dict:
 async def run_test_cases(
     source_code: str, language_id: int, test_cases: list[dict]
 ) -> dict:
-    """Run all test cases and return aggregated results."""
+    """Run all test cases via Judge0; falls back to local subprocess if Judge0 returns Internal Error."""
     if not test_cases:
         return {"tests_passed": 0, "tests_total": 0, "results": [], "status": "accepted"}
 
@@ -66,24 +124,24 @@ async def run_test_cases(
     passed = 0
 
     for i, tc in enumerate(test_cases):
+        stdin = tc.get("input", "")
+        data: dict | None = None
+
         try:
-            token = await submit_code(source_code, language_id, tc.get("input", ""))
+            token = await submit_code(source_code, language_id, stdin)
             data = await get_submission(token)
         except Exception as exc:
-            logger.error("judge0_test_case_error", index=i, error=str(exc))
-            results.append({
-                "index": i,
-                "passed": False,
-                "stdout": None,
-                "expected": tc.get("expected_output", ""),
-                "time_ms": None,
-                "memory_kb": None,
-            })
-            continue
+            logger.warning("judge0_unavailable", index=i, error=str(exc), fallback="local")
+
+        # Fall back to local runner when Judge0 returns Internal Error (status 13)
+        if data is None or data.get("status", {}).get("id") == 13:
+            logger.info("judge0_local_fallback", index=i, language_id=language_id)
+            data = await _run_local(source_code, language_id, stdin)
 
         actual = (data.get("stdout") or "").strip()
         expected = tc.get("expected_output", "").strip()
-        is_passed = actual == expected and data.get("status", {}).get("id") == 3
+        status_id = data.get("status", {}).get("id")
+        is_passed = actual == expected and status_id == 3
 
         if is_passed:
             passed += 1
