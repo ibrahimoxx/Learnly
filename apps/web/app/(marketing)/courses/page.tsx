@@ -67,13 +67,13 @@ export default async function CoursesPage({ searchParams }: Props) {
         {/* Filters sidebar — desktop only */}
         <aside className="hidden w-56 shrink-0 lg:block">
           <div className="sticky top-24">
-            <h2 className="mb-3 text-sm font-semibold text-[--color-text-primary]">Level</h2>
+            <p className="mb-3 text-sm font-semibold text-[--color-text-primary]">Level</p>
             <div className="space-y-1">
               {LEVELS.map((level) => (
                 <a
                   key={level.value}
                   href={`/courses?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), ...(level.value ? { level: level.value } : {}) })}`}
-                  className={`block rounded-[--radius-sm] px-3 py-2 text-sm transition-colors ${
+                  className={`flex min-h-11 items-center rounded-[--radius-sm] px-3 text-sm transition-colors ${
                     (params.level ?? "") === level.value
                       ? "bg-[--color-primary]/10 font-medium text-[--color-primary]"
                       : "text-[--color-text-secondary] hover:bg-[--color-surface]"

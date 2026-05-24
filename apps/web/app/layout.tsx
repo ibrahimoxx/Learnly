@@ -49,6 +49,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <ClerkProvider>
       <html lang={locale} className={cn("font-sans", geist.variable)}>
+        <head>
+          <link rel="preconnect" href="https://clerk.learnly.dev" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        </head>
         <body>
           <NextIntlClientProvider messages={messages}>
             <Providers>{children}</Providers>

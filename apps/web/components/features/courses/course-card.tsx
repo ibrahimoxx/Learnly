@@ -43,9 +43,9 @@ export function CourseCard({ course }: CourseCardProps) {
 
         {/* Content */}
         <div className="p-4">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-[--color-text-primary] group-hover:text-[--color-primary] transition-colors">
+          <h2 className="line-clamp-2 text-sm font-semibold leading-snug text-[--color-text-primary] group-hover:text-[--color-primary] transition-colors">
             {course.title}
-          </h3>
+          </h2>
 
           <div className="mt-2 flex items-center gap-2">
             <Badge variant="secondary">{levelLabels[course.level] ?? course.level}</Badge>
