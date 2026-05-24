@@ -15,6 +15,12 @@ export function InstallPrompt() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     if (localStorage.getItem(DISMISSED_KEY)) return;
     if (window.matchMedia("(display-mode: standalone)").matches) return;

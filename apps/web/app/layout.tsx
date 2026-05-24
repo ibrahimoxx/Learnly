@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     default: "Learnly — Learn Without Limits",
   },
   description: "Online learning marketplace with thousands of expert-led courses.",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
