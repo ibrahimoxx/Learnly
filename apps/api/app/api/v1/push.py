@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.db.tables.push_subscription import PushSubscription
 from app.db.tables.user import User
 from app.schemas.push import PushSubscribeRequest, VapidPublicKeyResponse
+from app.services.push import send_push
 
 router = APIRouter(tags=["push"])
 
@@ -44,6 +45,21 @@ async def subscribe(
                 auth=body.auth,
             )
         )
+    await db.commit()
+
+
+@router.post("/push/test", status_code=status.HTTP_204_NO_CONTENT)
+async def send_test_push(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> None:
+    await send_push(
+        uuid.UUID(str(user.id)),
+        "Learnly Test",
+        "Web Push is working correctly.",
+        "/dashboard",
+        db,
+    )
     await db.commit()
 
 
