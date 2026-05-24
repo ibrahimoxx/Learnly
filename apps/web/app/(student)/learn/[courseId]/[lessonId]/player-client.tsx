@@ -296,7 +296,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 {mobileTab === "content" ? (
                   <ContentTab sectionsWithLessons={sectionsWithLessons} currentLessonId={currentLesson.id} onNavigate={(id) => { setMobileDrawerOpen(false); navigateTo(id); }} completedIds={completedIds} />
                 ) : mobileTab === "qa" ? (
-                  <QATab lessonId={currentLesson.id} token={token} />
+                  <QATab lessonId={currentLesson.id} token={_serverToken} />
                 ) : (
                   <DiscussionSection courseId={enrollment.course_id} theme="dark" />
                 )}
@@ -354,7 +354,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 completedIds={completedIds}
               />
             ) : activeTab === "qa" ? (
-              <QATab lessonId={currentLesson.id} token={token} />
+              <QATab lessonId={currentLesson.id} token={_serverToken} />
             ) : (
               <DiscussionSection courseId={enrollment.course_id} theme="dark" />
             )}
@@ -365,7 +365,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       {showLiveRoom && liveSession && (
         <LiveRoom
           sessionId={liveSession.id}
-          token={token}
+          token={_serverToken}
           onClose={() => setShowLiveRoom(false)}
         />
       )}
