@@ -40,7 +40,7 @@ export function LiveRoom({ sessionId, token, onClose }: Props) {
         </button>
       </div>
 
-      <div className="flex flex-1 items-center justify-center">
+      <div className={`flex-1 min-h-0 ${roomToken ? "h-full w-full overflow-hidden" : "flex items-center justify-center"}`}>
         {loading && (
           <div className="flex flex-col items-center gap-3 text-white/50">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -104,7 +104,7 @@ function LiveKitRoom({ roomToken }: { roomToken: LiveSessionToken }) {
   const lkUrl = roomToken.url.startsWith("ws") ? roomToken.url : roomToken.url.replace("http://", "ws://").replace("https://", "wss://");
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full" data-lk-theme="default">
       <Room token={roomToken.token} serverUrl={lkUrl} connect>
         <VideoConference />
       </Room>
