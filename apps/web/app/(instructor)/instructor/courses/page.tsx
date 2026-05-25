@@ -132,10 +132,12 @@ function CreateCourseButton({
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleCreate() {
     if (!title.trim()) return;
     setSubmitting(true);
+    setError(null);
     const token = await getToken();
     try {
       const course = await apiFetch<Course>("/api/v1/courses", {
@@ -152,8 +154,8 @@ function CreateCourseButton({
       onCreated(course);
       setTitle("");
       setOpen(false);
-    } catch {
-      // error handled by toast in production
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setSubmitting(false);
     }
@@ -168,21 +170,24 @@ function CreateCourseButton({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <input
-        autoFocus
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-        placeholder="Course title"
-        className="h-9 rounded-[--radius-sm] border border-[--color-border] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
-      />
-      <Button onClick={handleCreate} disabled={submitting} size="sm">
-        {submitting ? "Creating…" : "Create"}
-      </Button>
-      <Button variant="outline" size="sm" onClick={() => { setOpen(false); setTitle(""); }}>
-        Cancel
-      </Button>
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          autoFocus
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+          placeholder="Course title"
+          className="h-9 rounded-[--radius-sm] border border-[--color-border] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+        />
+        <Button onClick={handleCreate} disabled={submitting} size="sm">
+          {submitting ? "Creating…" : "Create"}
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => { setOpen(false); setTitle(""); setError(null); }}>
+          Cancel
+        </Button>
+      </div>
+      {error && <p className="text-xs text-red-600">{error}</p>}
     </div>
   );
 }
