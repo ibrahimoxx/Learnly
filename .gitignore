@@ -87,3 +87,8 @@ apps/web/public/fallback-*.js
 .claude/plans/
 .claude/projects/
 *.claude.json
+
+# Generated reports
+*.report.html
+*.report.json
+lighthouse-*.html

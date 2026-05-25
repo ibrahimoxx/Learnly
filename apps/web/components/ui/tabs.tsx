@@ -26,6 +26,7 @@ function TabsTrigger({
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
+      suppressHydrationWarning
       className={cn(
         "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium text-[--color-text-secondary] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--color-primary] disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white data-[state=active]:text-[--color-text-primary] data-[state=active]:shadow-sm",
         className
@@ -41,6 +42,7 @@ function TabsContent({
 }: React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
+      suppressHydrationWarning
       className={cn("mt-2 focus-visible:outline-none", className)}
       {...props}
     />

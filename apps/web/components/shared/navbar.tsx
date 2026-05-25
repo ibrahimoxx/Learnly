@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
 import { Search, BookOpen, Menu, X } from "lucide-react";
@@ -21,9 +21,7 @@ export function Navbar() {
   const t = useTranslations("nav");
   const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  const signedIn = mounted && isSignedIn;
+  const signedIn = isSignedIn;
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();

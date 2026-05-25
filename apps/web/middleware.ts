@@ -10,6 +10,9 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks(.*)",
   "/offline",
   "/sw.js",
+  "/manifest.json",
+  "/icons(.*)",
+  "/swe-worker(.*)",
 ]);
 
 function getSubdomain(request: NextRequest): string | null {

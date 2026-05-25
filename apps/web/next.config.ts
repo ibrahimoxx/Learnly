@@ -16,6 +16,18 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: [
+      "@radix-ui/react-icons",
+      "lucide-react",
+      "date-fns",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-toast",
+    ],
+  },
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost", port: "9000" },
