@@ -61,6 +61,8 @@ async def get_current_user(
     result = await db.execute(select(User).where(User.clerk_id == clerk_id))
     user = result.scalar_one_or_none()
 
+    clerk_role: str = (payload.get("public_metadata") or {}).get("role") or "student"
+
     if not user:
         # Webhook may not have fired yet — auto-provision on first API call
         email: str = (
@@ -75,13 +77,18 @@ async def get_current_user(
             email=email,
             first_name=first_name,
             last_name=last_name,
-            role="student",
+            role=clerk_role,
             is_active=True,
         )
         db.add(user)
         await db.commit()
         await db.refresh(user)
-        log.info("user_auto_provisioned", clerk_id=clerk_id, email=email)
+        log.info("user_auto_provisioned", clerk_id=clerk_id, email=email, role=clerk_role)
+    elif clerk_role != "student" and user.role != clerk_role:
+        # Clerk is source of truth — sync role changes that arrived via JWT
+        user.role = clerk_role
+        await db.commit()
+        log.info("user_role_synced", clerk_id=clerk_id, role=clerk_role)
 
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account suspended")
