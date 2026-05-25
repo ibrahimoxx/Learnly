@@ -46,6 +46,9 @@ export default function DashboardPage() {
     load();
   }, [getToken]);
 
+  const [tabsMounted, setTabsMounted] = useState(false);
+  useEffect(() => { setTabsMounted(true); }, []);
+
   const active = enrollments.filter((e) => e.status === "active");
   const completed = enrollments.filter((e) => e.status === "completed");
 
@@ -125,7 +128,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <Tabs defaultValue="all" className="mt-6">
+      {tabsMounted && <Tabs defaultValue="all" className="mt-6">
         <TabsList>
           <TabsTrigger value="all">All ({enrollments.length})</TabsTrigger>
           <TabsTrigger value="active">In Progress ({active.length})</TabsTrigger>
@@ -157,7 +160,7 @@ export default function DashboardPage() {
             </TabsContent>
           </>
         )}
-      </Tabs>
+      </Tabs>}
 
       <div className="mt-10">
         <RecommendationsSection />
