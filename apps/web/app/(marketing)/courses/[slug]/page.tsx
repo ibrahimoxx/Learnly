@@ -14,6 +14,7 @@ import { ReviewSection } from "@/components/features/courses/review-section";
 import { WishlistButton } from "@/components/features/courses/wishlist-button";
 import AffiliateTracker from "@/components/shared/affiliate-tracker";
 import DiscussionSection from "@/components/features/courses/discussion-section";
+import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
 import { apiFetch } from "@/lib/api";
 import type { Course, Section, Lesson, Review } from "@/types";
 import { Suspense } from "react";

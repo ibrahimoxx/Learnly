@@ -1,61 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CourseCard } from "@/components/features/courses/course-card";
 import { apiFetch } from "@/lib/api";
 import type { Course } from "@/types";
 
-export function RecommendationsSection() {
-  const { getToken } = useAuth();
+export function RecommendationsSection({ currentCourseId }: { currentCourseId: string }) {
+  const { getToken, isSignedIn } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isSignedIn) return;
     async function load() {
+      const token = await getToken();
       try {
-        const token = await getToken();
-        const data = await apiFetch<Course[]>("/api/v1/recommendations?limit=6", {
+        const data = await apiFetch<Course[]>("/api/v1/recommendations?limit=4", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setCourses(data);
+        setCourses(data.filter((c) => c.id !== currentCourseId));
       } catch {
-        // silent — section simply stays hidden
-      } finally {
-        setLoading(false);
+        // silent — recommendations are non-critical
       }
     }
     load();
-  }, [getToken]);
+  }, [isSignedIn, getToken, currentCourseId]);
 
-  if (!loading && courses.length === 0) return null;
+  if (courses.length === 0) return null;
 
   return (
-    <section className="mt-8">
-      <h2 className="text-lg font-semibold text-[--color-text-primary] mb-4">
-        Recommended for you
-      </h2>
-
-      {loading ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="overflow-hidden rounded-[--radius-md] border border-[--color-border]">
-              <Skeleton className="aspect-video w-full rounded-none" />
-              <div className="space-y-2 p-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-3 w-2/3" />
-              </div>
+    <section>
+      <h2 className="text-lg font-bold text-[--color-text-primary]">You might also like</h2>
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {courses.map((course) => (
+          <Link
+            key={course.id}
+            href={`/courses/${course.slug}`}
+            className="flex gap-3 rounded-[--radius-md] border border-[--color-border] bg-white p-3 hover:border-[--color-primary] transition-colors"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[--color-text-primary] line-clamp-2">{course.title}</p>
+              <p className="mt-1 text-xs text-[--color-text-muted]">
+                {course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`}
+                {course.rating ? ` · ${Number(course.rating).toFixed(1)}★` : ""}
+              </p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {courses.map((course) => (
-            <CourseCard key={course.id} course={course} />
-          ))}
-        </div>
-      )}
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
