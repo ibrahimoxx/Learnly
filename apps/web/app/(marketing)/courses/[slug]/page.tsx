@@ -228,6 +228,10 @@ export default async function CourseDetailPage({ params }: Props) {
 
             <Separator className="my-8" />
 
+            <RecommendationsSection currentCourseId={course.id} />
+
+            <Separator className="my-8" />
+
             <section>
               <h2 className="text-lg font-bold text-[--color-text-primary]">Discussion</h2>
               <p className="mt-1 text-sm text-[--color-text-muted]">
