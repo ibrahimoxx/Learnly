@@ -365,7 +365,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       {showLiveRoom && liveSession && (
         <LiveRoom
           sessionId={liveSession.id}
-          token={_serverToken}
+          getToken={getAuthToken}
           onClose={() => setShowLiveRoom(false)}
         />
       )}

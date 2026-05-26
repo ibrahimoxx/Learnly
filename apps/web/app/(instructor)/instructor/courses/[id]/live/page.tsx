@@ -29,11 +29,9 @@ export default function InstructorLivePage() {
   const [newScheduledAt, setNewScheduledAt] = useState("");
   const [creating, setCreating] = useState(false);
   const [activeRoom, setActiveRoom] = useState<string | null>(null);
-  const [authToken, setAuthToken] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const token = await getToken();
-    setAuthToken(token);
     try {
       const data = await apiFetch<LiveSession[]>(
         `/api/v1/courses/${courseId}/live-sessions`,
@@ -215,10 +213,10 @@ export default function InstructorLivePage() {
         </div>
       )}
 
-      {activeRoom && authToken && (
+      {activeRoom && (
         <LiveRoom
           sessionId={activeRoom}
-          token={authToken}
+          getToken={async () => (await getToken()) ?? ""}
           onClose={() => setActiveRoom(null)}
         />
       )}

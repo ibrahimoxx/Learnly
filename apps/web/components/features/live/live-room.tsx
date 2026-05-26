@@ -7,23 +7,27 @@ import type { LiveSessionToken } from "@/types";
 
 interface Props {
   sessionId: string;
-  token: string;
+  getToken: () => Promise<string | null>;
   onClose: () => void;
 }
 
-export function LiveRoom({ sessionId, token, onClose }: Props) {
+export function LiveRoom({ sessionId, getToken, onClose }: Props) {
   const [roomToken, setRoomToken] = useState<LiveSessionToken | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    apiFetch<LiveSessionToken>(`/api/v1/live-sessions/${sessionId}/token`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    async function fetchToken() {
+      const token = await getToken();
+      return apiFetch<LiveSessionToken>(`/api/v1/live-sessions/${sessionId}/token`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+    fetchToken()
       .then(setRoomToken)
-      .catch(() => setError("Failed to get room token. You may not be enrolled in this course."))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : "Failed to get room token"))
       .finally(() => setLoading(false));
-  }, [sessionId, token]);
+  }, [sessionId, getToken]);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/95">

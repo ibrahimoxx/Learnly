@@ -92,3 +92,6 @@ apps/web/public/fallback-*.js
 *.report.html
 *.report.json
 lighthouse-*.html
+
+# Local service configs with secrets
+livekit.yaml

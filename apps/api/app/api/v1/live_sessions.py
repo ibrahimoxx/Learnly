@@ -1,3 +1,4 @@
+import secrets
 import uuid
 from datetime import datetime, timezone
 
@@ -166,7 +167,8 @@ async def get_session_token(
         user.role == "admin" or course.instructor_id == user.id
     )
 
-    token = _make_token(session.room_name, str(user.id), is_instructor)
+    identity = f"{user.id}-{secrets.token_hex(4)}"
+    token = _make_token(session.room_name, identity, is_instructor)
     ws_url = settings.livekit_url.replace("http://", "ws://").replace("https://", "wss://")
 
     return LiveSessionToken(
