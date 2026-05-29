@@ -16,7 +16,7 @@ import AffiliateTracker from "@/components/shared/affiliate-tracker";
 import DiscussionSection from "@/components/features/courses/discussion-section";
 import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
 import { apiFetch } from "@/lib/api";
-import type { Course, Section, Lesson, Review } from "@/types";
+import type { Course, Section, Lesson } from "@/types";
 import { Suspense } from "react";
 
 interface Props {
@@ -48,14 +48,6 @@ async function getLessons(sectionId: string) {
   }
 }
 
-async function getReviews(courseId: string) {
-  try {
-    return await apiFetch<Review[]>(`/api/v1/courses/${courseId}/reviews`);
-  } catch {
-    return [];
-  }
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const course = await getCourse(slug);
@@ -67,6 +59,7 @@ const levelLabels: Record<string, string> = {
   beginner: "Beginner",
   intermediate: "Intermediate",
   advanced: "Advanced",
+  expert: "Expert",
   all: "All Levels",
 };
 
@@ -75,6 +68,71 @@ function formatDuration(seconds: number) {
   const m = Math.floor((seconds % 3600) / 60);
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
+}
+
+// Async server component — fetches sections+lessons independently so hero renders first
+async function CourseCurriculumSection({ courseId, totalDuration }: {
+  courseId: string;
+  totalDuration: number;
+}) {
+  const t = await getTranslations("course");
+  const sections = await getSections(courseId);
+  const sectionsWithLessons = await Promise.all(
+    sections.map(async (section) => ({
+      ...section,
+      lessons: await getLessons(section.id),
+    }))
+  );
+  const totalLessons = sectionsWithLessons.reduce((acc, s) => acc + s.lessons.length, 0);
+
+  return (
+    <>
+      {/* Course includes — needs section count */}
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {[
+          { icon: PlayCircle, text: `${formatDuration(totalDuration)} ${t("onDemandVideo")}` },
+          { icon: FileText, text: `${sections.length} sections, ${totalLessons} lessons` },
+        ].map(({ icon: Icon, text }) => (
+          <div key={text} className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
+            <Icon className="h-4 w-4 text-[--color-text-muted]" />
+            {text}
+          </div>
+        ))}
+      </div>
+
+      <Separator className="my-8" />
+
+      <section>
+        <h2 className="text-lg font-bold text-[--color-text-primary]">{t("curriculum")}</h2>
+        <p className="mt-1 text-sm text-[--color-text-muted]">
+          {t("curriculumMeta", {
+            sections: sections.length,
+            lessons: totalLessons,
+            duration: formatDuration(totalDuration),
+          })}
+        </p>
+        {sectionsWithLessons.length > 0 ? (
+          <PreviewCurriculum
+            sectionsWithLessons={sectionsWithLessons}
+            lessonsLabel={t("lessons")}
+            previewLabel={t("preview")}
+          />
+        ) : (
+          <p className="mt-4 text-sm text-[--color-text-muted]">{t("noLessons")}</p>
+        )}
+      </section>
+    </>
+  );
+}
+
+function CurriculumSkeleton() {
+  return (
+    <div className="animate-pulse space-y-3 mt-3">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="h-12 rounded bg-[--color-surface]" />
+      ))}
+    </div>
+  );
 }
 
 export default async function CourseDetailPage({ params }: Props) {
@@ -86,19 +144,8 @@ export default async function CourseDetailPage({ params }: Props) {
 
   if (!course || course.status !== "published") notFound();
 
-  const [sections, initialReviews] = await Promise.all([
-    getSections(course.id),
-    getReviews(course.id),
-  ]);
-  const sectionsWithLessons = await Promise.all(
-    sections.map(async (section) => ({
-      ...section,
-      lessons: await getLessons(section.id),
-    }))
-  );
-
-  const totalLessons = sectionsWithLessons.reduce((acc, s) => acc + s.lessons.length, 0);
   const price = course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
+  const totalLessons = course.total_lessons ?? 0;
 
   const learnItems = [
     t("learnItem1"),
@@ -112,11 +159,11 @@ export default async function CourseDetailPage({ params }: Props) {
       <Suspense fallback={null}>
         <AffiliateTracker />
       </Suspense>
-      {/* Course hero — dark bg */}
+
+      {/* Course hero — renders immediately from single course fetch */}
       <div className="bg-[oklch(14%_0.03_295)] text-white">
         <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
           <div className="max-w-2xl">
-            {/* Breadcrumb */}
             <nav className="mb-4 flex items-center gap-2 text-xs text-white/50">
               <Link href="/courses" className="hover:text-white/80">{t("courses")}</Link>
               <span>/</span>
@@ -153,10 +200,12 @@ export default async function CourseDetailPage({ params }: Props) {
                 <Clock className="h-3 w-3" />
                 {formatDuration(course.total_duration_seconds)} total
               </span>
-              <span className="flex items-center gap-1">
-                <PlayCircle className="h-3 w-3" />
-                {totalLessons} {t("lessons").toLowerCase()}
-              </span>
+              {totalLessons > 0 && (
+                <span className="flex items-center gap-1">
+                  <PlayCircle className="h-3 w-3" />
+                  {totalLessons} {t("lessons").toLowerCase()}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -180,13 +229,11 @@ export default async function CourseDetailPage({ params }: Props) {
               </div>
             </section>
 
-            {/* Course includes */}
+            {/* Static includes (no section count needed) */}
             <section className="mt-8">
               <h2 className="text-lg font-bold text-[--color-text-primary]">{t("includes")}</h2>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {[
-                  { icon: PlayCircle, text: `${formatDuration(course.total_duration_seconds)} ${t("onDemandVideo")}` },
-                  { icon: FileText, text: `${sections.length} sections, ${totalLessons} lessons` },
                   { icon: BarChart, text: levelLabels[course.level] ?? course.level },
                   { icon: Award, text: t("certificateCompletion") },
                 ].map(({ icon: Icon, text }) => (
@@ -196,35 +243,18 @@ export default async function CourseDetailPage({ params }: Props) {
                   </div>
                 ))}
               </div>
-            </section>
-
-            <Separator className="my-8" />
-
-            {/* Curriculum */}
-            <section>
-              <h2 className="text-lg font-bold text-[--color-text-primary]">{t("curriculum")}</h2>
-              <p className="mt-1 text-sm text-[--color-text-muted]">
-                {t("curriculumMeta", {
-                  sections: sections.length,
-                  lessons: totalLessons,
-                  duration: formatDuration(course.total_duration_seconds),
-                })}
-              </p>
-
-              {sectionsWithLessons.length > 0 ? (
-                <PreviewCurriculum
-                  sectionsWithLessons={sectionsWithLessons}
-                  lessonsLabel={t("lessons")}
-                  previewLabel={t("preview")}
+              {/* Dynamic section/lesson counts stream in */}
+              <Suspense fallback={<CurriculumSkeleton />}>
+                <CourseCurriculumSection
+                  courseId={course.id}
+                  totalDuration={course.total_duration_seconds}
                 />
-              ) : (
-                <p className="mt-4 text-sm text-[--color-text-muted]">{t("noLessons")}</p>
-              )}
+              </Suspense>
             </section>
 
             <Separator className="my-8" />
 
-            <ReviewSection courseId={course.id} initialReviews={initialReviews} />
+            <ReviewSection courseId={course.id} initialReviews={[]} />
 
             <Separator className="my-8" />
 
@@ -248,7 +278,6 @@ export default async function CourseDetailPage({ params }: Props) {
           {/* Sticky sidebar */}
           <aside className="lg:w-80 shrink-0">
             <div className="sticky top-24 rounded-[--radius-md] border border-[--color-border] bg-white shadow-[0_4px_20px_rgba(0,0,0,.1)] overflow-hidden">
-              {/* Preview thumbnail */}
               <div className="relative aspect-video bg-[--color-surface]">
                 {course.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -285,7 +314,7 @@ export default async function CourseDetailPage({ params }: Props) {
                     { label: t("level"), value: levelLabels[course.level] ?? course.level },
                     { label: t("language"), value: course.language },
                     { label: t("duration"), value: formatDuration(course.total_duration_seconds) },
-                    { label: t("lessons"), value: totalLessons.toString() },
+                    ...(totalLessons > 0 ? [{ label: t("lessons"), value: totalLessons.toString() }] : []),
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between">
                       <span className="text-[--color-text-muted]">{label}</span>
