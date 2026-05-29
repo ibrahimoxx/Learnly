@@ -23,6 +23,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [postError, setPostError] = useState<string | null>(null);
 
   const dark = theme === "dark";
 
@@ -46,6 +47,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
     setSubmitting(true);
+    setPostError(null);
     const token = await getToken();
     try {
       const post = await apiFetch<DiscussionPost>(`/api/v1/courses/${courseId}/discussions`, {
@@ -57,8 +59,11 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
       setTitle("");
       setBody("");
       setShowForm(false);
-    } catch {
-      // silent — discussion post failure is non-critical
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to post";
+      setPostError(msg.includes("403") || msg.toLowerCase().includes("enrolled")
+        ? "You must be enrolled in this course to post."
+        : "Failed to post. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -134,10 +139,13 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
                   : "w-full rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
               }
             />
+            {postError && (
+              <p className="text-xs text-red-600">{postError}</p>
+            )}
             <div className="flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setShowForm(false)}
+                onClick={() => { setShowForm(false); setPostError(null); }}
                 className={`text-xs transition-colors ${
                   dark
                     ? "text-white/40 hover:text-white/70"
@@ -149,9 +157,9 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
               <button
                 type="submit"
                 disabled={submitting || !title.trim() || !body.trim()}
-                className="rounded bg-[--color-primary] px-3 py-1 text-xs font-semibold text-white disabled:opacity-40 hover:bg-[--color-primary-hover] transition-colors"
+                className="rounded bg-violet-600 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50 hover:bg-violet-700 transition-colors"
               >
-                Post
+                {submitting ? "Posting…" : "Post"}
               </button>
             </div>
           </form>
