@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/shared/navbar";
+import { InstructorSidebar } from "@/components/shared/instructor-sidebar";
 
 export default async function InstructorLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
@@ -12,7 +13,10 @@ export default async function InstructorLayout({ children }: { children: React.R
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-[--color-surface]">{children}</main>
+      <div className="flex min-h-screen bg-[--color-surface]">
+        <InstructorSidebar />
+        <main className="flex-1 min-w-0">{children}</main>
+      </div>
     </>
   );
 }
