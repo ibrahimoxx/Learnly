@@ -107,8 +107,7 @@ async def update_my_link(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No affiliate link yet — visit GET /affiliate/my-link first")
     if body.is_active is not None:
         link.is_active = body.is_active
-    if body.commission_pct is not None:
-        link.commission_pct = body.commission_pct
+    # commission_pct is admin-only — instructors cannot change their own rate
     await db.commit()
     await db.refresh(link)
     return await _build_stats(link, db)

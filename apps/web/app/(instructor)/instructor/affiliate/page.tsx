@@ -27,8 +27,6 @@ export default function AffiliatePageInstructor() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [toggling, setToggling] = useState(false);
-  const [editingPct, setEditingPct] = useState(false);
-  const [pctValue, setPctValue] = useState("");
 
   useEffect(() => {
     async function load() {
@@ -67,27 +65,6 @@ export default function AffiliatePageInstructor() {
       toast.success(updated.link.is_active ? "Link activated" : "Link deactivated");
     } catch {
       toast.error("Failed to update link");
-    } finally {
-      setToggling(false);
-    }
-  }
-
-  async function saveCommission() {
-    const pct = parseInt(pctValue, 10);
-    if (isNaN(pct) || pct < 1 || pct > 100) { toast.error("Enter a value between 1 and 100"); return; }
-    setToggling(true);
-    try {
-      const token = await getToken();
-      const updated = await apiFetch<AffiliateStats>("/api/v1/affiliate/my-link", {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ commission_pct: pct }),
-      });
-      setStats(updated);
-      setEditingPct(false);
-      toast.success("Commission updated");
-    } catch {
-      toast.error("Failed to update commission");
     } finally {
       setToggling(false);
     }
@@ -154,31 +131,10 @@ export default function AffiliatePageInstructor() {
           </button>
         </div>
 
-        {/* Commission rate editor */}
-        <div className="flex items-center gap-3 pt-1 border-t border-[--color-border]">
+        <div className="flex items-center gap-2 pt-1 border-t border-[--color-border]">
           <span className="text-xs text-[--color-text-muted]">Commission rate:</span>
-          {editingPct ? (
-            <div className="flex items-center gap-2">
-              <input
-                type="number" min={1} max={100}
-                value={pctValue}
-                onChange={(e) => setPctValue(e.target.value)}
-                className="w-16 rounded border border-[--color-border] px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-                autoFocus
-                onKeyDown={(e) => { if (e.key === "Enter") saveCommission(); if (e.key === "Escape") setEditingPct(false); }}
-              />
-              <span className="text-xs text-[--color-text-muted]">%</span>
-              <Button size="sm" className="h-7 bg-violet-600 hover:bg-violet-700 text-white" onClick={saveCommission} disabled={toggling}>Save</Button>
-              <Button size="sm" variant="ghost" className="h-7" onClick={() => setEditingPct(false)} disabled={toggling}>Cancel</Button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-[--color-text-primary]">{link.commission_pct}%</span>
-              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { setPctValue(String(link.commission_pct)); setEditingPct(true); }}>
-                Change
-              </Button>
-            </div>
-          )}
+          <span className="text-sm font-bold text-[--color-text-primary]">{link.commission_pct}%</span>
+          <span className="text-xs text-[--color-text-muted]">(set by platform admin)</span>
         </div>
 
         <p className="text-xs text-[--color-text-muted]">
