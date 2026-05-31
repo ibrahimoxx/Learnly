@@ -12,6 +12,9 @@ import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
+const navLinkClass = "px-3 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors";
+const mobileNavLinkClass = "py-2 text-sm font-medium text-neutral-600";
+
 export function Navbar() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
@@ -39,15 +42,15 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-[--color-text-primary]">
-          <BookOpen className="h-6 w-6 text-[--color-primary]" />
+        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-neutral-900">
+          <BookOpen className="h-6 w-6 text-violet-600" />
           <span className="text-lg">Learnly</span>
         </Link>
 
         {/* Search — desktop */}
         <form onSubmit={handleSearch} className="hidden flex-1 lg:flex max-w-lg">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[--color-text-muted]" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -59,24 +62,14 @@ export function Navbar() {
 
         {/* Nav links — desktop */}
         <nav className="hidden items-center gap-1 lg:flex ml-2">
-          <Link href="/courses" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
-            {t("explore")}
-          </Link>
-          <Link href="/paths" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
-            Paths
-          </Link>
+          <Link href="/courses" className={navLinkClass}>{t("explore")}</Link>
+          <Link href="/paths" className={navLinkClass}>Paths</Link>
           {signedIn && (
             <>
-              <Link href="/dashboard" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
-                {t("myLearning")}
-              </Link>
-              <Link href="/wishlist" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
-                {t("wishlist")}
-              </Link>
+              <Link href="/dashboard" className={navLinkClass}>{t("myLearning")}</Link>
+              <Link href="/wishlist" className={navLinkClass}>{t("wishlist")}</Link>
               {isInstructor && (
-                <Link href="/instructor/courses" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
-                  {t("teach")}
-                </Link>
+                <Link href="/instructor/courses" className={navLinkClass}>{t("teach")}</Link>
               )}
               {isAdmin && (
                 <Link href="/admin" className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
@@ -107,7 +100,7 @@ export function Navbar() {
 
         {/* Mobile menu toggle */}
         <button
-          className="ml-auto lg:hidden p-2 text-[--color-text-secondary]"
+          className="ml-auto lg:hidden p-2 text-neutral-600"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
@@ -117,10 +110,10 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-[--color-border] bg-white px-4 pb-4 lg:hidden">
+        <div className="border-t border-neutral-200 bg-white px-4 pb-4 lg:hidden">
           <form onSubmit={handleSearch} className="py-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[--color-text-muted]" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -130,29 +123,17 @@ export function Navbar() {
             </div>
           </form>
           <nav className="flex flex-col gap-1">
-            <Link href="/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-              {t("explore")}
-            </Link>
-            <Link href="/paths" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-              Paths
-            </Link>
+            <Link href="/courses" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("explore")}</Link>
+            <Link href="/paths" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>Paths</Link>
             {signedIn && (
               <>
-                <Link href="/dashboard" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-                  {t("myLearning")}
-                </Link>
-                <Link href="/wishlist" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-                  {t("wishlist")}
-                </Link>
+                <Link href="/dashboard" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("myLearning")}</Link>
+                <Link href="/wishlist" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("wishlist")}</Link>
                 {isInstructor && (
-                  <Link href="/instructor/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
-                    {t("teach")}
-                  </Link>
+                  <Link href="/instructor/courses" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("teach")}</Link>
                 )}
                 {isAdmin && (
-                  <Link href="/admin" className="py-2 text-sm font-medium text-red-600" onClick={() => setMobileOpen(false)}>
-                    Admin
-                  </Link>
+                  <Link href="/admin" className="py-2 text-sm font-medium text-red-600" onClick={() => setMobileOpen(false)}>Admin</Link>
                 )}
               </>
             )}
