@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Plus, Edit, BarChart2, BookOpen, Video, MessageSquare } from "lucide-react";
+import { Plus, Edit, BarChart2, BookOpen, Video, MessageSquare, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
