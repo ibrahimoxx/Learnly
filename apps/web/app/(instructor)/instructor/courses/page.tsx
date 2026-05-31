@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Plus, Edit, BarChart2, BookOpen, Tag } from "lucide-react";
+import { Plus, Edit, BarChart2, BookOpen, Video, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -101,10 +101,20 @@ export default function InstructorCoursesPage() {
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
                 <Link href={`/instructor/courses/${course.id}/edit`}>
                   <Button variant="outline" size="sm" className="gap-1">
                     <Edit className="h-3 w-3" /> Edit
+                  </Button>
+                </Link>
+                <Link href={`/instructor/courses/${course.id}/live`}>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Video className="h-3 w-3" /> Live
+                  </Button>
+                </Link>
+                <Link href={`/instructor/courses/${course.id}/discussions`}>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <MessageSquare className="h-3 w-3" /> Discuss
                   </Button>
                 </Link>
                 <Link href={`/courses/${course.slug}`}>

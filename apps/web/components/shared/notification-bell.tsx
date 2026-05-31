@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
+import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch } from "@/lib/api";
 
@@ -93,7 +94,7 @@ export function NotificationBell() {
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-72 overflow-y-auto">
             {notifications.length === 0 ? (
               <p className="px-4 py-6 text-center text-sm text-[--color-text-muted]">No notifications yet</p>
             ) : (
@@ -119,6 +120,15 @@ export function NotificationBell() {
                 </div>
               ))
             )}
+          </div>
+          <div className="border-t border-[--color-border] px-4 py-2">
+            <Link
+              href="/notifications"
+              onClick={() => setOpen(false)}
+              className="block text-center text-xs text-[--color-primary] hover:underline"
+            >
+              View all notifications
+            </Link>
           </div>
         </div>
       )}
