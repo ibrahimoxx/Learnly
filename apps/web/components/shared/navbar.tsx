@@ -52,7 +52,7 @@ export function Navbar() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
-              className="pl-9 rounded-full border-[--color-border]"
+              className="pl-9 rounded-full border-neutral-200"
             />
           </div>
         </form>
