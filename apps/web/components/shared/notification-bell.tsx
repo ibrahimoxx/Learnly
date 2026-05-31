@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bell } from "lucide-react";
-import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch } from "@/lib/api";
 
