@@ -2,12 +2,13 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
 from app.db.session import get_db
+from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.user import User
@@ -149,3 +150,86 @@ async def update_user_status(
     await db.commit()
     await db.refresh(user)
     return user
+
+
+# ── Affiliate management ───────────────────────────────────────────────────────
+
+class AdminAffiliateLinkRead(BaseModel):
+    instructor_id: uuid.UUID
+    instructor_email: str
+    instructor_name: str
+    code: str
+    commission_pct: int
+    click_count: int
+    is_active: bool
+    total_conversions: int
+
+
+class AdminCommissionUpdate(BaseModel):
+    commission_pct: int = Field(..., ge=1, le=100)
+
+
+@router.get("/affiliates", response_model=list[AdminAffiliateLinkRead])
+async def list_affiliate_links(
+    _: User = Depends(_require_admin),
+    db: AsyncSession = Depends(get_db),
+) -> list[AdminAffiliateLinkRead]:
+    result = await db.execute(
+        select(AffiliateLink, User)
+        .join(User, User.id == AffiliateLink.instructor_id)
+        .order_by(AffiliateLink.click_count.desc())
+    )
+    rows = result.all()
+    out = []
+    for link, instructor in rows:
+        count_result = await db.execute(
+            select(func.count(AffiliateConversion.id)).where(
+                AffiliateConversion.link_id == link.id
+            )
+        )
+        total_conversions = count_result.scalar_one()
+        out.append(AdminAffiliateLinkRead(
+            instructor_id=instructor.id,
+            instructor_email=instructor.email,
+            instructor_name=f"{instructor.first_name} {instructor.last_name}".strip() or instructor.email,
+            code=link.code,
+            commission_pct=link.commission_pct,
+            click_count=link.click_count,
+            is_active=link.is_active,
+            total_conversions=total_conversions,
+        ))
+    return out
+
+
+@router.patch("/affiliates/{instructor_id}/commission", response_model=AdminAffiliateLinkRead)
+async def update_affiliate_commission(
+    instructor_id: uuid.UUID,
+    body: AdminCommissionUpdate,
+    _: User = Depends(_require_admin),
+    db: AsyncSession = Depends(get_db),
+) -> AdminAffiliateLinkRead:
+    result = await db.execute(
+        select(AffiliateLink, User)
+        .join(User, User.id == AffiliateLink.instructor_id)
+        .where(AffiliateLink.instructor_id == instructor_id)
+    )
+    row = result.one_or_none()
+    if not row:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No affiliate link for this instructor")
+    link, instructor = row
+    link.commission_pct = body.commission_pct
+    await db.commit()
+    await db.refresh(link)
+    count_result = await db.execute(
+        select(func.count(AffiliateConversion.id)).where(AffiliateConversion.link_id == link.id)
+    )
+    return AdminAffiliateLinkRead(
+        instructor_id=instructor.id,
+        instructor_email=instructor.email,
+        instructor_name=f"{instructor.first_name} {instructor.last_name}".strip() or instructor.email,
+        code=link.code,
+        commission_pct=link.commission_pct,
+        click_count=link.click_count,
+        is_active=link.is_active,
+        total_conversions=count_result.scalar_one(),
+    )

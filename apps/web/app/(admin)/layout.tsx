@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, Users, LayoutDashboard, Tag } from "lucide-react";
+import { BookOpen, Users, LayoutDashboard, Tag, Link2 } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
