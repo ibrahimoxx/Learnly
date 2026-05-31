@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.learnly.app https://*.clerk.accounts.dev https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: http://localhost:9000 https://*.r2.cloudflarestorage.com https://*.cloudflare.com https://img.clerk.com",
+              "img-src 'self' data: blob: http://localhost:9000 https://*.r2.cloudflarestorage.com https://*.cloudflare.com https://img.clerk.com https://*.clerk.com https://*.clerk.dev https://lh3.googleusercontent.com https://www.gstatic.com https://ssl.gstatic.com",
               "connect-src 'self' http://localhost:8000 https://*.clerk.accounts.dev https://api.stripe.com https://clerk.learnly.app wss: ws:",
               "frame-src https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev",
               "worker-src 'self' blob:",
