@@ -181,8 +181,8 @@ export default function AdminAffiliatesPage() {
                         </Button>
                       </div>
                     ) : (
-                      <Button size="sm" variant="outline" className="h-7 gap-1" onClick={() => startEdit(link)}>
-                        <Pencil className="h-3 w-3" /> Edit
+                      <Button size="sm" variant="outline" className="h-7 gap-1 text-neutral-700" onClick={() => startEdit(link)}>
+                        <Pencil className="h-3 w-3" /> Edit %
                       </Button>
                     )}
                   </td>

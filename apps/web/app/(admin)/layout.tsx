@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, Users, LayoutDashboard, Tag, Link2 } from "lucide-react";
+import { BookOpen, Users, LayoutDashboard, Tag, Link2, ArrowLeft } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
@@ -17,6 +17,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span className="font-bold text-[--color-text-primary]">Admin Panel</span>
         </div>
         <nav className="p-3 space-y-1">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-50 hover:text-neutral-600 transition-colors mb-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to site
+          </Link>
           {[
             { href: "/admin", label: "Overview", icon: LayoutDashboard },
             { href: "/admin/courses", label: "Courses", icon: BookOpen },
