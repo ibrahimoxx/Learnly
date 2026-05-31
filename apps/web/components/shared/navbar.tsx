@@ -17,6 +17,7 @@ export function Navbar() {
   const { user } = useUser();
   const role = user?.publicMetadata?.role as string | undefined;
   const isInstructor = role === "instructor" || role === "admin";
+  const isAdmin = role === "admin";
   const router = useRouter();
   const t = useTranslations("nav");
   const [query, setQuery] = useState("");
@@ -58,32 +59,28 @@ export function Navbar() {
 
         {/* Nav links — desktop */}
         <nav className="hidden items-center gap-1 lg:flex ml-2">
-          <Link
-            href="/courses"
-            className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
-          >
+          <Link href="/courses" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
             {t("explore")}
+          </Link>
+          <Link href="/paths" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
+            Paths
           </Link>
           {signedIn && (
             <>
-              <Link
-                href="/dashboard"
-                className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
-              >
+              <Link href="/dashboard" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
                 {t("myLearning")}
               </Link>
-              <Link
-                href="/wishlist"
-                className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
-              >
+              <Link href="/wishlist" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
                 {t("wishlist")}
               </Link>
               {isInstructor && (
-                <Link
-                  href="/instructor/courses"
-                  className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
-                >
+                <Link href="/instructor/courses" className="px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors">
                   {t("teach")}
+                </Link>
+              )}
+              {isAdmin && (
+                <Link href="/admin" className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
+                  Admin
                 </Link>
               )}
             </>
@@ -136,6 +133,9 @@ export function Navbar() {
             <Link href="/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
               {t("explore")}
             </Link>
+            <Link href="/paths" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
+              Paths
+            </Link>
             {signedIn && (
               <>
                 <Link href="/dashboard" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
@@ -147,6 +147,11 @@ export function Navbar() {
                 {isInstructor && (
                   <Link href="/instructor/courses" className="py-2 text-sm font-medium text-[--color-text-secondary]" onClick={() => setMobileOpen(false)}>
                     {t("teach")}
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link href="/admin" className="py-2 text-sm font-medium text-red-600" onClick={() => setMobileOpen(false)}>
+                    Admin
                   </Link>
                 )}
               </>
