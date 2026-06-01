@@ -29,6 +29,19 @@ export function Navbar() {
   useEffect(() => { setMounted(true); }, []);
   const signedIn = mounted && isSignedIn;
 
+  if (!mounted) {
+    return (
+      <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
+          <div className="flex shrink-0 items-center gap-2 font-bold text-neutral-900">
+            <BookOpen className="h-6 w-6 text-violet-600" />
+            <span className="text-lg">Learnly</span>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (query.trim()) {
