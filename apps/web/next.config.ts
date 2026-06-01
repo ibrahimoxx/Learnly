@@ -16,6 +16,7 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  turbopack: {},
   experimental: {
     optimizePackageImports: [
       "@radix-ui/react-icons",
