@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePostHog } from "posthog-js/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { Tag, X } from "lucide-react";
@@ -35,6 +35,7 @@ function getAffiliateCookie(): string | undefined {
 export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   const { isSignedIn, getToken } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const posthog = usePostHog();
   const [loading, setLoading] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
@@ -44,7 +45,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
 
   if (!isSignedIn) {
     return (
-      <SignInButton mode="modal">
+      <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
         <Button className="mt-4 w-full text-sm font-semibold" size="lg">
           {isFree ? "Enroll for free" : "Buy now"}
         </Button>
