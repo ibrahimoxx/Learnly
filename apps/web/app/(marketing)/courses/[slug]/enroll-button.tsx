@@ -45,7 +45,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
 
   if (!isSignedIn) {
     return (
-      <SignInButton mode="modal" fallbackRedirectUrl={pathname}>
+      <SignInButton mode="modal" forceRedirectUrl={pathname}>
         <Button className="mt-4 w-full text-sm font-semibold" size="lg">
           {isFree ? "Enroll for free" : "Buy now"}
         </Button>
