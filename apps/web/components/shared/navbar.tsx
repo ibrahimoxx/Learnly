@@ -105,10 +105,10 @@ export function Navbar() {
             <UserButton fallbackRedirectUrl="/" />
           ) : (
             <>
-              <SignInButton mode="modal" fallbackRedirectUrl={returnTo}>
+              <SignInButton mode="modal" forceRedirectUrl={returnTo}>
                 <Button variant="outline" size="sm">{t("login")}</Button>
               </SignInButton>
-              <SignUpButton mode="modal" fallbackRedirectUrl={returnTo}>
+              <SignUpButton mode="modal" forceRedirectUrl={returnTo}>
                 <Button size="sm">{t("signup")}</Button>
               </SignUpButton>
             </>
@@ -162,10 +162,10 @@ export function Navbar() {
                 <UserButton fallbackRedirectUrl="/" />
               ) : (
                 <>
-                  <SignInButton mode="modal" fallbackRedirectUrl={returnTo}>
+                  <SignInButton mode="modal" forceRedirectUrl={returnTo}>
                     <Button variant="outline" size="sm">{t("login")}</Button>
                   </SignInButton>
-                  <SignUpButton mode="modal" fallbackRedirectUrl={returnTo}>
+                  <SignUpButton mode="modal" forceRedirectUrl={returnTo}>
                     <Button size="sm">{t("signup")}</Button>
                   </SignUpButton>
                 </>
