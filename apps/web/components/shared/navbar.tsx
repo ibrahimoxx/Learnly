@@ -42,6 +42,10 @@ export function Navbar() {
     );
   }
 
+  // After mount, preserve current page + query params (including ?ref=) so Clerk
+  // redirects back here after sign in / sign up instead of going to /dashboard.
+  const returnTo = window.location.pathname + window.location.search;
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (query.trim()) {
@@ -101,10 +105,10 @@ export function Navbar() {
             <UserButton fallbackRedirectUrl="/" />
           ) : (
             <>
-              <SignInButton mode="modal">
+              <SignInButton mode="modal" fallbackRedirectUrl={returnTo}>
                 <Button variant="outline" size="sm">{t("login")}</Button>
               </SignInButton>
-              <SignUpButton mode="modal">
+              <SignUpButton mode="modal" fallbackRedirectUrl={returnTo}>
                 <Button size="sm">{t("signup")}</Button>
               </SignUpButton>
             </>
@@ -158,10 +162,10 @@ export function Navbar() {
                 <UserButton fallbackRedirectUrl="/" />
               ) : (
                 <>
-                  <SignInButton mode="modal">
+                  <SignInButton mode="modal" fallbackRedirectUrl={returnTo}>
                     <Button variant="outline" size="sm">{t("login")}</Button>
                   </SignInButton>
-                  <SignUpButton mode="modal">
+                  <SignUpButton mode="modal" fallbackRedirectUrl={returnTo}>
                     <Button size="sm">{t("signup")}</Button>
                   </SignUpButton>
                 </>
