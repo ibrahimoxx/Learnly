@@ -102,7 +102,7 @@ export function Navbar() {
           <LanguageSwitcher />
           <NotificationBell />
           {signedIn ? (
-            <UserButton fallbackRedirectUrl="/" />
+            <UserButton />
           ) : (
             <>
               <SignInButton mode="modal" forceRedirectUrl={returnTo}>
@@ -159,7 +159,7 @@ export function Navbar() {
             <LanguageSwitcher />
             <div className={cn("flex gap-2", signedIn && "justify-start")}>
               {signedIn ? (
-                <UserButton fallbackRedirectUrl="/" />
+                <UserButton />
               ) : (
                 <>
                   <SignInButton mode="modal" forceRedirectUrl={returnTo}>

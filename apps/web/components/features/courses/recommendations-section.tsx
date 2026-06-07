@@ -6,7 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { apiFetch } from "@/lib/api";
 import type { Course } from "@/types";
 
-export function RecommendationsSection({ currentCourseId }: { currentCourseId: string }) {
+export function RecommendationsSection({ currentCourseId = "" }: { currentCourseId?: string }) {
   const { getToken, isSignedIn } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
 
