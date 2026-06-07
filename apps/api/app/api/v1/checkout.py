@@ -1,5 +1,7 @@
+import asyncio
 import uuid
 from datetime import datetime, timezone
+from urllib.parse import urlencode
 
 import stripe
 import structlog
@@ -19,12 +21,32 @@ from app.schemas.checkout import CheckoutSessionCreate, CheckoutSessionRead
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/checkout", tags=["checkout"])
+STRIPE_ERROR_TYPES = tuple(
+    error_type
+    for error_type in {
+        getattr(stripe, "StripeError", None),
+        getattr(getattr(stripe, "error", None), "StripeError", None),
+    }
+    if error_type is not None
+)
 
 
 def _apply_coupon_discount(price_cents: int, coupon: Coupon) -> int:
     if coupon.discount_type == "percent":
         return max(0, price_cents - int(price_cents * coupon.discount_value / 100))
     return max(0, price_cents - coupon.discount_value)
+
+
+async def _create_stripe_session(**params: object) -> stripe.checkout.Session:
+    create_async = getattr(stripe.checkout.Session, "create_async", None)
+    if create_async:
+        return await create_async(**params)
+    return await asyncio.to_thread(stripe.checkout.Session.create, **params)
+
+
+def _get_stripe_error_message(exc: BaseException) -> str:
+    message = getattr(exc, "user_message", None) or getattr(exc, "message", None) or str(exc)
+    return " ".join(str(message).split())
 
 
 @router.post("/sessions", response_model=CheckoutSessionRead)
@@ -75,23 +97,37 @@ async def create_checkout_session(
     if applied_coupon:
         metadata["coupon_id"] = str(applied_coupon.id)
 
-    idempotency_key = f"checkout-{user.id}-{course.id}"
-    session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        line_items=[{
-            "price_data": {
-                "currency": "usd",
-                "unit_amount": final_price,
-                "product_data": {"name": course.title},
-            },
-            "quantity": 1,
-        }],
-        mode="payment",
-        success_url=f"{settings.app_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=f"{settings.app_url}/checkout/cancel?course={course.slug}",
-        metadata=metadata,
-        idempotency_key=idempotency_key,
-    )
+    idempotency_key = f"checkout-{user.id}-{course.id}-{uuid.uuid4().hex}"
+    cancel_url = f"{settings.app_url}/checkout/cancel?{urlencode({'course': course.slug})}"
+    try:
+        session = await _create_stripe_session(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": final_price,
+                    "product_data": {"name": course.title},
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=f"{settings.app_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=cancel_url,
+            metadata=metadata,
+            idempotency_key=idempotency_key,
+        )
+    except STRIPE_ERROR_TYPES as exc:
+        message = _get_stripe_error_message(exc)
+        log.error(
+            "checkout_session_failed",
+            error=message,
+            user_id=str(user.id),
+            course_id=str(course.id),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Payment provider error: {message}",
+        ) from exc
 
     if applied_coupon:
         applied_coupon.uses_count += 1
