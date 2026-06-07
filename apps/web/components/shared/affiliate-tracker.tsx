@@ -16,7 +16,8 @@ export default function AffiliateTracker() {
     const secure = window.location.protocol === "https:" ? "; Secure" : "";
     document.cookie = `affiliate_ref=${sanitized}; path=/; max-age=2592000; SameSite=Lax${secure}`;
 
-    fetch(`/api/v1/affiliate/track/${sanitized}`, { method: "POST" }).catch(() => undefined);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    fetch(`${apiUrl}/api/v1/affiliate/track/${sanitized}`, { method: "POST" }).catch(() => undefined);
   }, [searchParams]);
 
   return null;
