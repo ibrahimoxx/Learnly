@@ -258,3 +258,106 @@ html {
 .animate-accordion-up {
   animation: accordion-up 200ms ease-out;
 }
+
+/* ============================================================
+   Phase 3.5 — Premium animation utilities
+   Compositor-friendly only (transform / opacity).
+   ============================================================ */
+
+@keyframes sf-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes sf-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes sf-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes sf-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.animate-fade-up {
+  animation: sf-fade-up var(--duration-slow) var(--ease-out) both;
+}
+
+.animate-fade-in {
+  animation: sf-fade-in var(--duration-normal) var(--ease-out) both;
+}
+
+.animate-scale-in {
+  animation: sf-scale-in var(--duration-normal) var(--ease-out) both;
+}
+
+/* Staggered entrance — apply to a parent; children cascade in */
+.stagger-children > * {
+  animation: sf-fade-up var(--duration-slow) var(--ease-out) both;
+}
+.stagger-children > :nth-child(1)  { animation-delay: 0ms; }
+.stagger-children > :nth-child(2)  { animation-delay: 60ms; }
+.stagger-children > :nth-child(3)  { animation-delay: 120ms; }
+.stagger-children > :nth-child(4)  { animation-delay: 180ms; }
+.stagger-children > :nth-child(5)  { animation-delay: 240ms; }
+.stagger-children > :nth-child(6)  { animation-delay: 300ms; }
+.stagger-children > :nth-child(7)  { animation-delay: 360ms; }
+.stagger-children > :nth-child(8)  { animation-delay: 420ms; }
+.stagger-children > :nth-child(n+9) { animation-delay: 480ms; }
+
+/* Hover lift — cards, tiles */
+.hover-lift {
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Premium skeleton shimmer (upgrade over animate-pulse) */
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 0%,
+    var(--color-surface-raised) 50%,
+    var(--color-surface) 100%
+  );
+  background-size: 200% 100%;
+  animation: sf-shimmer 1.6s linear infinite;
+}
+
+/* Brand gradient text — hero headlines */
+.text-gradient-brand {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Focus polish */
+:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-scale-in,
+  .stagger-children > *,
+  .skeleton-shimmer {
+    animation: none;
+  }
+  .hover-lift,
+  .hover-lift:hover {
+    transition: none;
+    transform: none;
+  }
+}
