@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
-const navLinkClass = "px-3 py-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors";
-const mobileNavLinkClass = "py-2 text-sm font-medium text-neutral-600";
+const navLinkClass = "rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
+const mobileNavLinkClass = "py-2 text-sm font-medium text-[--color-text-secondary]";
 
 export function Navbar() {
   const { isSignedIn } = useAuth();
@@ -31,10 +31,10 @@ export function Navbar() {
 
   if (!mounted) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 w-full border-b border-[--color-border] bg-[--color-background]/90 backdrop-blur-md shadow-[var(--shadow-xs)]">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-          <div className="flex shrink-0 items-center gap-2 font-bold text-neutral-900">
-            <BookOpen className="h-6 w-6 text-violet-600" />
+          <div className="flex shrink-0 items-center gap-2 font-bold text-[--color-text-primary]">
+            <BookOpen className="h-6 w-6 text-[--color-primary]" />
             <span className="text-lg">Learnly</span>
           </div>
         </div>
@@ -56,23 +56,23 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-200 bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-[--color-border] bg-[--color-background]/90 backdrop-blur-md shadow-[var(--shadow-xs)]">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-neutral-900">
-          <BookOpen className="h-6 w-6 text-violet-600" />
+        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-[--color-text-primary]">
+          <BookOpen className="h-6 w-6 text-[--color-primary]" />
           <span className="text-lg">Learnly</span>
         </Link>
 
         {/* Search — desktop */}
         <form onSubmit={handleSearch} className="hidden flex-1 lg:flex max-w-lg">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[--color-text-muted]" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
-              className="pl-9 rounded-full border-neutral-200"
+              className="pl-9 rounded-full border-[--color-border] bg-[--color-surface] focus-visible:bg-[--color-background] transition-colors"
             />
           </div>
         </form>
@@ -89,7 +89,7 @@ export function Navbar() {
                 <Link href="/instructor/courses" className={navLinkClass}>{t("teach")}</Link>
               )}
               {isAdmin && (
-                <Link href="/admin" className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
+                <Link href="/admin" className="px-3 py-2 text-sm font-medium text-[--color-error] hover:opacity-80 transition-colors">
                   Admin
                 </Link>
               )}
@@ -117,7 +117,7 @@ export function Navbar() {
 
         {/* Mobile menu toggle */}
         <button
-          className="ml-auto lg:hidden p-2 text-neutral-600"
+          className="ml-auto lg:hidden p-2 text-[--color-text-secondary]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
@@ -127,10 +127,10 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-neutral-200 bg-white px-4 pb-4 lg:hidden">
+        <div className="border-t border-[--color-border] bg-[--color-background] px-4 pb-4 lg:hidden">
           <form onSubmit={handleSearch} className="py-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[--color-text-muted]" />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -150,7 +150,7 @@ export function Navbar() {
                   <Link href="/instructor/courses" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("teach")}</Link>
                 )}
                 {isAdmin && (
-                  <Link href="/admin" className="py-2 text-sm font-medium text-red-600" onClick={() => setMobileOpen(false)}>Admin</Link>
+                  <Link href="/admin" className="py-2 text-sm font-medium text-[--color-error]" onClick={() => setMobileOpen(false)}>Admin</Link>
                 )}
               </>
             )}

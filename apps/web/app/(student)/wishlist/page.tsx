@@ -60,7 +60,7 @@ export default function WishlistPage() {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="mt-10 flex flex-col items-center gap-3 rounded-[--radius-lg] border border-dashed border-[--color-border] py-16 text-center">
+        <div className="mt-10 flex flex-col items-center gap-3 rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
           <Heart className="h-12 w-12 text-[--color-border]" />
           <p className="font-semibold text-[--color-text-secondary]">Your wishlist is empty</p>
           <p className="text-sm text-[--color-text-muted]">Save courses you want to take later.</p>
@@ -76,7 +76,7 @@ export default function WishlistPage() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-white p-4 hover:shadow-sm transition-shadow"
+              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 hover-lift shadow-[var(--shadow-xs)]"
             >
               {/* Thumbnail */}
               <div className="h-20 w-32 shrink-0 rounded overflow-hidden bg-[--color-surface] flex items-center justify-center">

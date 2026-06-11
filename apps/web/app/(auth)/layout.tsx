@@ -4,7 +4,7 @@ import { BookOpen } from "lucide-react";
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b border-[--color-border] bg-white">
+      <header className="border-b border-[--color-border] bg-[--color-surface-raised]">
         <div className="mx-auto flex h-16 max-w-7xl items-center px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-[--color-text-primary]">
             <BookOpen className="h-5 w-5 text-[--color-primary]" />

@@ -19,8 +19,8 @@ export function InstructorSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-56 shrink-0 border-r border-neutral-200 bg-white min-h-screen pt-6 pb-10 hidden lg:block">
-      <p className="px-5 mb-3 text-[10px] font-semibold uppercase tracking-widest text-neutral-400">
+    <aside className="w-56 shrink-0 border-r border-[--color-border] bg-[--color-surface-raised] min-h-screen pt-6 pb-10 hidden lg:block">
+      <p className="px-5 mb-3 text-[10px] font-semibold uppercase tracking-widest text-[--color-text-muted]">
         Instructor
       </p>
       <nav className="flex flex-col gap-0.5 px-3">
@@ -31,13 +31,13 @@ export function InstructorSidebar() {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-violet-50 text-violet-700"
-                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                  ? "bg-[--color-primary-subtle] text-[--brand-800] shadow-[var(--shadow-xs)]"
+                  : "text-[--color-text-secondary] hover:bg-[--color-surface] hover:text-[--color-text-primary]"
               )}
             >
-              <Icon className={cn("h-4 w-4 shrink-0", active ? "text-violet-600" : "text-neutral-400")} />
+              <Icon className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-[--color-primary]" : "text-[--color-text-muted]")} />
               {label}
             </Link>
           );

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 export default function CheckoutSuccessPage() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-      <CheckCircle className="h-16 w-16 text-[--color-success]" />
+      <span className="flex h-20 w-20 items-center justify-center rounded-full bg-[--color-primary-subtle] animate-scale-in"><CheckCircle className="h-10 w-10 text-[--color-success]" /></span>
       <h1 className="mt-4 text-2xl font-bold text-[--color-text-primary]">Payment successful!</h1>
       <p className="mt-2 text-[--color-text-muted]">
         You&apos;re now enrolled. Head to your dashboard to start learning.

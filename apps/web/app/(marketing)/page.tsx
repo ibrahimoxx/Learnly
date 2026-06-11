@@ -47,9 +47,9 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-linear-to-br from-[oklch(20%_0.05_295)] via-[oklch(28%_0.12_295)] to-[oklch(22%_0.08_295)] px-4 py-20 text-white sm:px-6 sm:py-28">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+      <section className="relative overflow-hidden bg-[image:var(--gradient-hero)] px-4 py-20 text-white sm:px-6 sm:py-28">
+        <div className="mx-auto max-w-3xl text-center stagger-children">
+          <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
             {t("heroTitle")}
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
@@ -80,16 +80,16 @@ export default async function HomePage() {
 
         {/* Decorative blobs */}
         <div className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-[--color-primary]/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-purple-400/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-[oklch(55%_0.24_320)]/15 blur-3xl" />
       </section>
 
       {/* Stats */}
-      <section className="border-b border-[--color-border] bg-white">
+      <section className="border-b border-[--color-border] bg-[--color-surface-raised]">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {STATS.map(({ icon: Icon, value, label }) => (
               <div key={label} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-[--radius-md] bg-[--color-primary]/10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-[--radius-md] bg-[--color-primary-subtle]">
                   <Icon className="h-5 w-5 text-[--color-primary]" />
                 </div>
                 <div>
@@ -110,7 +110,7 @@ export default async function HomePage() {
             <Link
               key={cat.href}
               href={cat.href}
-              className="group flex flex-col items-center gap-2 rounded-[--radius-md] border border-[--color-border] bg-white p-4 text-center transition-all hover:border-[--color-primary]/40 hover:shadow-md"
+              className="group flex flex-col items-center gap-2 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 text-center hover-lift hover:border-[--color-primary]/40"
             >
               <span className="text-2xl">{cat.icon}</span>
               <span className="text-xs font-medium text-[--color-text-secondary] group-hover:text-[--color-primary] transition-colors leading-tight">
@@ -135,14 +135,16 @@ export default async function HomePage() {
           </div>
 
           {featured.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
               {featured.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
           ) : (
-            <div className="mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] bg-white py-16 text-center">
-              <PlayCircle className="h-12 w-12 text-[--color-border]" />
+            <div className="mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 text-center shadow-[var(--shadow-xs)]">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[--color-primary-subtle]">
+                <PlayCircle className="h-7 w-7 text-[--color-primary]" />
+              </span>
               <h3 className="mt-4 text-base font-semibold text-[--color-text-secondary]">{t("noCoursesTitle")}</h3>
               <p className="mt-1 text-sm text-[--color-text-muted]">{t("noCoursesDesc")}</p>
             </div>
@@ -152,7 +154,7 @@ export default async function HomePage() {
 
       {/* Become instructor CTA */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <div className="rounded-[--radius-lg] bg-gradient-to-r from-[--color-primary] to-[oklch(42%_0.24_295)] p-10 text-white">
+        <div className="rounded-[--radius-lg] bg-gradient-to-r from-[--color-primary] to-[oklch(48%_0.25_320)] p-10 shadow-[var(--shadow-brand)] text-white">
           <div className="max-w-xl">
             <h2 className="text-2xl font-bold sm:text-3xl">{t("becomeInstructor")}</h2>
             <p className="mt-3 text-white/80">{t("becomeInstructorDesc")}</p>

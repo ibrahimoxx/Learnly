@@ -157,7 +157,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
               <button
                 type="submit"
                 disabled={submitting || !title.trim() || !body.trim()}
-                className="rounded bg-violet-600 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50 hover:bg-violet-700 transition-colors"
+                className="rounded bg-[--color-primary] px-3 py-1 text-xs font-semibold text-white disabled:opacity-50 hover:bg-[--color-primary-hover] transition-colors"
               >
                 {submitting ? "Posting…" : "Post"}
               </button>

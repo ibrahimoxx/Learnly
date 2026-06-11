@@ -80,7 +80,7 @@ export default function DashboardPage() {
           {stats.badges.length > 0 && (
             <div className="flex items-center gap-1">
               {stats.badges.slice(0, 4).map((ub) => (
-                <span key={ub.badge.id} title={ub.badge.name} className="flex h-7 w-7 items-center justify-center rounded-full border border-[--color-border] bg-white text-sm">
+                <span key={ub.badge.id} title={ub.badge.name} className="flex h-7 w-7 items-center justify-center rounded-full border border-[--color-border] bg-[--color-surface-raised] text-sm shadow-[var(--shadow-xs)]">
                   {ub.badge.icon}
                 </span>
               ))}
@@ -110,9 +110,9 @@ export default function DashboardPage() {
                 <Link
                   key={path.id}
                   href={`/paths/${path.slug}`}
-                  className="flex items-start gap-3 rounded-[--radius-md] border border-[--color-border] bg-white p-4 hover:border-[--color-primary] transition-colors"
+                  className="flex items-start gap-3 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 hover-lift hover:border-[--color-primary]/50 shadow-[var(--shadow-xs)]"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary]/10">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary-subtle]">
                     <GraduationCap className="h-5 w-5 text-[--color-primary]" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -136,7 +136,7 @@ export default function DashboardPage() {
         </TabsList>
 
         {loading ? (
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
             {Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="rounded-[--radius-md] border border-[--color-border] overflow-hidden">
                 <Skeleton className="aspect-video w-full rounded-none" />
@@ -172,8 +172,8 @@ export default function DashboardPage() {
 function EnrollmentGrid({ enrollments }: { enrollments: Enrollment[] }) {
   if (enrollments.length === 0) {
     return (
-      <div className="mt-8 flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] bg-white py-16 text-center">
-        <BookOpen className="h-12 w-12 text-[--color-border]" />
+      <div className="mt-8 flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[--color-primary-subtle]"><BookOpen className="h-7 w-7 text-[--color-primary]" /></span>
         <p className="mt-3 font-semibold text-[--color-text-secondary]">No courses here yet</p>
         <p className="mt-1 text-sm text-[--color-text-muted]">Browse the catalog to find something you love.</p>
         <Link
@@ -187,7 +187,7 @@ function EnrollmentGrid({ enrollments }: { enrollments: Enrollment[] }) {
   }
 
   return (
-    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
       {enrollments.map((enrollment) => (
         <EnrollmentCard key={enrollment.id} enrollment={enrollment} />
       ))}
@@ -216,7 +216,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-white">
+    <div className="hover-lift overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]">
       {/* Placeholder thumbnail */}
       <div className="relative aspect-video bg-linear-to-br from-[--color-primary]/10 to-[--color-primary]/5 flex items-center justify-center">
         {isCompleted ? (

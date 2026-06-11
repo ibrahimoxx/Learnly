@@ -145,7 +145,7 @@ export default function AdminAffiliatesPage() {
                           max={100}
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="w-16 rounded border border-[--color-border] px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                          className="w-16 rounded border border-[--color-border] px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-[--brand-400]"
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") saveCommission(link.instructor_id);
@@ -170,7 +170,7 @@ export default function AdminAffiliatesPage() {
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           size="sm"
-                          className="h-7 gap-1 bg-violet-600 hover:bg-violet-700 text-white"
+                          className="h-7 gap-1 bg-[--color-primary] hover:bg-[--color-primary-hover] text-white"
                           onClick={() => saveCommission(link.instructor_id)}
                           disabled={saving}
                         >
@@ -181,7 +181,7 @@ export default function AdminAffiliatesPage() {
                         </Button>
                       </div>
                     ) : (
-                      <Button size="sm" variant="outline" className="h-7 gap-1 text-neutral-700" onClick={() => startEdit(link)}>
+                      <Button size="sm" variant="outline" className="h-7 gap-1 text-[--color-text-secondary]" onClick={() => startEdit(link)}>
                         <Pencil className="h-3 w-3" /> Edit %
                       </Button>
                     )}

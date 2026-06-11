@@ -65,7 +65,7 @@ export default async function PathDetailPage({ params }: Props) {
       </h2>
 
       {path.courses.length === 0 ? (
-        <div className="rounded-[--radius-lg] border border-dashed border-[--color-border] py-16 text-center">
+        <div className="rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
           <p className="text-sm text-[--color-text-muted]">No courses added yet.</p>
         </div>
       ) : (

@@ -27,13 +27,15 @@ export default async function PathsPage() {
       </div>
 
       {paths.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] py-20 text-center">
-          <GraduationCap className="h-12 w-12 text-[--color-border]" />
+        <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-20 text-center shadow-[var(--shadow-xs)]">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[--color-primary-subtle]">
+            <GraduationCap className="h-7 w-7 text-[--color-primary]" />
+          </span>
           <p className="mt-3 font-semibold text-[--color-text-secondary]">No learning paths yet</p>
           <p className="mt-1 text-sm text-[--color-text-muted]">Check back soon — instructors are building paths.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
           {paths.map((path) => (
             <PathCard key={path.id} path={path} />
           ))}
@@ -47,7 +49,7 @@ function PathCard({ path }: { path: LearningPath }) {
   return (
     <Link
       href={`/paths/${path.slug}`}
-      className="group block overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-white transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,.12)]"
+      className="group hover-lift block overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]"
     >
       {path.image_url ? (
         <div className="relative aspect-video overflow-hidden bg-[--color-surface]">

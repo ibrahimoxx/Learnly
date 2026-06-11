@@ -89,13 +89,13 @@ export default async function CoursesPage({ searchParams }: Props) {
         {/* Course grid */}
         <div className="flex-1">
           {items.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 stagger-children">
               {items.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] py-20 text-center">
+            <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-20 text-center shadow-[var(--shadow-xs)]">
               <p className="text-base font-semibold text-[--color-text-secondary]">No courses found</p>
               <p className="mt-1 text-sm text-[--color-text-muted]">
                 {params.q ? `Try a different search term.` : "Check back soon — new courses are added regularly."}

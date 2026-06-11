@@ -65,7 +65,7 @@ export default function NotificationsPage() {
           {notifications.map((n) => (
             <div
               key={n.id}
-              className={`rounded-[--radius-md] border border-[--color-border] p-4 ${!n.is_read ? "bg-blue-50/40" : "bg-white"}`}
+              className={`rounded-[--radius-md] border border-[--color-border] p-4 ${!n.is_read ? "bg-[--color-primary-subtle]/40 border-l-2 border-l-[--color-primary]" : "bg-[--color-surface-raised]"}`}
             >
               {n.link ? (
                 <Link href={n.link} className="block hover:opacity-80 transition-opacity">

@@ -58,22 +58,22 @@ export default async function AchievementsPage() {
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-4 text-center">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 text-center shadow-[var(--shadow-xs)] hover-lift">
           <Zap className="mx-auto h-6 w-6 text-[--color-primary] mb-1" />
           <p className="text-2xl font-bold text-[--color-text-primary]">{stats?.level ?? 1}</p>
           <p className="text-xs text-[--color-text-muted]">Level</p>
         </div>
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-4 text-center">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 text-center shadow-[var(--shadow-xs)] hover-lift">
           <Trophy className="mx-auto h-6 w-6 text-[--color-star] mb-1" />
           <p className="text-2xl font-bold text-[--color-text-primary]">{stats?.xp_total ?? 0}</p>
           <p className="text-xs text-[--color-text-muted]">Total XP</p>
         </div>
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-4 text-center">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 text-center shadow-[var(--shadow-xs)] hover-lift">
           <Flame className="mx-auto h-6 w-6 text-orange-500 mb-1" />
           <p className="text-2xl font-bold text-[--color-text-primary]">{stats?.current_streak ?? 0}</p>
           <p className="text-xs text-[--color-text-muted]">Day streak</p>
         </div>
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-4 text-center">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 text-center shadow-[var(--shadow-xs)] hover-lift">
           <Calendar className="mx-auto h-6 w-6 text-teal-500 mb-1" />
           <p className="text-2xl font-bold text-[--color-text-primary]">{stats?.longest_streak ?? 0}</p>
           <p className="text-xs text-[--color-text-muted]">Best streak</p>
@@ -81,7 +81,7 @@ export default async function AchievementsPage() {
       </div>
 
       {/* XP progress bar */}
-      <div className="mt-6 rounded-[--radius-md] border border-[--color-border] bg-white p-4">
+      <div className="mt-6 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]">
         <div className="flex justify-between text-sm mb-2">
           <span className="font-semibold text-[--color-text-primary]">Level {stats?.level ?? 1}</span>
           <span className="text-[--color-text-muted]">{xpInLevel} / 100 XP to next level</span>

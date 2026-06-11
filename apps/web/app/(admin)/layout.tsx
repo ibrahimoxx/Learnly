@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <nav className="p-3 space-y-1">
           <Link
             href="/"
-            className="flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-50 hover:text-neutral-600 transition-colors mb-2"
+            className="flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-[--color-text-muted] hover:bg-[--color-surface] hover:text-[--color-text-secondary] transition-colors mb-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to site

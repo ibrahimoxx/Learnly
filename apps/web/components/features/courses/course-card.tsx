@@ -22,9 +22,9 @@ export function CourseCard({ course }: CourseCardProps) {
 
   return (
     <Link href={`/courses/${course.slug}`} className="group block">
-      <div className="overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-white transition-shadow hover:shadow-[0_4px_16px_rgba(0,0,0,.12)]">
+      <div className="hover-lift overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]">
         {/* Thumbnail */}
-        <div className="relative aspect-video w-full overflow-hidden bg-[--color-surface]">
+        <div className="relative aspect-video w-full overflow-hidden bg-[image:var(--gradient-hero)]">
           {course.image_url ? (
             <Image
               src={course.image_url}
@@ -34,7 +34,7 @@ export function CourseCard({ course }: CourseCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="text-3xl font-bold text-[--color-border]">
+              <span className="text-3xl font-extrabold tracking-tight text-white/25">
                 {course.title.slice(0, 2).toUpperCase()}
               </span>
             </div>
@@ -62,7 +62,7 @@ export function CourseCard({ course }: CourseCardProps) {
               <Users className="h-3 w-3" />
               <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
             </div>
-            <span className="text-sm font-bold text-[--color-text-primary]">{price}</span>
+            <span className="text-sm font-extrabold text-[--color-primary]">{price}</span>
           </div>
         </div>
       </div>
