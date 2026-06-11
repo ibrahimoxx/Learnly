@@ -133,11 +133,8 @@
   }
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* NOTE: Tailwind preflight (@layer base) owns box-sizing/margin/padding resets.
+   An unlayered `*` reset here would override layered utilities (mx-auto, px-*) — never re-add. */
 
 html {
   font-family: var(--font-sans);
