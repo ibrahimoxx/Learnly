@@ -46,7 +46,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   if (!isSignedIn) {
     return (
       <SignInButton mode="modal" forceRedirectUrl={pathname}>
-        <Button className="mt-4 w-full text-sm font-semibold" size="lg">
+        <Button className="mt-4 w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]" size="lg">
           {isFree ? "Enroll for free" : "Buy now"}
         </Button>
       </SignInButton>
@@ -127,7 +127,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
 
   return (
     <div className="mt-4 space-y-2">
-      <Button className="w-full text-sm font-semibold" size="lg" onClick={handleEnroll} disabled={loading}>
+      <Button className="w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]" size="lg" onClick={handleEnroll} disabled={loading}>
         {loading
           ? "Processing…"
           : isFree
@@ -169,7 +169,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
                 </button>
               </div>
               {couponResult?.valid && (
-                <p className="text-xs text-green-600 font-medium">
+                <p className="text-xs text-[--color-success] font-medium">
                   ✓ {couponResult.message} — ${(couponResult.discounted_price_cents / 100).toFixed(2)} (was ${(priceInCents / 100).toFixed(2)})
                 </p>
               )}

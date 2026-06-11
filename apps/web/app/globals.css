@@ -27,7 +27,7 @@
   --color-primary: var(--brand-600);
   --color-primary-dark: var(--brand-800);
   --color-primary-hover: var(--brand-700);
-  --color-primary-subtle: var(--brand-50);
+  --color-primary-subtle: var(--brand-100);
 
   /* Hero / deep surfaces (course hero, player chrome) */
   --color-hero: oklch(16% 0.045 295);

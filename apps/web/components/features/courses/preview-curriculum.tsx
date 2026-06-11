@@ -41,10 +41,10 @@ export function PreviewCurriculum({ sectionsWithLessons, lessonsLabel, previewLa
 
   return (
     <>
-      <Accordion type="multiple" className="mt-4">
+      <Accordion type="multiple" className="mt-4 overflow-hidden rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-sm)]">
         {sectionsWithLessons.map((section) => (
-          <AccordionItem key={section.id} value={section.id}>
-            <AccordionTrigger className="font-semibold text-[--color-text-primary]">
+          <AccordionItem key={section.id} value={section.id} className="border-[--color-border] px-4 last:border-b-0 data-[state=open]:bg-[--color-surface]/60">
+            <AccordionTrigger className="font-semibold text-[--color-text-primary] hover:text-[--color-primary] hover:no-underline transition-colors">
               <span className="flex-1 text-left">{section.title}</span>
               <span className="mr-4 text-xs font-normal text-[--color-text-muted]">
                 {section.lessons.length} {lessonsLabel.toLowerCase()}
@@ -55,7 +55,7 @@ export function PreviewCurriculum({ sectionsWithLessons, lessonsLabel, previewLa
                 {section.lessons.map((lesson) => {
                   const isLocked = !!(lesson.unlock_at && new Date() < new Date(lesson.unlock_at));
                   return (
-                  <li key={lesson.id} className="flex items-center gap-3 py-2.5">
+                  <li key={lesson.id} className="group flex items-center gap-3 py-2.5 transition-colors hover:bg-[--color-primary-subtle]/50 rounded-[--radius-sm] px-2 -mx-2">
                     <LessonIcon type={lesson.type} locked={isLocked} />
                     <span className="flex flex-col flex-1 min-w-0">
                       <span className="text-sm text-[--color-text-secondary]">{lesson.title}</span>

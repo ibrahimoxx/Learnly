@@ -163,7 +163,7 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
           <button
             type="submit"
             disabled={submitting || rating === 0}
-            style={{ marginTop: "12px", padding: "8px 20px", background: "#a435f0", color: "#fff", borderRadius: "4px", fontWeight: 600, fontSize: "14px", cursor: "pointer", opacity: rating === 0 ? 0.5 : 1 }}
+            className="mt-3 rounded-[--radius-sm] bg-[--color-primary] px-5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-sm)] transition-colors hover:bg-[--color-primary-hover] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {submitting ? "Submitting…" : "Submit Review"}
           </button>
@@ -174,9 +174,11 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
 
       {/* Reviews list */}
       {reviews.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center gap-2 rounded-[--radius-lg] border border-dashed border-[--color-border] py-10 text-center">
-          <MessageSquare className="h-8 w-8 text-[--color-border]" />
-          <p className="text-sm text-[--color-text-muted]">No reviews yet. Be the first!</p>
+        <div className="mt-6 flex flex-col items-center gap-3 rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface] py-12 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[--color-primary-subtle]">
+            <MessageSquare className="h-6 w-6 text-[--color-primary]" />
+          </span>
+          <p className="text-sm font-medium text-[--color-text-secondary]">No reviews yet. Be the first!</p>
         </div>
       ) : (
         <div className="mt-6 divide-y divide-[--color-border]">
