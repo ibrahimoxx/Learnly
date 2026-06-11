@@ -5,81 +5,131 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Brand */
-  --color-primary: oklch(52% 0.26 295);
-  --color-primary-dark: oklch(42% 0.24 295);
-  --color-primary-hover: oklch(47% 0.25 295);
+  /* ============================================================
+     Skillforge Premium Token Layer — Phase 3.5 (design-only)
+     Single source of truth. shadcn vars below REMAP to these.
+     ============================================================ */
+
+  /* Brand — violet ramp (50 → 950) */
+  --brand-50:  oklch(97.5% 0.02 295);
+  --brand-100: oklch(94.5% 0.045 295);
+  --brand-200: oklch(89% 0.09 295);
+  --brand-300: oklch(81% 0.14 295);
+  --brand-400: oklch(68% 0.21 295);
+  --brand-500: oklch(58% 0.25 295);
+  --brand-600: oklch(52% 0.26 295);
+  --brand-700: oklch(45% 0.24 295);
+  --brand-800: oklch(38% 0.20 295);
+  --brand-900: oklch(30% 0.15 295);
+  --brand-950: oklch(21% 0.09 295);
+
+  /* Brand aliases (legacy names — keep, pages use them) */
+  --color-primary: var(--brand-600);
+  --color-primary-dark: var(--brand-800);
+  --color-primary-hover: var(--brand-700);
+  --color-primary-subtle: var(--brand-50);
+
+  /* Hero / deep surfaces (course hero, player chrome) */
+  --color-hero: oklch(16% 0.045 295);
+  --color-hero-raised: oklch(21% 0.055 295);
 
   /* Text */
-  --color-text-primary: oklch(14% 0 0);
-  --color-text-secondary: oklch(46% 0 0);
-  --color-text-muted: oklch(64% 0 0);
+  --color-text-primary: oklch(16% 0.015 295);
+  --color-text-secondary: oklch(42% 0.02 295);
+  --color-text-muted: oklch(58% 0.015 295);
 
   /* Surfaces */
-  --color-border: oklch(86% 0 0);
+  --color-border: oklch(90% 0.008 295);
+  --color-border-strong: oklch(83% 0.012 295);
   --color-background: oklch(100% 0 0);
-  --color-surface: oklch(97% 0 0);
+  --color-surface: oklch(97.5% 0.004 295);
+  --color-surface-raised: oklch(99% 0.002 295);
 
   /* Semantic */
   --color-star: oklch(72% 0.16 75);
-  --color-success: oklch(58% 0.16 195);
-  --color-error: oklch(48% 0.22 25);
+  --color-success: oklch(58% 0.14 165);
+  --color-error: oklch(52% 0.21 25);
+  --color-warning: oklch(75% 0.15 85);
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, var(--brand-600), oklch(55% 0.24 320));
+  --gradient-hero: linear-gradient(160deg, oklch(14% 0.05 295), oklch(22% 0.07 310));
+  --gradient-card-sheen: linear-gradient(180deg, oklch(100% 0 0 / 6%), transparent 40%);
+
+  /* Elevation — violet-tinted ambient shadows */
+  --shadow-xs: 0 1px 2px oklch(20% 0.05 295 / 6%);
+  --shadow-sm: 0 1px 3px oklch(20% 0.05 295 / 8%), 0 1px 2px oklch(20% 0.05 295 / 5%);
+  --shadow-md: 0 4px 12px oklch(20% 0.05 295 / 10%), 0 2px 4px oklch(20% 0.05 295 / 6%);
+  --shadow-lg: 0 12px 28px oklch(20% 0.05 295 / 14%), 0 4px 10px oklch(20% 0.05 295 / 8%);
+  --shadow-xl: 0 24px 48px oklch(20% 0.05 295 / 18%), 0 8px 16px oklch(20% 0.05 295 / 8%);
+  --shadow-brand: 0 8px 24px oklch(52% 0.26 295 / 25%);
 
   /* Typography */
   --font-sans: Inter, system-ui, sans-serif;
   --text-base: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
 
   /* Spacing */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 
   /* Motion */
   --duration-fast: 150ms;
   --duration-normal: 300ms;
+  --duration-slow: 500ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* ---- shadcn tokens — remapped to brand (visual unification) ---- */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: var(--color-text-primary);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: var(--color-text-primary);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--brand-600);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --secondary: var(--brand-50);
+  --secondary-foreground: var(--brand-800);
+  --muted: var(--color-surface);
+  --muted-foreground: var(--color-text-muted);
+  --accent: var(--brand-100);
+  --accent-foreground: var(--brand-900);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: var(--color-border);
+  --input: var(--color-border-strong);
+  --ring: var(--brand-400);
+  --chart-1: var(--brand-600);
+  --chart-2: var(--brand-400);
+  --chart-3: oklch(55% 0.24 320);
+  --chart-4: var(--color-star);
+  --chart-5: var(--color-success);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar: oklch(0.99 0.002 295);
+  --sidebar-foreground: var(--color-text-primary);
+  --sidebar-primary: var(--brand-600);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: var(--brand-50);
+  --sidebar-accent-foreground: var(--brand-800);
+  --sidebar-border: var(--color-border);
+  --sidebar-ring: var(--brand-400);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: oklch(11% 0 0);
-    --color-surface: oklch(16% 0 0);
-    --color-border: oklch(25% 0 0);
-    --color-text-primary: oklch(96% 0 0);
-    --color-text-secondary: oklch(70% 0 0);
-    --color-text-muted: oklch(55% 0 0);
+    --color-background: oklch(13% 0.015 295);
+    --color-surface: oklch(18% 0.02 295);
+    --color-surface-raised: oklch(21% 0.022 295);
+    --color-border: oklch(27% 0.02 295);
+    --color-border-strong: oklch(34% 0.025 295);
+    --color-text-primary: oklch(96% 0.005 295);
+    --color-text-secondary: oklch(72% 0.015 295);
+    --color-text-muted: oklch(56% 0.015 295);
+    --color-primary: var(--brand-400);
+    --color-primary-hover: var(--brand-300);
+    --color-primary-subtle: oklch(25% 0.06 295);
+    --shadow-brand: 0 8px 24px oklch(52% 0.26 295 / 35%);
   }
 }
 
