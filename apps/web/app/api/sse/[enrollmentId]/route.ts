@@ -4,7 +4,7 @@ import { Agent, fetch as undiciFetch } from "undici";
 const sseAgent = new Agent({ headersTimeout: 0, bodyTimeout: 0 });
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ enrollmentId: string }> }
 ) {
   const { enrollmentId } = await params;
@@ -17,7 +17,11 @@ export async function GET(
   try {
     upstream = await undiciFetch(
       `${apiUrl}/api/v1/enrollments/${enrollmentId}/progress/stream`,
-      { headers: { Authorization: `Bearer ${token}` }, dispatcher: sseAgent }
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        dispatcher: sseAgent,
+        signal: req.signal,
+      }
     );
   } catch {
     return new Response("Stream unavailable", { status: 502 });
