@@ -33,6 +33,7 @@ async def send_push(
                 data=json.dumps({"title": title, "body": body, "url": url}),
                 vapid_private_key=settings.vapid_private_key,
                 vapid_claims={"sub": settings.vapid_claims_subject},
+                ttl=60,
             )
         except WebPushException as exc:
             if exc.response and exc.response.status_code in (404, 410):

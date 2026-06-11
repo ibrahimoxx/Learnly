@@ -10,9 +10,9 @@ const withPWA = withPWAInit({
   cacheOnFrontEndNav: true,
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
-  customWorkerSrc: "worker/index.ts",
-  fallbacks: { document: "/~offline" },
-  workboxOptions: { disableDevLogs: true },
+  workboxOptions: {
+    swSrc: "worker/index.ts",
+  },
 });
 
 const nextConfig: NextConfig = {

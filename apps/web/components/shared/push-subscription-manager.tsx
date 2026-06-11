@@ -83,15 +83,19 @@ export function PushSubscriptionManager() {
       const json = sub.toJSON();
       const keys = json.keys ?? {};
       const token = await getToken();
-      await apiFetch("/api/v1/push/subscribe", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          endpoint: sub.endpoint,
-          p256dh: keys["p256dh"] ?? "",
-          auth: keys["auth"] ?? "",
-        }),
-      });
+      try {
+        await apiFetch("/api/v1/push/subscribe", {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            endpoint: sub.endpoint,
+            p256dh: keys["p256dh"] ?? "",
+            auth: keys["auth"] ?? "",
+          }),
+        });
+      } catch (error) {
+        if (!(error instanceof Error) || !error.message.startsWith("404")) throw error;
+      }
       await sub.unsubscribe();
       setSubscribed(false);
     } finally {
