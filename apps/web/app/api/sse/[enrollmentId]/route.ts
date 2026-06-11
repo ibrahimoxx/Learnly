@@ -27,7 +27,7 @@ export async function GET(
     return new Response("Stream unavailable", { status: 502 });
   }
 
-  return new Response(upstream.body, {
+  return new Response(upstream.body as unknown as ReadableStream, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
