@@ -27,7 +27,10 @@
   --color-primary: var(--brand-600);
   --color-primary-dark: var(--brand-800);
   --color-primary-hover: var(--brand-700);
-  --color-primary-subtle: var(--brand-100);
+  --color-primary-subtle: oklch(95.5% 0.045 292);
+  --color-accent-warm: oklch(77% 0.16 62);
+  --color-accent-mint: oklch(72% 0.14 168);
+  --color-accent-sky: oklch(69% 0.13 235);
 
   /* Hero / deep surfaces (course hero, player chrome) */
   --color-hero: oklch(15% 0.06 292);
@@ -41,9 +44,10 @@
   /* Surfaces */
   --color-border: oklch(89% 0.012 290);
   --color-border-strong: oklch(80% 0.018 290);
-  --color-background: oklch(100% 0 0);
-  --color-surface: oklch(96.5% 0.008 290);
+  --color-background: oklch(99% 0.006 292);
+  --color-surface: oklch(96.8% 0.012 292);
   --color-surface-raised: oklch(100% 0 0);
+  --color-surface-glass: oklch(100% 0 0 / 76%);
 
   /* Semantic */
   --color-star: oklch(75% 0.17 70);
@@ -52,27 +56,35 @@
   --color-warning: oklch(76% 0.16 80);
 
   /* Gradients */
-  --gradient-brand: linear-gradient(135deg, var(--brand-600), oklch(52% 0.28 320));
-  --gradient-hero: linear-gradient(160deg, oklch(13% 0.06 292), oklch(24% 0.1 310));
-  --gradient-card-sheen: linear-gradient(180deg, oklch(100% 0 0 / 6%), transparent 40%);
+  --gradient-brand: linear-gradient(135deg, var(--brand-600), oklch(59% 0.25 326), var(--color-accent-sky));
+  --gradient-hero: radial-gradient(circle at 18% 12%, oklch(57% 0.28 298 / 45%), transparent 32%),
+    radial-gradient(circle at 78% 18%, oklch(73% 0.14 215 / 34%), transparent 30%),
+    linear-gradient(150deg, oklch(13% 0.06 292), oklch(22% 0.1 310) 54%, oklch(18% 0.07 258));
+  --gradient-page: radial-gradient(circle at top left, oklch(95% 0.04 292), transparent 34%),
+    linear-gradient(180deg, oklch(99% 0.006 292), oklch(97% 0.012 292));
+  --gradient-card-sheen: linear-gradient(120deg, transparent 18%, oklch(100% 0 0 / 36%) 42%, transparent 62%);
+  --gradient-thumbnail: radial-gradient(circle at 18% 18%, oklch(78% 0.13 220 / 70%), transparent 30%),
+    radial-gradient(circle at 82% 28%, oklch(78% 0.16 62 / 70%), transparent 28%),
+    linear-gradient(135deg, var(--brand-900), var(--brand-600) 52%, oklch(48% 0.24 326));
 
   /* Elevation — violet-tinted ambient shadows */
-  --shadow-xs: 0 1px 2px oklch(20% 0.05 295 / 6%);
-  --shadow-sm: 0 1px 3px oklch(20% 0.05 295 / 8%), 0 1px 2px oklch(20% 0.05 295 / 5%);
-  --shadow-md: 0 4px 12px oklch(20% 0.05 295 / 10%), 0 2px 4px oklch(20% 0.05 295 / 6%);
-  --shadow-lg: 0 12px 28px oklch(20% 0.05 295 / 14%), 0 4px 10px oklch(20% 0.05 295 / 8%);
-  --shadow-xl: 0 24px 48px oklch(20% 0.05 295 / 18%), 0 8px 16px oklch(20% 0.05 295 / 8%);
-  --shadow-brand: 0 8px 24px oklch(52% 0.26 295 / 25%);
+  --shadow-xs: 0 1px 2px oklch(20% 0.05 295 / 7%);
+  --shadow-sm: 0 8px 22px oklch(20% 0.05 295 / 7%), 0 1px 2px oklch(20% 0.05 295 / 5%);
+  --shadow-md: 0 16px 38px oklch(20% 0.05 295 / 10%), 0 2px 8px oklch(20% 0.05 295 / 7%);
+  --shadow-lg: 0 22px 56px oklch(20% 0.05 295 / 14%), 0 8px 18px oklch(20% 0.05 295 / 8%);
+  --shadow-xl: 0 34px 82px oklch(20% 0.05 295 / 18%), 0 14px 28px oklch(20% 0.05 295 / 10%);
+  --shadow-brand: 0 18px 44px oklch(52% 0.26 295 / 30%), 0 4px 12px oklch(72% 0.16 220 / 18%);
 
   /* Typography */
-  --font-sans: Inter, system-ui, sans-serif;
+  --font-sans: Manrope, system-ui, sans-serif;
+  --font-heading: Fraunces, Manrope, system-ui, sans-serif;
   --text-base: clamp(0.9375rem, 0.875rem + 0.3125vw, 1rem);
 
   /* Spacing */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 20px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 
   /* Motion */
   --duration-fast: 150ms;
@@ -82,9 +94,9 @@
   --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 
   /* ---- shadcn tokens — remapped to brand (visual unification) ---- */
-  --background: oklch(1 0 0);
+  --background: var(--color-background);
   --foreground: var(--color-text-primary);
-  --card: oklch(1 0 0);
+  --card: var(--color-surface-raised);
   --card-foreground: var(--color-text-primary);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--color-text-primary);
@@ -220,9 +232,17 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+    background-image: var(--gradient-page);
+    background-attachment: fixed;
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    letter-spacing: 0;
   }
 }
 
@@ -299,11 +319,70 @@ html {
 .hover-lift {
   transition:
     transform var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out);
+    box-shadow var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 .hover-lift:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-lg);
+  border-color: color-mix(in oklch, var(--brand-300) 65%, var(--color-border));
+}
+
+.premium-shell {
+  background:
+    radial-gradient(circle at top left, oklch(93% 0.05 292 / 62%), transparent 30%),
+    radial-gradient(circle at top right, oklch(88% 0.07 218 / 40%), transparent 24%),
+    var(--gradient-page);
+}
+
+.premium-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-surface-raised), oklch(99% 0.006 292));
+  box-shadow: var(--shadow-sm);
+}
+
+.premium-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, oklch(100% 0 0 / 55%), transparent 38%);
+}
+
+.mesh-panel {
+  background:
+    radial-gradient(circle at 12% 20%, oklch(78% 0.13 220 / 42%), transparent 26%),
+    radial-gradient(circle at 88% 16%, oklch(78% 0.16 62 / 38%), transparent 24%),
+    var(--gradient-hero);
+}
+
+.thumbnail-fallback {
+  background-image:
+    url("/brand/course-pattern.svg"),
+    var(--gradient-thumbnail);
+  background-size: cover;
+  background-position: center;
+}
+
+.sheen-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--gradient-card-sheen);
+  opacity: 0;
+  transform: translateX(-30%);
+  transition:
+    opacity var(--duration-normal) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+.group:hover .sheen-overlay::after,
+.sheen-overlay:hover::after {
+  opacity: 1;
+  transform: translateX(30%);
 }
 
 /* Premium skeleton shimmer (upgrade over animate-pulse) */

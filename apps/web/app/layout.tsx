@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Fraunces, Manrope } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
@@ -9,7 +9,8 @@ import { InstallPrompt } from "@/components/shared/install-prompt";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
+const fraunces = Fraunces({ subsets: ["latin"], variable: "--font-heading" });
 
 export const viewport: Viewport = {
   themeColor: "#a435f0",
@@ -48,7 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <ClerkProvider>
-      <html lang={locale} className={cn("font-sans", geist.variable)}>
+      <html lang={locale} className={cn("font-sans", manrope.variable, fraunces.variable)}>
         <head>
           <link rel="preconnect" href="https://clerk.learnly.dev" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
