@@ -50,7 +50,7 @@ export default function AdminOverviewPage() {
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-[--radius-md]" />)
           : cards.map(({ label, value, icon: Icon, color }) => (
-              <div key={label} className="rounded-[--radius-md] border border-[--color-border] bg-white p-5">
+              <div key={label} className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] hover-lift">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-[--color-text-muted]">{label}</p>
                   <Icon className={`h-4 w-4 ${color}`} />

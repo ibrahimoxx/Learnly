@@ -120,7 +120,7 @@ export default function InstructorPathsPage() {
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-[--radius-md]" />)}
           </div>
         ) : paths.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] py-20 text-center">
+          <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-20 shadow-[var(--shadow-xs)] text-center">
             <GraduationCap className="h-12 w-12 text-[--color-border]" />
             <p className="mt-3 font-semibold text-[--color-text-secondary]">No paths yet</p>
             <p className="mt-1 text-sm text-[--color-text-muted]">Create a path to guide students through a learning journey.</p>
@@ -130,7 +130,7 @@ export default function InstructorPathsPage() {
             {paths.map((path) => (
               <div
                 key={path.id}
-                className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-white p-4"
+                className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary]/10">
                   <GraduationCap className="h-5 w-5 text-[--color-primary]" />

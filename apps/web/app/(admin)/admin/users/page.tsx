@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 rounded-[--radius-md]" />)}
         </div>
       ) : (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white overflow-hidden">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
           <table className="w-full text-sm">
             <thead className="border-b border-[--color-border] bg-[--color-surface]">
               <tr>
@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
             </thead>
             <tbody className="divide-y divide-[--color-border]">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-[--color-surface]/50">
+                <tr key={u.id} className="transition-colors hover:bg-[--color-primary-subtle]/40">
                   <td className="px-4 py-3 font-medium text-[--color-text-primary]">
                     {u.first_name} {u.last_name}
                   </td>

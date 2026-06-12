@@ -166,7 +166,7 @@ export default function EditPathPage({ params }: Props) {
       </div>
 
       {/* Details */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-5 space-y-4">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] space-y-4">
         <h2 className="text-sm font-semibold text-[--color-text-primary]">Details</h2>
         <div>
           <label className="mb-1 block text-xs font-medium text-[--color-text-secondary]">Title</label>
@@ -191,7 +191,7 @@ export default function EditPathPage({ params }: Props) {
       </div>
 
       {/* Courses */}
-      <div className="mt-5 rounded-[--radius-md] border border-[--color-border] bg-white p-5">
+      <div className="mt-5 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)]">
         <h2 className="mb-4 text-sm font-semibold text-[--color-text-primary] flex items-center gap-2">
           <GraduationCap className="h-4 w-4 text-[--color-primary]" />
           Courses ({courses.length})

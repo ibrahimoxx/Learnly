@@ -121,7 +121,7 @@ export default function InstructorLivePage() {
       </div>
 
       {/* Create session form */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-5 mb-6">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] mb-6">
         <h2 className="text-sm font-semibold text-[--color-text-primary] mb-3">New Session</h2>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Input
@@ -145,14 +145,14 @@ export default function InstructorLivePage() {
 
       {/* Sessions list */}
       {sessions.length === 0 ? (
-        <div className="rounded-[--radius-md] border border-dashed border-[--color-border] bg-white py-12 text-center">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
           <Radio className="mx-auto h-8 w-8 text-[--color-text-muted] mb-3" />
           <p className="text-sm text-[--color-text-muted]">No live sessions yet. Create one above.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {sessions.map((session) => (
-            <div key={session.id} className="rounded-[--radius-md] border border-[--color-border] bg-white p-4">
+            <div key={session.id} className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">

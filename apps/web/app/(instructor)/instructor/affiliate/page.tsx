@@ -104,7 +104,7 @@ export default function AffiliatePageInstructor() {
       </div>
 
       {/* Link card */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-5 space-y-4">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-[--color-primary]" />
@@ -154,7 +154,7 @@ export default function AffiliatePageInstructor() {
         ].map(({ icon: Icon, label, value }) => (
           <div
             key={label}
-            className="rounded-[--radius-md] border border-[--color-border] bg-white p-4 flex flex-col gap-1"
+            className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 flex flex-col gap-1 shadow-[var(--shadow-xs)] hover-lift"
           >
             <div className="flex items-center gap-1.5 text-xs text-[--color-text-muted]">
               <Icon className="h-3.5 w-3.5" />
@@ -166,7 +166,7 @@ export default function AffiliatePageInstructor() {
       </div>
 
       {/* Conversions table */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]">
         <div className="px-5 py-4 border-b border-[--color-border]">
           <h2 className="text-sm font-semibold text-[--color-text-primary]">Conversion History</h2>
         </div>

@@ -47,7 +47,7 @@ export default function AdminCouponsPage() {
       ) : coupons.length === 0 ? (
         <p className="text-sm text-[--color-text-muted] text-center py-10">No coupons created yet.</p>
       ) : (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white overflow-hidden">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
           <table className="w-full text-sm">
             <thead className="border-b border-[--color-border] bg-[--color-surface]">
               <tr>
@@ -58,7 +58,7 @@ export default function AdminCouponsPage() {
             </thead>
             <tbody className="divide-y divide-[--color-border]">
               {coupons.map((c) => (
-                <tr key={c.id} className={`hover:bg-[--color-surface]/50 ${!c.is_active ? "opacity-50" : ""}`}>
+                <tr key={c.id} className={`transition-colors hover:bg-[--color-primary-subtle]/40 ${!c.is_active ? "opacity-50" : ""}`}>
                   <td className="px-4 py-3 font-mono font-bold text-[--color-text-primary]">{c.code}</td>
                   <td className="px-4 py-3 text-[--color-text-secondary]">
                     {c.discount_type === "percent" ? `${c.discount_value}%` : `$${(c.discount_value / 100).toFixed(2)}`}

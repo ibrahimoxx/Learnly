@@ -38,12 +38,12 @@ export default async function OrgHomePage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="bg-white border-b border-[--color-border] px-4 py-14 sm:px-6">
+      <section className="relative overflow-hidden bg-[image:var(--gradient-hero)] px-4 py-16 text-white sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <h1 className="text-3xl font-bold text-[--color-text-primary] sm:text-4xl">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Welcome to your learning hub
           </h1>
-          <p className="mt-3 max-w-xl text-[--color-text-secondary]">
+          <p className="mt-3 max-w-xl text-white/75">
             Access all courses curated for your organization. Learn at your own pace.
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
@@ -53,12 +53,12 @@ export default async function OrgHomePage({ params }: Props) {
           </div>
 
           <div className="mt-8 flex flex-wrap gap-6">
-            <div className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
-              <BookOpen className="h-4 w-4 text-[--color-primary]" />
-              <span><strong className="text-[--color-text-primary]">{stats.total_courses}</strong> courses available</span>
+            <div className="flex items-center gap-2 text-sm text-white/70">
+              <BookOpen className="h-4 w-4 text-[--brand-300]" />
+              <span><strong className="text-white">{stats.total_courses}</strong> courses available</span>
             </div>
-            <div className="flex items-center gap-2 text-sm text-[--color-text-secondary]">
-              <Users className="h-4 w-4 text-[--color-primary]" />
+            <div className="flex items-center gap-2 text-sm text-white/70">
+              <Users className="h-4 w-4 text-[--brand-300]" />
               <span>Team learning</span>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default async function OrgHomePage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] border border-dashed border-[--color-border] bg-white py-16 text-center">
+          <div className="mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
             <BookOpen className="h-10 w-10 text-[--color-border]" />
             <p className="mt-3 text-sm text-[--color-text-muted]">No courses published yet.</p>
           </div>

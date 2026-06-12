@@ -116,7 +116,7 @@ export default function PromotionsPage() {
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Promotions</h1>
       </div>
 
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-6 space-y-4">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)] space-y-4">
         <h2 className="font-semibold text-[--color-text-primary]">Create coupon</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Input placeholder="Code (e.g. SAVE20)" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
@@ -161,13 +161,13 @@ export default function PromotionsPage() {
             {[1, 2, 3].map((i) => <div key={i} className="h-12 animate-pulse rounded-[--radius-sm] bg-[--color-border]" />)}
           </div>
         ) : coupons.length === 0 ? (
-          <div className="rounded-[--radius-md] border border-dashed border-[--color-border] py-10 text-center">
+          <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-10 shadow-[var(--shadow-xs)] text-center">
             <p className="text-sm text-[--color-text-muted]">No active coupons.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {coupons.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-[--radius-sm] border border-[--color-border] bg-white px-4 py-3">
+              <div key={c.id} className="flex items-center justify-between rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-4 py-3 shadow-[var(--shadow-xs)] transition-colors hover:border-[--color-primary]/40">
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="font-mono text-sm font-bold text-[--color-text-primary]">{c.code}</span>
                   <Badge variant="outline" className="text-xs shrink-0">

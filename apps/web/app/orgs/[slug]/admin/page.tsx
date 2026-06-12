@@ -68,7 +68,7 @@ export default async function OrgAdminPage({ params }: Props) {
           <a
             key={label}
             href={href}
-            className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-white p-5 hover:border-[--color-primary]/40 hover:shadow-sm transition-all"
+            className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 hover-lift hover:border-[--color-primary]/40 shadow-[var(--shadow-xs)]"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-[--radius-md] bg-[--color-primary]/10">
               <Icon className="h-5 w-5 text-[--color-primary]" />
@@ -82,7 +82,7 @@ export default async function OrgAdminPage({ params }: Props) {
       </div>
 
       {/* Settings shortcut */}
-      <div className="mt-8 rounded-[--radius-md] border border-[--color-border] bg-white p-6">
+      <div className="mt-8 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)]">
         <h2 className="font-semibold text-[--color-text-primary]">Organization Settings</h2>
         <p className="mt-1 text-sm text-[--color-text-muted]">
           Manage branding, SSO, and seat configuration from your Clerk organization dashboard.

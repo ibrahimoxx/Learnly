@@ -12,7 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r border-[--color-border] bg-white">
+      <aside className="w-56 shrink-0 border-r border-[--color-border] bg-[--color-surface-raised]">
         <div className="flex h-16 items-center border-b border-[--color-border] px-5">
           <span className="font-bold text-[--color-text-primary]">Admin Panel</span>
         </div>

@@ -40,7 +40,7 @@ export default async function OrgLayout({ children, params }: Props) {
   return (
     <div className="min-h-screen bg-[--color-surface]">
       {/* Org header */}
-      <header className="border-b border-[--color-border] bg-white">
+      <header className="border-b border-[--color-border] bg-[--color-surface-raised]">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6">
           {org.logo_url ? (
             <Image src={org.logo_url} alt={org.name} width={32} height={32} className="rounded object-contain" />

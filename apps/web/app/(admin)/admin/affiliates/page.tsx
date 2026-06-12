@@ -93,7 +93,7 @@ export default function AdminAffiliatesPage() {
         </p>
       </div>
 
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white overflow-hidden">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[--color-border] bg-[--color-surface]">
@@ -126,7 +126,7 @@ export default function AdminAffiliatesPage() {
                 </tr>
               )
               : links.map((link) => (
-                <tr key={link.instructor_id} className="border-b border-[--color-border] last:border-0 hover:bg-[--color-surface]/50">
+                <tr key={link.instructor_id} className="border-b border-[--color-border] last:border-0 transition-colors hover:bg-[--color-primary-subtle]/40">
                   <td className="px-5 py-3">
                     <p className="font-medium text-[--color-text-primary]">{link.instructor_name}</p>
                     <p className="text-xs text-[--color-text-muted]">{link.instructor_email}</p>

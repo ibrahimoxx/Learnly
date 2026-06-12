@@ -95,7 +95,7 @@ export default function CourseDiscussionsPage() {
           ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-[--radius-md] border border-dashed border-[--color-border] bg-white py-16 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
           <MessageSquare className="h-10 w-10 text-[--color-border]" />
           <p className="text-sm text-[--color-text-muted]">No discussions yet for this course.</p>
         </div>
@@ -104,7 +104,7 @@ export default function CourseDiscussionsPage() {
           {posts.map((post) => (
             <div
               key={post.id}
-              className="rounded-[--radius-md] border border-[--color-border] bg-white px-5 py-4"
+              className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] px-5 py-4 shadow-[var(--shadow-xs)]"
             >
               <div className="flex items-start gap-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[--color-primary]/10 text-sm font-bold text-[--color-primary]">

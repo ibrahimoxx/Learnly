@@ -66,7 +66,7 @@ export default function InstructorCoursesPage() {
           ))}
         </div>
       ) : courses.length === 0 ? (
-        <div className="mt-12 flex flex-col items-center rounded-[--radius-lg] border border-dashed border-[--color-border] bg-white py-16 text-center">
+        <div className="mt-12 flex flex-col items-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
           <BookOpen className="h-12 w-12 text-[--color-border]" />
           <h3 className="mt-4 font-semibold text-[--color-text-secondary]">No courses yet</h3>
           <p className="mt-1 text-sm text-[--color-text-muted]">
@@ -78,7 +78,7 @@ export default function InstructorCoursesPage() {
           {courses.map((course) => (
             <div
               key={course.id}
-              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-white p-4"
+              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]"
             >
               {/* Color swatch */}
               <div className="hidden h-14 w-20 shrink-0 rounded-[--radius-sm] bg-gradient-to-br from-[--color-primary]/10 to-[--color-primary]/5 sm:block" />

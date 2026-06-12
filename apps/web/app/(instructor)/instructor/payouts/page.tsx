@@ -70,7 +70,7 @@ function PayoutsContent() {
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Payouts</h1>
       </div>
 
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-6">
+      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)]">
         <h2 className="font-semibold text-[--color-text-primary] mb-1">Stripe Connect</h2>
         <p className="text-sm text-[--color-text-muted] mb-5">
           Connect your Stripe account to receive payouts from course sales.

@@ -104,7 +104,7 @@ export default function AdminCoursesPage() {
       ) : courses.length === 0 ? (
         <p className="text-sm text-[--color-text-muted] text-center py-10">No courses found.</p>
       ) : (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white overflow-hidden">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
           <table className="w-full text-sm">
             <thead className="border-b border-[--color-border] bg-[--color-surface]">
               <tr>
@@ -117,7 +117,7 @@ export default function AdminCoursesPage() {
             </thead>
             <tbody className="divide-y divide-[--color-border]">
               {courses.map((c) => (
-                <tr key={c.id} className="hover:bg-[--color-surface]/50">
+                <tr key={c.id} className="transition-colors hover:bg-[--color-primary-subtle]/40">
                   <td className="px-4 py-3 font-medium text-[--color-text-primary] max-w-xs truncate">
                     {c.title}
                   </td>

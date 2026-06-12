@@ -323,7 +323,7 @@ export default function CourseEditorPage() {
       </div>
 
       {/* Course details */}
-      <section className="mt-8 rounded-[--radius-md] border border-[--color-border] bg-white p-6">
+      <section className="mt-8 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)]">
         <h2 className="font-semibold text-[--color-text-primary]">Course Details</h2>
         <div className="mt-4 space-y-4">
           <div>
@@ -366,7 +366,7 @@ export default function CourseEditorPage() {
         </div>
 
         {sections.length === 0 ? (
-          <div className="mt-4 rounded-[--radius-md] border border-dashed border-[--color-border] bg-white py-10 text-center">
+          <div className="mt-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
             <p className="text-sm text-[--color-text-muted]">
               No sections yet. Add a section to start building your curriculum.
             </p>
@@ -374,7 +374,7 @@ export default function CourseEditorPage() {
         ) : (
           <div className="mt-4 space-y-3">
             {sections.map((section) => (
-              <div key={section.id} className="rounded-[--radius-md] border border-[--color-border] bg-white overflow-hidden">
+              <div key={section.id} className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
                 {/* Section header */}
                 <div className="flex items-center gap-2 bg-[--color-surface] px-4 py-3">
                   <GripVertical className="h-4 w-4 text-[--color-text-muted] cursor-grab" />
@@ -591,7 +591,7 @@ export default function CourseEditorPage() {
           <h2 className="font-semibold text-[--color-text-primary]">Promotions</h2>
         </div>
 
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-white p-6 space-y-4">
+        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)] space-y-4">
           <p className="text-sm text-[--color-text-muted]">Create coupon codes for this course.</p>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
