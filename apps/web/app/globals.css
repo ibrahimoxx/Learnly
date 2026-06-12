@@ -10,18 +10,18 @@
      Single source of truth. shadcn vars below REMAP to these.
      ============================================================ */
 
-  /* Brand — violet ramp (50 → 950) */
-  --brand-50:  oklch(97.5% 0.02 295);
-  --brand-100: oklch(94.5% 0.045 295);
-  --brand-200: oklch(89% 0.09 295);
-  --brand-300: oklch(81% 0.14 295);
-  --brand-400: oklch(68% 0.21 295);
-  --brand-500: oklch(58% 0.25 295);
-  --brand-600: oklch(52% 0.26 295);
-  --brand-700: oklch(45% 0.24 295);
-  --brand-800: oklch(38% 0.20 295);
-  --brand-900: oklch(30% 0.15 295);
-  --brand-950: oklch(21% 0.09 295);
+  /* Brand — vivid violet ramp (50 → 950) */
+  --brand-50:  oklch(97.5% 0.025 292);
+  --brand-100: oklch(94% 0.055 292);
+  --brand-200: oklch(88% 0.1 292);
+  --brand-300: oklch(79% 0.16 292);
+  --brand-400: oklch(66% 0.23 292);
+  --brand-500: oklch(56% 0.27 292);
+  --brand-600: oklch(50% 0.28 292);
+  --brand-700: oklch(44% 0.26 292);
+  --brand-800: oklch(37% 0.21 292);
+  --brand-900: oklch(29% 0.16 292);
+  --brand-950: oklch(20% 0.1 292);
 
   /* Brand aliases (legacy names — keep, pages use them) */
   --color-primary: var(--brand-600);
@@ -30,30 +30,30 @@
   --color-primary-subtle: var(--brand-100);
 
   /* Hero / deep surfaces (course hero, player chrome) */
-  --color-hero: oklch(16% 0.045 295);
-  --color-hero-raised: oklch(21% 0.055 295);
+  --color-hero: oklch(15% 0.06 292);
+  --color-hero-raised: oklch(20% 0.07 292);
 
-  /* Text */
-  --color-text-primary: oklch(16% 0.015 295);
-  --color-text-secondary: oklch(42% 0.02 295);
-  --color-text-muted: oklch(58% 0.015 295);
+  /* Text — strong contrast, light-only app */
+  --color-text-primary: oklch(13% 0.02 290);
+  --color-text-secondary: oklch(38% 0.025 290);
+  --color-text-muted: oklch(52% 0.02 290);
 
   /* Surfaces */
-  --color-border: oklch(90% 0.008 295);
-  --color-border-strong: oklch(83% 0.012 295);
+  --color-border: oklch(89% 0.012 290);
+  --color-border-strong: oklch(80% 0.018 290);
   --color-background: oklch(100% 0 0);
-  --color-surface: oklch(97.5% 0.004 295);
-  --color-surface-raised: oklch(99% 0.002 295);
+  --color-surface: oklch(96.5% 0.008 290);
+  --color-surface-raised: oklch(100% 0 0);
 
   /* Semantic */
-  --color-star: oklch(72% 0.16 75);
-  --color-success: oklch(58% 0.14 165);
-  --color-error: oklch(52% 0.21 25);
-  --color-warning: oklch(75% 0.15 85);
+  --color-star: oklch(75% 0.17 70);
+  --color-success: oklch(60% 0.17 160);
+  --color-error: oklch(55% 0.23 27);
+  --color-warning: oklch(76% 0.16 80);
 
   /* Gradients */
-  --gradient-brand: linear-gradient(135deg, var(--brand-600), oklch(55% 0.24 320));
-  --gradient-hero: linear-gradient(160deg, oklch(14% 0.05 295), oklch(22% 0.07 310));
+  --gradient-brand: linear-gradient(135deg, var(--brand-600), oklch(52% 0.28 320));
+  --gradient-hero: linear-gradient(160deg, oklch(13% 0.06 292), oklch(24% 0.1 310));
   --gradient-card-sheen: linear-gradient(180deg, oklch(100% 0 0 / 6%), transparent 40%);
 
   /* Elevation — violet-tinted ambient shadows */
@@ -116,22 +116,10 @@
   --sidebar-ring: var(--brand-400);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: oklch(13% 0.015 295);
-    --color-surface: oklch(18% 0.02 295);
-    --color-surface-raised: oklch(21% 0.022 295);
-    --color-border: oklch(27% 0.02 295);
-    --color-border-strong: oklch(34% 0.025 295);
-    --color-text-primary: oklch(96% 0.005 295);
-    --color-text-secondary: oklch(72% 0.015 295);
-    --color-text-muted: oklch(56% 0.015 295);
-    --color-primary: var(--brand-400);
-    --color-primary-hover: var(--brand-300);
-    --color-primary-subtle: oklch(25% 0.06 295);
-    --shadow-brand: 0 8px 24px oklch(52% 0.26 295 / 35%);
-  }
-}
+/* NOTE: app is LIGHT-ONLY for now. Never re-add a `prefers-color-scheme: dark`
+   override on these tokens — it flips text to white while page backgrounds stay
+   light (no dark layout exists), making every page unreadable for dark-OS users.
+   Real dark mode = Phase 4+ task via the `.dark` class, full layout pass. */
 
 /* NOTE: Tailwind preflight (@layer base) owns box-sizing/margin/padding resets.
    An unlayered `*` reset here would override layered utilities (mx-auto, px-*) — never re-add. */
