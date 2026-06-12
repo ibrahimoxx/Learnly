@@ -38,12 +38,12 @@ export default async function OrgHomePage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-[image:var(--gradient-hero)] px-4 py-16 text-white sm:px-6">
+      <section className="mesh-panel relative overflow-hidden px-4 py-20 text-white sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h1 className="text-5xl font-black tracking-tight sm:text-6xl">
             Welcome to your learning hub
           </h1>
-          <p className="mt-3 max-w-xl text-white/75">
+          <p className="mt-4 max-w-xl text-lg leading-8 text-white/75">
             Access all courses curated for your organization. Learn at your own pace.
           </p>
           <div className="mt-6 flex flex-wrap gap-4">
@@ -68,7 +68,7 @@ export default async function OrgHomePage({ params }: Props) {
       {/* Featured courses */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-[--color-text-primary]">Available courses</h2>
+          <h2 className="text-3xl font-black tracking-tight text-[--color-text-primary]">Available courses</h2>
           {courses.length > 0 && (
             <Link
               href={`/orgs/${slug}/courses`}
@@ -86,9 +86,10 @@ export default async function OrgHomePage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
-            <BookOpen className="h-10 w-10 text-[--color-border]" />
-            <p className="mt-3 text-sm text-[--color-text-muted]">No courses published yet.</p>
+          <div className="premium-card mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] py-16 text-center">
+            <img src="/brand/empty-state.svg" alt="" className="mb-4 h-32 w-auto" />
+            <BookOpen className="h-10 w-10 text-[--color-primary]" />
+            <p className="relative mt-3 text-sm text-[--color-text-muted]">No courses published yet.</p>
           </div>
         )}
       </section>

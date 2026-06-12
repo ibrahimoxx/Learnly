@@ -97,14 +97,14 @@ export default function AffiliatePageInstructor() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-[--color-text-primary]">Affiliate Program</h1>
+        <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Affiliate Program</h1>
         <p className="mt-1 text-sm text-[--color-text-muted]">
           Share your referral link and earn {link.commission_pct}% commission on paid enrollments.
         </p>
       </div>
 
       {/* Link card */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] space-y-4">
+      <div className="premium-card rounded-[--radius-lg] p-5 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link2 className="h-4 w-4 text-[--color-primary]" />
@@ -127,7 +127,7 @@ export default function AffiliatePageInstructor() {
             className="shrink-0 text-[--color-text-muted] hover:text-[--color-primary] transition-colors"
             title="Copy link"
           >
-            {copied ? <CheckCheck className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+            {copied ? <CheckCheck className="h-4 w-4 text-[--color-success]" /> : <Copy className="h-4 w-4" />}
           </button>
         </div>
 
@@ -154,7 +154,7 @@ export default function AffiliatePageInstructor() {
         ].map(({ icon: Icon, label, value }) => (
           <div
             key={label}
-            className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 flex flex-col gap-1 shadow-[var(--shadow-xs)] hover-lift"
+            className="hover-lift premium-card rounded-[--radius-md] p-4 flex flex-col gap-1"
           >
             <div className="flex items-center gap-1.5 text-xs text-[--color-text-muted]">
               <Icon className="h-3.5 w-3.5" />
@@ -166,7 +166,7 @@ export default function AffiliatePageInstructor() {
       </div>
 
       {/* Conversions table */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]">
+      <div className="premium-card rounded-[--radius-md]">
         <div className="px-5 py-4 border-b border-[--color-border]">
           <h2 className="text-sm font-semibold text-[--color-text-primary]">Conversion History</h2>
         </div>
@@ -178,7 +178,7 @@ export default function AffiliatePageInstructor() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-[--color-border] text-[--color-text-muted]">
+                <tr className="border-b border-[--color-border] bg-[--color-surface] text-[--color-text-muted]">
                   <th className="px-5 py-3 text-left font-medium">Date</th>
                   <th className="px-5 py-3 text-right font-medium">Amount</th>
                   <th className="px-5 py-3 text-right font-medium">Commission</th>
@@ -187,12 +187,12 @@ export default function AffiliatePageInstructor() {
               </thead>
               <tbody>
                 {conversions.map((c) => (
-                  <tr key={c.id} className="border-b border-[--color-border] last:border-0">
+                  <tr key={c.id} className="border-b border-[--color-border] transition-colors last:border-0 hover:bg-[--color-primary-subtle]">
                     <td className="px-5 py-3 text-[--color-text-secondary]">{formatDate(c.created_at)}</td>
                     <td className="px-5 py-3 text-right text-[--color-text-primary] font-medium">
                       {c.amount_cents === 0 ? "Free" : formatCents(c.amount_cents)}
                     </td>
-                    <td className="px-5 py-3 text-right text-green-600 font-medium">
+                    <td className="px-5 py-3 text-right text-[--color-success] font-medium">
                       {c.commission_cents === 0 ? "—" : formatCents(c.commission_cents)}
                     </td>
                     <td className="px-5 py-3 text-right">

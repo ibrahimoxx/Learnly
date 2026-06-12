@@ -11,15 +11,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (role !== "admin") redirect("/");
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r border-[--color-border] bg-[--color-surface-raised]">
-        <div className="flex h-16 items-center border-b border-[--color-border] px-5">
-          <span className="font-bold text-[--color-text-primary]">Admin Panel</span>
+    <div className="premium-shell flex min-h-screen">
+      <aside className="w-60 shrink-0 border-r border-white/60 bg-[--color-surface-glass] shadow-[var(--shadow-sm)] backdrop-blur-xl">
+        <div className="flex h-16 items-center border-b border-white/60 px-5">
+          <span className="font-heading text-xl font-black text-[--color-text-primary]">Admin Panel</span>
         </div>
         <nav className="p-3 space-y-1">
           <Link
             href="/"
-            className="flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-[--color-text-muted] hover:bg-[--color-surface] hover:text-[--color-text-secondary] transition-colors mb-2"
+            className="mb-2 flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-extrabold text-[--color-text-muted] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to site
@@ -34,7 +34,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:bg-[--color-surface] hover:text-[--color-text-primary] transition-colors"
+              className="flex items-center gap-2.5 rounded-[--radius-sm] px-3 py-2 text-sm font-extrabold text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
             >
               <Icon className="h-4 w-4" />
               {label}
@@ -42,7 +42,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
       </aside>
-      <main className="flex-1 bg-[--color-surface] overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </div>
   );
 }

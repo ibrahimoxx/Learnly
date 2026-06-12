@@ -44,8 +44,9 @@ export default function NotificationsPage() {
   }, [getToken]);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-[--color-text-primary] mb-4">Notifications</h1>
+    <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-2xl">
+      <h1 className="mb-4 text-4xl font-black tracking-tight text-[--color-text-primary]">Notifications</h1>
 
       <div className="mb-6">
         <PushSubscriptionManager />
@@ -57,15 +58,16 @@ export default function NotificationsPage() {
         </div>
       ) : notifications.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
-          <Bell className="h-10 w-10 text-[--color-border]" />
-          <p className="font-semibold text-[--color-text-secondary]">No notifications yet</p>
+          <img src="/brand/empty-state.svg" alt="" className="h-32 w-auto" />
+          <Bell className="h-10 w-10 text-[--color-primary]" />
+          <p className="font-extrabold text-[--color-text-secondary]">No notifications yet</p>
         </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n) => (
             <div
               key={n.id}
-              className={`rounded-[--radius-md] border border-[--color-border] p-4 ${!n.is_read ? "bg-[--color-primary-subtle]/40 border-l-2 border-l-[--color-primary]" : "bg-[--color-surface-raised]"}`}
+              className={`rounded-[--radius-md] border border-[--color-border] p-4 shadow-[var(--shadow-xs)] ${!n.is_read ? "bg-[--color-primary-subtle] border-l-2 border-l-[--color-primary]" : "bg-[--color-surface-raised]"}`}
             >
               {n.link ? (
                 <Link href={n.link} className="block hover:opacity-80 transition-opacity">
@@ -85,6 +87,7 @@ export default function NotificationsPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

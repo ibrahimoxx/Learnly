@@ -17,9 +17,9 @@ interface AdminUser {
 }
 
 const ROLE_COLORS: Record<string, string> = {
-  admin: "bg-purple-100 text-purple-700",
-  instructor: "bg-blue-100 text-blue-700",
-  student: "bg-gray-100 text-gray-600",
+  admin: "bg-[--color-primary-subtle] text-[--brand-800]",
+  instructor: "bg-[--color-accent-sky]/15 text-[--color-accent-sky]",
+  student: "bg-[--color-surface] text-[--color-text-secondary]",
 };
 
 export default function AdminUsersPage() {
@@ -63,14 +63,14 @@ export default function AdminUsersPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold text-[--color-text-primary] mb-5">User Management</h1>
+      <h1 className="mb-5 text-4xl font-black tracking-tight text-[--color-text-primary]">User Management</h1>
 
       {loading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 rounded-[--radius-md]" />)}
         </div>
       ) : (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
+        <div className="premium-card rounded-[--radius-lg]">
           <table className="w-full text-sm">
             <thead className="border-b border-[--color-border] bg-[--color-surface]">
               <tr>
@@ -89,12 +89,12 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-[--color-text-muted] max-w-[200px] truncate">{u.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${ROLE_COLORS[u.role] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold ${ROLE_COLORS[u.role] ?? "bg-[--color-surface] text-[--color-text-secondary]"}`}>
                       {u.role}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-medium ${u.is_active ? "text-green-600" : "text-red-500"}`}>
+                    <span className={`text-xs font-bold ${u.is_active ? "text-[--color-success]" : "text-[--color-error]"}`}>
                       {u.is_active ? "Active" : "Suspended"}
                     </span>
                   </td>
@@ -104,8 +104,8 @@ export default function AdminUsersPage() {
                       disabled={updating === u.id}
                       className={`rounded border px-2.5 py-1 text-xs font-semibold disabled:opacity-50 transition-colors ${
                         u.is_active
-                          ? "border-red-200 text-red-500 hover:bg-red-50"
-                          : "border-green-200 text-green-600 hover:bg-green-50"
+                          ? "border-[--color-error]/30 text-[--color-error] hover:bg-[--color-error]/10"
+                          : "border-[--color-success]/30 text-[--color-success] hover:bg-[--color-success]/10"
                       }`}
                     >
                       {updating === u.id ? "…" : u.is_active ? "Suspend" : "Activate"}

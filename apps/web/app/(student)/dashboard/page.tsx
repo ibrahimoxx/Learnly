@@ -53,16 +53,20 @@ export default function DashboardPage() {
   const completed = enrollments.filter((e) => e.status === "completed");
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-[--color-text-primary]">My Learning</h1>
+    <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-6xl">
+      <span className="inline-flex rounded-full bg-[--color-primary-subtle] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-[--brand-800]">
+        Student studio
+      </span>
+      <h1 className="mt-3 text-4xl font-black tracking-tight text-[--color-text-primary] sm:text-5xl">My Learning</h1>
 
       {stats && (
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold ${stats.current_streak > 0 ? "border-orange-200 bg-orange-50 text-orange-700" : "border-[--color-border] bg-[--color-surface] text-[--color-text-muted]"}`}>
+          <div className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-extrabold shadow-[var(--shadow-xs)] ${stats.current_streak > 0 ? "border-[--color-warning]/30 bg-[--color-warning]/12 text-[--color-warning]" : "border-[--color-border] bg-[--color-surface-raised] text-[--color-text-muted]"}`}>
             <Flame className="h-4 w-4" />
             {stats.current_streak} day streak
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm font-semibold text-[--color-text-secondary]">
+          <div className="flex items-center gap-2 rounded-full border border-[--color-border] bg-[--color-surface-raised] px-3 py-1.5 text-sm font-extrabold text-[--color-text-secondary] shadow-[var(--shadow-xs)]">
             <Zap className="h-4 w-4 text-[--color-primary]" />
             <span>Lv.{stats.level}</span>
             <div className="w-20">
@@ -72,7 +76,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/achievements"
-            className="flex items-center gap-1.5 rounded-full border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm font-semibold text-[--color-text-secondary] hover:border-[--color-primary] transition-colors"
+            className="flex items-center gap-1.5 rounded-full border border-[--color-border] bg-[--color-surface-raised] px-3 py-1.5 text-sm font-extrabold text-[--color-text-secondary] shadow-[var(--shadow-xs)] hover:border-[--color-primary] transition-colors"
           >
             <Medal className="h-4 w-4 text-[--color-star]" />
             {stats.badges.length} badges
@@ -100,7 +104,6 @@ export default function DashboardPage() {
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {myPaths.map((path) => {
-              const enrolledCourseIds = new Set(enrollments.map((e) => e.course_id));
               const completedInPath = path.courses.filter(
                 (c) => enrollments.find((e) => e.course_id === c.id && e.status === "completed")
               ).length;
@@ -110,19 +113,18 @@ export default function DashboardPage() {
                 <Link
                   key={path.id}
                   href={`/paths/${path.slug}`}
-                  className="flex items-start gap-3 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 hover-lift hover:border-[--color-primary]/50 shadow-[var(--shadow-xs)]"
+                  className="hover-lift premium-card flex items-start gap-3 rounded-[--radius-md] p-4 hover:border-[--color-primary]/50"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary-subtle]">
                     <GraduationCap className="h-5 w-5 text-[--color-primary]" />
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="relative flex-1 min-w-0">
                     <p className="truncate text-sm font-semibold text-[--color-text-primary]">{path.title}</p>
                     <p className="mt-0.5 text-xs text-[--color-text-muted]">{completedInPath}/{total} courses completed</p>
                     <Progress value={pct} className="mt-2 h-1.5" />
                   </div>
                 </Link>
               );
-              void enrolledCourseIds;
             })}
           </div>
         </div>
@@ -138,7 +140,7 @@ export default function DashboardPage() {
         {loading ? (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 stagger-children">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="rounded-[--radius-md] border border-[--color-border] overflow-hidden">
+              <div key={i} className="premium-card rounded-[--radius-md]">
                 <Skeleton className="aspect-video w-full rounded-none" />
                 <div className="p-4 space-y-2">
                   <Skeleton className="h-4 w-full" />
@@ -165,6 +167,7 @@ export default function DashboardPage() {
       <div className="mt-10">
         <RecommendationsSection />
       </div>
+      </div>
     </div>
   );
 }
@@ -172,13 +175,14 @@ export default function DashboardPage() {
 function EnrollmentGrid({ enrollments }: { enrollments: Enrollment[] }) {
   if (enrollments.length === 0) {
     return (
-      <div className="mt-8 flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
+      <div className="premium-card mt-8 flex flex-col items-center justify-center rounded-[--radius-lg] py-16 text-center">
+        <img src="/brand/empty-state.svg" alt="" className="mb-4 h-32 w-auto" />
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[--color-primary-subtle]"><BookOpen className="h-7 w-7 text-[--color-primary]" /></span>
         <p className="mt-3 font-semibold text-[--color-text-secondary]">No courses here yet</p>
         <p className="mt-1 text-sm text-[--color-text-muted]">Browse the catalog to find something you love.</p>
         <Link
           href="/courses"
-          className="mt-4 inline-flex items-center gap-2 rounded-[--radius-sm] bg-[--color-primary] px-4 py-2 text-sm font-semibold text-white hover:bg-[--color-primary-hover] transition-colors"
+          className="mt-4 inline-flex items-center gap-2 rounded-[--radius-sm] bg-[image:var(--gradient-brand)] px-4 py-2 text-sm font-extrabold text-white shadow-[var(--shadow-brand)] hover:-translate-y-0.5 transition-all"
         >
           Explore courses
         </Link>
@@ -216,13 +220,13 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
   }
 
   return (
-    <div className="hover-lift overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]">
+    <div className="hover-lift premium-card rounded-[--radius-lg]">
       {/* Placeholder thumbnail */}
-      <div className="relative aspect-video bg-linear-to-br from-[--color-primary]/10 to-[--color-primary]/5 flex items-center justify-center">
+      <div className="thumbnail-fallback relative flex aspect-video items-center justify-center">
         {isCompleted ? (
           <Award className="h-12 w-12 text-[--color-star]" />
         ) : (
-          <PlayCircle className="h-12 w-12 text-[--color-primary]/40" />
+          <PlayCircle className="h-12 w-12 text-white/80" />
         )}
         {isCompleted && (
           <div className="absolute top-2 right-2">
@@ -231,7 +235,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
         )}
       </div>
 
-      <div className="p-4">
+      <div className="relative p-4">
         {enrollment.course_title && (
           <p className="text-sm font-semibold text-[--color-text-primary] mb-1 line-clamp-2">{enrollment.course_title}</p>
         )}

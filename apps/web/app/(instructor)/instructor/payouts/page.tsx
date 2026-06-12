@@ -64,13 +64,13 @@ function PayoutsContent() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <div className="flex items-center gap-3 mb-6">
         <DollarSign className="h-5 w-5 text-[--color-primary]" />
-        <h1 className="text-2xl font-bold text-[--color-text-primary]">Payouts</h1>
+        <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Payouts</h1>
       </div>
 
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)]">
+      <div className="premium-card rounded-[--radius-lg] p-6">
         <h2 className="font-semibold text-[--color-text-primary] mb-1">Stripe Connect</h2>
         <p className="text-sm text-[--color-text-muted] mb-5">
           Connect your Stripe account to receive payouts from course sales.
@@ -82,9 +82,9 @@ function PayoutsContent() {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               {status.charges_enabled && status.payouts_enabled ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 text-[--color-success]" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-yellow-500" />
+                <AlertCircle className="h-5 w-5 text-[--color-warning]" />
               )}
               <span className="text-sm font-medium text-[--color-text-primary]">
                 {status.charges_enabled && status.payouts_enabled

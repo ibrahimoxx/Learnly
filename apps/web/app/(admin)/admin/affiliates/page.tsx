@@ -87,13 +87,13 @@ export default function AdminAffiliatesPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[--color-text-primary]">Affiliate Links</h1>
+        <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Affiliate Links</h1>
         <p className="mt-1 text-sm text-[--color-text-muted]">
           Manage commission rates for each instructor's referral link.
         </p>
       </div>
 
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
+      <div className="premium-card rounded-[--radius-lg]">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-[--color-border] bg-[--color-surface]">
@@ -145,7 +145,7 @@ export default function AdminAffiliatesPage() {
                           max={100}
                           value={editValue}
                           onChange={(e) => setEditValue(e.target.value)}
-                          className="w-16 rounded border border-[--color-border] px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-[--brand-400]"
+                          className="w-16 rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1 text-center text-sm focus:outline-none focus:ring-2 focus:ring-[--brand-400]"
                           autoFocus
                           onKeyDown={(e) => {
                             if (e.key === "Enter") saveCommission(link.instructor_id);

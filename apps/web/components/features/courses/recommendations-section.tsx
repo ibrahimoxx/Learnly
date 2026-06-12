@@ -30,15 +30,15 @@ export function RecommendationsSection({ currentCourseId = "" }: { currentCourse
 
   return (
     <section>
-      <h2 className="text-lg font-bold text-[--color-text-primary]">You might also like</h2>
+      <h2 className="text-xl font-black tracking-tight text-[--color-text-primary]">You might also like</h2>
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {courses.map((course) => (
           <Link
             key={course.id}
             href={`/courses/${course.slug}`}
-            className="flex gap-3 rounded-[--radius-md] border border-[--color-border] bg-white p-3 hover:border-[--color-primary] transition-colors"
+            className="hover-lift premium-card flex gap-3 rounded-[--radius-md] p-3 transition-colors hover:border-[--color-primary]"
           >
-            <div className="flex-1 min-w-0">
+            <div className="relative flex-1 min-w-0">
               <p className="text-sm font-semibold text-[--color-text-primary] line-clamp-2">{course.title}</p>
               <p className="mt-1 text-xs text-[--color-text-muted]">
                 {course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`}

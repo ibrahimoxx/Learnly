@@ -141,7 +141,7 @@ export default function EditPathPage({ params }: Props) {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 space-y-4">
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 space-y-4">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40 w-full rounded-[--radius-md]" />
         <Skeleton className="h-60 w-full rounded-[--radius-md]" />
@@ -156,17 +156,17 @@ export default function EditPathPage({ params }: Props) {
   );
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <div className="mb-6 flex items-center gap-3">
         <Link href="/instructor/paths" className="text-[--color-text-muted] hover:text-[--color-text-primary] transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-xl font-bold text-[--color-text-primary]">Edit Path</h1>
+        <h1 className="text-3xl font-black tracking-tight text-[--color-text-primary]">Edit Path</h1>
         <Badge variant={path.status === "published" ? "success" : "secondary"}>{path.status}</Badge>
       </div>
 
       {/* Details */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] space-y-4">
+      <div className="premium-card rounded-[--radius-lg] p-5 space-y-4">
         <h2 className="text-sm font-semibold text-[--color-text-primary]">Details</h2>
         <div>
           <label className="mb-1 block text-xs font-medium text-[--color-text-secondary]">Title</label>
@@ -178,7 +178,7 @@ export default function EditPathPage({ params }: Props) {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full rounded-[--radius-sm] border border-[--color-border] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]/30 resize-none"
+            className="w-full resize-none rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]/30"
             placeholder="What will students learn from this path?"
           />
         </div>
@@ -191,7 +191,7 @@ export default function EditPathPage({ params }: Props) {
       </div>
 
       {/* Courses */}
-      <div className="mt-5 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)]">
+      <div className="premium-card mt-5 rounded-[--radius-lg] p-5">
         <h2 className="mb-4 text-sm font-semibold text-[--color-text-primary] flex items-center gap-2">
           <GraduationCap className="h-4 w-4 text-[--color-primary]" />
           Courses ({courses.length})
@@ -213,7 +213,7 @@ export default function EditPathPage({ params }: Props) {
                 <p className="flex-1 truncate text-sm font-medium text-[--color-text-primary]">{course.title}</p>
                 <button
                   onClick={() => removeCourse(course.id)}
-                  className="shrink-0 text-[--color-text-muted] hover:text-red-500 transition-colors"
+                  className="shrink-0 text-[--color-text-muted] hover:text-[--color-error] transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

@@ -110,20 +110,20 @@ export default function PromotionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <div className="flex items-center gap-3 mb-6">
         <Tag className="h-5 w-5 text-[--color-text-muted]" />
-        <h1 className="text-2xl font-bold text-[--color-text-primary]">Promotions</h1>
+        <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Promotions</h1>
       </div>
 
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)] space-y-4">
+      <div className="premium-card rounded-[--radius-lg] p-6 space-y-4">
         <h2 className="font-semibold text-[--color-text-primary]">Create coupon</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Input placeholder="Code (e.g. SAVE20)" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
           <select
             value={discountType}
             onChange={(e) => setDiscountType(e.target.value as "percent" | "fixed")}
-            className="rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="percent">% Off</option>
             <option value="fixed">$ Fixed</option>
@@ -139,7 +139,7 @@ export default function PromotionsPage() {
           <select
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
-            className="rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="__global__">All courses (global)</option>
             {courses.map((c) => (
@@ -161,13 +161,13 @@ export default function PromotionsPage() {
             {[1, 2, 3].map((i) => <div key={i} className="h-12 animate-pulse rounded-[--radius-sm] bg-[--color-border]" />)}
           </div>
         ) : coupons.length === 0 ? (
-          <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-10 shadow-[var(--shadow-xs)] text-center">
+          <div className="premium-card rounded-[--radius-md] py-10 text-center">
             <p className="text-sm text-[--color-text-muted]">No active coupons.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {coupons.map((c) => (
-              <div key={c.id} className="flex items-center justify-between rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-4 py-3 shadow-[var(--shadow-xs)] transition-colors hover:border-[--color-primary]/40">
+              <div key={c.id} className="hover-lift premium-card flex items-center justify-between rounded-[--radius-sm] px-4 py-3 transition-colors hover:border-[--color-primary]/40">
                 <div className="flex items-center gap-3 min-w-0">
                   <span className="font-mono text-sm font-bold text-[--color-text-primary]">{c.code}</span>
                   <Badge variant="outline" className="text-xs shrink-0">

@@ -13,7 +13,7 @@ export default async function InstructorLayout({ children }: { children: React.R
   return (
     <>
       <Navbar />
-      <div className="flex min-h-screen bg-[--color-surface]">
+      <div className="premium-shell flex min-h-screen">
         <InstructorSidebar />
         <main className="flex-1 min-w-0">{children}</main>
       </div>

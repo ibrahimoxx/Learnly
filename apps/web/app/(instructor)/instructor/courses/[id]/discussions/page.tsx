@@ -72,7 +72,7 @@ export default function CourseDiscussionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       <div className="flex items-center gap-3 mb-8">
         <Link
           href={`/instructor/courses/${id}/edit`}
@@ -81,7 +81,7 @@ export default function CourseDiscussionsPage() {
           <ChevronLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-xl font-bold text-[--color-text-primary]">Discussions</h1>
+          <h1 className="text-3xl font-black tracking-tight text-[--color-text-primary]">Discussions</h1>
           <p className="text-sm text-[--color-text-muted] mt-0.5">
             Moderate student discussions — pin important posts or remove off-topic ones.
           </p>
@@ -95,7 +95,7 @@ export default function CourseDiscussionsPage() {
           ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
+        <div className="premium-card flex flex-col items-center gap-3 rounded-[--radius-md] py-14 text-center">
           <MessageSquare className="h-10 w-10 text-[--color-border]" />
           <p className="text-sm text-[--color-text-muted]">No discussions yet for this course.</p>
         </div>
@@ -104,10 +104,10 @@ export default function CourseDiscussionsPage() {
           {posts.map((post) => (
             <div
               key={post.id}
-              className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] px-5 py-4 shadow-[var(--shadow-xs)]"
+              className="hover-lift premium-card rounded-[--radius-md] px-5 py-4"
             >
               <div className="flex items-start gap-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[--color-primary]/10 text-sm font-bold text-[--color-primary]">
+                <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[--color-primary-subtle] text-sm font-bold text-[--brand-800]">
                   {post.author_name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -146,7 +146,7 @@ export default function CourseDiscussionsPage() {
                     onClick={() => deletePost(post.id)}
                     disabled={actionId === post.id}
                     title="Delete post"
-                    className="rounded p-2 text-[--color-text-muted] hover:text-[--color-error] hover:bg-red-50 transition-colors disabled:opacity-40"
+                    className="rounded p-2 text-[--color-text-muted] hover:text-[--color-error] hover:bg-[--color-error]/10 transition-colors disabled:opacity-40"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

@@ -283,7 +283,7 @@ export default function CourseEditorPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
         <div className="h-6 w-48 animate-pulse rounded bg-[--color-border]" />
       </div>
     );
@@ -292,14 +292,14 @@ export default function CourseEditorPage() {
   if (!course) return null;
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link href="/instructor/courses" className="text-[--color-text-muted] hover:text-[--color-text-primary]">
             <ChevronLeft className="h-5 w-5" />
           </Link>
-          <h1 className="text-xl font-bold text-[--color-text-primary] truncate">{course.title}</h1>
+          <h1 className="truncate text-3xl font-black tracking-tight text-[--color-text-primary]">{course.title}</h1>
           <Badge variant={course.status === "published" ? "success" : "secondary"}>
             {course.status}
           </Badge>
@@ -323,7 +323,7 @@ export default function CourseEditorPage() {
       </div>
 
       {/* Course details */}
-      <section className="mt-8 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)]">
+      <section className="premium-card mt-8 rounded-[--radius-lg] p-6">
         <h2 className="font-semibold text-[--color-text-primary]">Course Details</h2>
         <div className="mt-4 space-y-4">
           <div>
@@ -345,7 +345,7 @@ export default function CourseEditorPage() {
               onChange={(e) => setDraftDescription(e.target.value)}
               rows={4}
               placeholder="What will students learn?"
-              className="w-full rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
+              className="w-full resize-none rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
             />
           </div>
           <Button onClick={saveCourseDetails} disabled={saving} size="sm">
@@ -366,7 +366,7 @@ export default function CourseEditorPage() {
         </div>
 
         {sections.length === 0 ? (
-          <div className="mt-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
+          <div className="premium-card mt-4 rounded-[--radius-md] py-14 text-center">
             <p className="text-sm text-[--color-text-muted]">
               No sections yet. Add a section to start building your curriculum.
             </p>
@@ -374,9 +374,9 @@ export default function CourseEditorPage() {
         ) : (
           <div className="mt-4 space-y-3">
             {sections.map((section) => (
-              <div key={section.id} className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
+              <div key={section.id} className="premium-card rounded-[--radius-md]">
                 {/* Section header */}
-                <div className="flex items-center gap-2 bg-[--color-surface] px-4 py-3">
+                <div className="relative flex items-center gap-2 bg-[--color-surface] px-4 py-3">
                   <GripVertical className="h-4 w-4 text-[--color-text-muted] cursor-grab" />
                   <EditableTitle
                     value={section.title}
@@ -405,7 +405,7 @@ export default function CourseEditorPage() {
 
                 {/* Lessons */}
                 {section.expanded && (
-                  <div>
+                  <div className="relative">
                     {section.lessons.map((lesson) => (
                       <div key={lesson.id} className="border-t border-[--color-border]">
                         <div className="flex items-center gap-2 px-4 py-3">
@@ -469,7 +469,7 @@ export default function CourseEditorPage() {
                         <div className="flex items-center gap-2 border-t border-[--color-border] px-4 py-2 bg-[--color-surface]">
                           <Lock className="h-3 w-3 shrink-0 text-[--color-text-muted]" />
                           <span className="text-xs text-[--color-text-muted] shrink-0">Unlock on</span>
-                          <input
+          <input
                             type="datetime-local"
                             value={lesson.unlock_at ? lesson.unlock_at.slice(0, 16) : ""}
                             onChange={async (e) => {
@@ -489,7 +489,7 @@ export default function CourseEditorPage() {
                                 )
                               );
                             }}
-                            className="rounded border border-[--color-border] bg-white px-2 py-0.5 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                            className="rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-0.5 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
                           />
                           {lesson.unlock_at && (
                             <button
@@ -560,7 +560,7 @@ export default function CourseEditorPage() {
                             [section.id]: e.target.value as "video" | "article" | "quiz",
                           }))
                         }
-                        className="rounded border border-[--color-border] bg-white px-2 py-1 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                        className="rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
                       >
                         <option value="video">Video</option>
                         <option value="article">Article</option>
@@ -591,7 +591,7 @@ export default function CourseEditorPage() {
           <h2 className="font-semibold text-[--color-text-primary]">Promotions</h2>
         </div>
 
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)] space-y-4">
+        <div className="premium-card rounded-[--radius-lg] p-6 space-y-4">
           <p className="text-sm text-[--color-text-muted]">Create coupon codes for this course.</p>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -603,7 +603,7 @@ export default function CourseEditorPage() {
             <select
               value={couponType}
               onChange={(e) => setCouponType(e.target.value as "percent" | "fixed")}
-              className="rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              className="rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
             >
               <option value="percent">% Off</option>
               <option value="fixed">$ Fixed</option>
@@ -746,7 +746,7 @@ function ExerciseBuilderPanel({
         <select
           value={languageId}
           onChange={(e) => setLanguageId(Number(e.target.value))}
-          className="rounded border border-[--color-border] bg-white px-2 py-1 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+          className="rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
         >
           <option value={71}>Python</option>
           <option value={63}>JavaScript</option>
@@ -761,7 +761,7 @@ function ExerciseBuilderPanel({
           onChange={(e) => setProblemStatement(e.target.value)}
           rows={5}
           placeholder="Describe the problem…"
-          className="w-full rounded border border-[--color-border] bg-white px-2 py-1.5 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary] resize-y"
+          className="w-full resize-y rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1.5 text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
         />
       </div>
       <div>
@@ -771,7 +771,7 @@ function ExerciseBuilderPanel({
           onChange={(e) => setStarterCode(e.target.value)}
           rows={4}
           placeholder="# starter code here"
-          className="w-full rounded border border-[--color-border] bg-white px-2 py-1.5 font-mono text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary] resize-y"
+          className="w-full resize-y rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1.5 font-mono text-xs text-[--color-text-secondary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
         />
       </div>
       <div>
@@ -783,14 +783,14 @@ function ExerciseBuilderPanel({
                 placeholder="Input"
                 value={tc.input}
                 onChange={(e) => setTestCases((prev) => prev.map((t, j) => j === i ? { ...t, input: e.target.value } : t))}
-                className="flex-1 rounded border border-[--color-border] bg-white px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                className="flex-1 rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
               />
               <span className="mt-1 text-xs text-[--color-text-muted]">→</span>
               <input
                 placeholder="Expected output"
                 value={tc.expected_output}
                 onChange={(e) => setTestCases((prev) => prev.map((t, j) => j === i ? { ...t, expected_output: e.target.value } : t))}
-                className="flex-1 rounded border border-[--color-border] bg-white px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                className="flex-1 rounded border border-[--color-border] bg-[--color-surface-raised] px-2 py-1 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
               />
               <button
                 onClick={() => setTestCases((prev) => prev.filter((_, j) => j !== i))}
@@ -844,7 +844,7 @@ function EditableTitle({
           if (e.key === "Enter") commit();
           if (e.key === "Escape") { setEditing(false); setDraft(value); }
         }}
-        className="flex-1 rounded border border-[--color-primary] bg-white px-2 py-0.5 text-sm focus:outline-none"
+        className="flex-1 rounded border border-[--color-primary] bg-[--color-surface-raised] px-2 py-0.5 text-sm focus:outline-none"
       />
     );
   }

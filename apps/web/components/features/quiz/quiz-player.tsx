@@ -162,7 +162,7 @@ export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
           ))}
         </div>
 
-        {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+        {error && <p className="mt-4 text-sm text-[--color-error]">{error}</p>}
 
         <div className="mt-8 flex items-center justify-between">
           <span className="text-xs text-white/40">
@@ -198,17 +198,17 @@ function QuizResults({
         {/* Score card */}
         <div className={`mb-8 rounded-xl border p-6 text-center ${
           attempt.passed
-            ? "border-green-500/30 bg-green-500/10"
-            : "border-red-500/30 bg-red-500/10"
+            ? "border-[--color-success]/30 bg-[--color-success]/10"
+            : "border-[--color-error]/30 bg-[--color-error]/10"
         }`}>
-          <Trophy className={`mx-auto mb-3 h-10 w-10 ${attempt.passed ? "text-green-400" : "text-red-400"}`} />
+          <Trophy className={`mx-auto mb-3 h-10 w-10 ${attempt.passed ? "text-[--color-success]" : "text-[--color-error]"}`} />
           <p className="text-4xl font-bold text-white">{pct}%</p>
           <p className="mt-1 text-sm text-white/60">
             {attempt.score} / {attempt.total} correct
           </p>
           <div className="mt-3 flex items-center justify-center gap-3">
             <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-              attempt.passed ? "bg-green-500/20 text-green-300" : "bg-red-500/20 text-red-300"
+              attempt.passed ? "bg-[--color-success]/20 text-[--color-success]" : "bg-[--color-error]/20 text-[--color-error]"
             }`}>
               {attempt.passed ? "Passed" : "Try again — need 70% to pass"}
             </span>
@@ -224,14 +224,14 @@ function QuizResults({
               <div
                 key={r.question_id}
                 className={`rounded-lg border p-4 ${
-                  r.is_correct ? "border-green-500/20 bg-green-500/5" : "border-red-500/20 bg-red-500/5"
+                  r.is_correct ? "border-[--color-success]/20 bg-[--color-success]/5" : "border-[--color-error]/20 bg-[--color-error]/5"
                 }`}
               >
                 <div className="flex items-start gap-2">
                   {r.is_correct ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
                   ) : (
-                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-[--color-error]" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white leading-snug">
@@ -247,15 +247,15 @@ function QuizResults({
                             key={oi}
                             className={`flex items-center gap-2 rounded px-3 py-1.5 text-xs ${
                               isCorrect
-                                ? "bg-green-500/15 text-green-300"
+                                ? "bg-[--color-success]/15 text-[--color-success]"
                                 : isSelected && !isCorrect
-                                ? "bg-red-500/15 text-red-300 line-through"
+                                ? "bg-[--color-error]/15 text-[--color-error] line-through"
                                 : "text-white/40"
                             }`}
                           >
                             <span className="font-bold">{String.fromCharCode(65 + oi)}.</span>
                             {opt}
-                            {isCorrect && <span className="ml-auto text-green-400">✓ Correct</span>}
+                            {isCorrect && <span className="ml-auto text-[--color-success]">✓ Correct</span>}
                           </div>
                         );
                       })}

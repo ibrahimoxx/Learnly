@@ -38,14 +38,14 @@ export default async function OrgLayout({ children, params }: Props) {
   if (!org) notFound();
 
   return (
-    <div className="min-h-screen bg-[--color-surface]">
+    <div className="premium-shell min-h-screen">
       {/* Org header */}
-      <header className="border-b border-[--color-border] bg-[--color-surface-raised]">
+      <header className="border-b border-white/60 bg-[--color-surface-glass] shadow-[var(--shadow-sm)] backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6">
           {org.logo_url ? (
             <Image src={org.logo_url} alt={org.name} width={32} height={32} className="rounded object-contain" />
           ) : (
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-[--color-primary]/10">
+            <div className="flex h-8 w-8 items-center justify-center rounded-[--radius-sm] bg-[--color-primary-subtle] shadow-[var(--shadow-xs)]">
               <Building2 className="h-4 w-4 text-[--color-primary]" />
             </div>
           )}
@@ -58,13 +58,13 @@ export default async function OrgLayout({ children, params }: Props) {
           <nav className="ml-4 flex items-center gap-1">
             <Link
               href={`/orgs/${slug}/courses`}
-              className="px-3 py-1.5 text-sm text-[--color-text-secondary] hover:text-[--color-text-primary]"
+              className="rounded-full px-3 py-1.5 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
             >
               Courses
             </Link>
             <Link
               href={`/orgs/${slug}/admin`}
-              className="px-3 py-1.5 text-sm text-[--color-text-secondary] hover:text-[--color-text-primary]"
+              className="rounded-full px-3 py-1.5 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
             >
               Admin
             </Link>

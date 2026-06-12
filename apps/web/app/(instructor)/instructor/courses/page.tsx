@@ -40,11 +40,12 @@ export default function InstructorCoursesPage() {
   }, [getToken]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[--color-text-primary]">My Courses</h1>
+          <span className="inline-flex rounded-full bg-[--color-primary-subtle] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-[--brand-800]">Instructor studio</span>
+          <h1 className="mt-3 text-4xl font-black tracking-tight text-[--color-text-primary]">My Courses</h1>
           <p className="mt-1 text-sm text-[--color-text-muted]">
             Create and manage your courses
           </p>
@@ -66,9 +67,10 @@ export default function InstructorCoursesPage() {
           ))}
         </div>
       ) : courses.length === 0 ? (
-        <div className="mt-12 flex flex-col items-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
-          <BookOpen className="h-12 w-12 text-[--color-border]" />
-          <h3 className="mt-4 font-semibold text-[--color-text-secondary]">No courses yet</h3>
+        <div className="premium-card mt-12 flex flex-col items-center rounded-[--radius-lg] py-14 text-center">
+          <img src="/brand/empty-state.svg" alt="" className="mb-2 h-32 w-auto" />
+          <BookOpen className="h-12 w-12 text-[--color-primary]" />
+          <h3 className="relative mt-4 font-extrabold text-[--color-text-secondary]">No courses yet</h3>
           <p className="mt-1 text-sm text-[--color-text-muted]">
             Create your first course and start sharing your knowledge.
           </p>
@@ -78,12 +80,12 @@ export default function InstructorCoursesPage() {
           {courses.map((course) => (
             <div
               key={course.id}
-              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]"
+              className="hover-lift premium-card flex items-center gap-4 rounded-[--radius-md] p-4"
             >
               {/* Color swatch */}
-              <div className="hidden h-14 w-20 shrink-0 rounded-[--radius-sm] bg-gradient-to-br from-[--color-primary]/10 to-[--color-primary]/5 sm:block" />
+              <div className="thumbnail-fallback hidden h-14 w-20 shrink-0 rounded-[--radius-sm] sm:block" />
 
-              <div className="flex-1 min-w-0">
+              <div className="relative flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold text-[--color-text-primary] truncate">{course.title}</h3>
                   <Badge variant={statusVariant[course.status] ?? "secondary"}>
@@ -188,7 +190,7 @@ function CreateCourseButton({
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleCreate()}
           placeholder="Course title"
-          className="h-9 rounded-[--radius-sm] border border-[--color-border] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="h-9 rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <Button onClick={handleCreate} disabled={submitting} size="sm">
           {submitting ? "Creating…" : "Create"}
@@ -197,7 +199,7 @@ function CreateCourseButton({
           Cancel
         </Button>
       </div>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs text-[--color-error]">{error}</p>}
     </div>
   );
 }

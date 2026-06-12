@@ -30,7 +30,7 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
         >
           <Star
             className={`h-7 w-7 fill-current transition-colors ${
-              star <= active ? "text-[--color-star]" : "text-gray-200"
+              star <= active ? "text-[--color-star]" : "text-[--color-border-strong]"
             }`}
           />
         </button>
@@ -145,7 +145,7 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
       ) : isEnrolled && !alreadyReviewed ? (
         <form
           onSubmit={handleSubmit}
-          className="mt-6 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface] p-5"
+          className="premium-card mt-6 rounded-[--radius-lg] p-5"
         >
           <h3 className="font-semibold text-[--color-text-primary]">Leave a Review</h3>
           <div className="mt-3">
@@ -157,7 +157,7 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
             placeholder="Share your experience with this course (optional)"
             rows={3}
             maxLength={2000}
-            className="mt-3 w-full rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-1 focus:ring-[--color-primary] resize-none"
+            className="mt-3 w-full resize-none rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
           />
           {error && <p className="mt-1 text-xs text-[--color-error]">{error}</p>}
           <button
@@ -174,7 +174,7 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
 
       {/* Reviews list */}
       {reviews.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center gap-3 rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface] py-12 text-center">
+        <div className="premium-card mt-6 flex flex-col items-center gap-3 rounded-[--radius-lg] py-12 text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[--color-primary-subtle]">
             <MessageSquare className="h-6 w-6 text-[--color-primary]" />
           </span>
@@ -185,7 +185,7 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
           {reviews.map((review) => (
             <div key={review.id} className="py-5">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[--color-primary]/10 text-sm font-semibold text-[--color-primary]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[--color-primary-subtle] text-sm font-extrabold text-[--brand-800]">
                   {review.student_name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -197,7 +197,7 @@ export function ReviewSection({ courseId, initialReviews }: ReviewSectionProps) 
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
                           key={s}
-                          className={`h-3 w-3 fill-current ${s <= review.rating ? "text-[--color-star]" : "text-gray-200"}`}
+                          className={`h-3 w-3 fill-current ${s <= review.rating ? "text-[--color-star]" : "text-[--color-border-strong]"}`}
                         />
                       ))}
                     </div>

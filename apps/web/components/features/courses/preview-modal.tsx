@@ -17,7 +17,7 @@ interface Props {
 export function PreviewModal({ lesson, onClose }: Props) {
   return (
     <Dialog open={!!lesson} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden bg-[oklch(10%_0.02_295)] border-white/10">
+      <DialogContent className="max-w-3xl overflow-hidden border-white/10 bg-[--color-hero] p-0">
         {lesson && (
           <>
             <DialogHeader className="px-5 pt-5 pb-3">

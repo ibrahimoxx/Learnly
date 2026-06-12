@@ -44,13 +44,17 @@ export default function WishlistPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold text-[--color-text-primary]">My Wishlist</h1>
+    <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-4xl">
+      <span className="inline-flex rounded-full bg-[--color-primary-subtle] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-[--brand-800]">
+        Saved courses
+      </span>
+      <h1 className="mt-3 text-4xl font-black tracking-tight text-[--color-text-primary]">My Wishlist</h1>
 
       {loading ? (
         <div className="mt-6 space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex gap-4 rounded-[--radius-md] border border-[--color-border] p-4">
+            <div key={i} className="premium-card flex gap-4 rounded-[--radius-md] p-4">
               <Skeleton className="h-20 w-32 shrink-0 rounded" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
@@ -60,13 +64,14 @@ export default function WishlistPage() {
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="mt-10 flex flex-col items-center gap-3 rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-16 shadow-[var(--shadow-xs)] text-center">
-          <Heart className="h-12 w-12 text-[--color-border]" />
-          <p className="font-semibold text-[--color-text-secondary]">Your wishlist is empty</p>
+        <div className="premium-card mt-10 flex flex-col items-center gap-3 rounded-[--radius-lg] py-16 text-center">
+          <img src="/brand/empty-state.svg" alt="" className="h-32 w-auto" />
+          <Heart className="h-12 w-12 text-[--color-error]" />
+          <p className="relative font-extrabold text-[--color-text-secondary]">Your wishlist is empty</p>
           <p className="text-sm text-[--color-text-muted]">Save courses you want to take later.</p>
           <Link
             href="/courses"
-            className="mt-2 inline-flex items-center gap-2 rounded-[--radius-sm] bg-[--color-primary] px-4 py-2 text-sm font-semibold text-white hover:bg-[--color-primary-hover] transition-colors"
+            className="mt-2 inline-flex items-center gap-2 rounded-[--radius-sm] bg-[image:var(--gradient-brand)] px-4 py-2 text-sm font-extrabold text-white shadow-[var(--shadow-brand)] transition-all hover:-translate-y-0.5"
           >
             <BookOpen className="h-4 w-4" /> Browse courses
           </Link>
@@ -76,20 +81,20 @@ export default function WishlistPage() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 hover-lift shadow-[var(--shadow-xs)]"
+              className="hover-lift premium-card flex items-center gap-4 rounded-[--radius-md] p-4"
             >
               {/* Thumbnail */}
-              <div className="h-20 w-32 shrink-0 rounded overflow-hidden bg-[--color-surface] flex items-center justify-center">
+              <div className="thumbnail-fallback flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
                 {item.course_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.course_image_url} alt={item.course_title} className="h-full w-full object-cover" />
                 ) : (
-                  <BookOpen className="h-8 w-8 text-[--color-border]" />
+                  <BookOpen className="h-8 w-8 text-white/80" />
                 )}
               </div>
 
               {/* Info */}
-              <div className="flex-1 min-w-0">
+              <div className="relative flex-1 min-w-0">
                 <Link
                   href={`/courses/${item.course_slug}`}
                   className="font-semibold text-[--color-text-primary] hover:text-[--color-primary] transition-colors line-clamp-2"
@@ -105,13 +110,13 @@ export default function WishlistPage() {
               <div className="flex shrink-0 flex-col gap-2">
                 <Link
                   href={`/courses/${item.course_slug}`}
-                  className="rounded-[--radius-sm] bg-[--color-primary] px-4 py-1.5 text-center text-xs font-semibold text-white hover:bg-[--color-primary-hover] transition-colors"
+                  className="rounded-[--radius-sm] bg-[--color-primary] px-4 py-1.5 text-center text-xs font-extrabold text-white hover:bg-[--color-primary-hover] transition-colors"
                 >
                   View course
                 </Link>
                 <button
                   onClick={() => remove(item.course_id)}
-                  className="rounded-[--radius-sm] border border-[--color-border] px-4 py-1.5 text-xs font-semibold text-[--color-text-muted] hover:border-red-300 hover:text-red-400 transition-colors"
+                  className="rounded-[--radius-sm] border border-[--color-border] px-4 py-1.5 text-xs font-extrabold text-[--color-text-muted] hover:border-[--color-error]/30 hover:text-[--color-error] transition-colors"
                 >
                   Remove
                 </button>
@@ -120,6 +125,7 @@ export default function WishlistPage() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

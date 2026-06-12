@@ -31,9 +31,9 @@ export function LiveRoom({ sessionId, getToken, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/95">
-      <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[oklch(10%_0.02_295)] px-4 py-3">
+      <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[--color-hero] px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+          <div className="h-2 w-2 animate-pulse rounded-full bg-[--color-error]" />
           <span className="text-sm font-semibold text-white">Live Session</span>
         </div>
         <button
@@ -55,7 +55,7 @@ export function LiveRoom({ sessionId, getToken, onClose }: Props) {
         {error && (
           <div className="flex flex-col items-center gap-3 text-center">
             <Video className="h-12 w-12 text-white/20" />
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-sm text-[--color-error]">{error}</p>
             <button
               onClick={onClose}
               className="rounded bg-white/10 px-4 py-2 text-xs text-white hover:bg-white/20 transition-colors"

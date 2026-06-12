@@ -166,7 +166,6 @@ export default async function CourseDetailPage({ params }: Props) {
       <div className="relative overflow-hidden bg-[image:var(--gradient-hero)] text-white">
         {/* Decorative atmosphere — pure visual */}
         <div aria-hidden className="pointer-events-none absolute -top-24 right-[8%] h-72 w-72 rounded-full bg-[--brand-500] opacity-20 blur-[110px]" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-32 left-[12%] h-64 w-64 rounded-full bg-[oklch(55%_0.24_320)] opacity-15 blur-[120px]" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="max-w-2xl stagger-children">
@@ -181,7 +180,7 @@ export default async function CourseDetailPage({ params }: Props) {
               <span className="truncate text-white/60">{course.title}</span>
             </nav>
 
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               {course.title}
             </h1>
 
@@ -192,7 +191,7 @@ export default async function CourseDetailPage({ params }: Props) {
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Badge variant="default" className="border-0 bg-[image:var(--gradient-brand)] px-3 py-1 text-xs font-semibold text-white shadow-[var(--shadow-brand)]">
+              <Badge variant="default" className="border-0 bg-[image:var(--gradient-brand)] px-3 py-1 text-xs font-extrabold text-white shadow-[var(--shadow-brand)]">
                 {levelLabels[course.level] ?? course.level}
               </Badge>
               {course.review_count > 0 && (
@@ -232,7 +231,7 @@ export default async function CourseDetailPage({ params }: Props) {
             {/* What you'll learn */}
             <section className="animate-fade-up">
               <h2 className="text-xl font-bold tracking-tight text-[--color-text-primary]">{t("whatYoullLearn")}</h2>
-              <div className="mt-4 grid grid-cols-1 gap-3 rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-sm)] sm:grid-cols-2">
+              <div className="premium-card mt-4 grid grid-cols-1 gap-3 rounded-[--radius-lg] p-6 sm:grid-cols-2">
                 {learnItems.map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
@@ -292,14 +291,14 @@ export default async function CourseDetailPage({ params }: Props) {
 
           {/* Sticky sidebar */}
           <aside className="lg:w-80 shrink-0">
-            <div className="sticky top-24 animate-scale-in overflow-hidden rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xl)]">
-              <div className="group relative aspect-video overflow-hidden bg-[image:var(--gradient-hero)]">
+            <div className="premium-card sticky top-24 animate-scale-in rounded-[--radius-xl]">
+              <div className="thumbnail-fallback sheen-overlay group relative aspect-video overflow-hidden">
                 {course.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={course.image_url}
                     alt={course.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">

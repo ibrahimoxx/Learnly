@@ -124,7 +124,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
               className={
                 dark
                   ? "w-full rounded bg-white/10 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
-                  : "w-full rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  : "w-full rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
               }
             />
             <textarea
@@ -136,11 +136,11 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
               className={
                 dark
                   ? "w-full rounded bg-white/10 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[--color-primary] resize-none"
-                  : "w-full rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
+                  : "w-full resize-none rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
               }
             />
             {postError && (
-              <p className="text-xs text-red-600">{postError}</p>
+              <p className="text-xs text-[--color-error]">{postError}</p>
             )}
             <div className="flex justify-end gap-2">
               <button
@@ -169,7 +169,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
             className={
               dark
                 ? "w-full rounded bg-white/5 px-2.5 py-1.5 text-left text-xs text-white/30 hover:bg-white/10 hover:text-white/50 transition-colors"
-                : "w-full rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface] px-3 py-2.5 text-left text-sm text-[--color-text-muted] hover:border-[--color-primary]/50 hover:bg-white transition-colors"
+                : "w-full rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface] px-3 py-2.5 text-left text-sm text-[--color-text-muted] hover:border-[--color-primary]/50 hover:bg-[--color-surface-raised] transition-colors"
             }
           >
             Start a discussion…
@@ -200,7 +200,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
                 <div className="flex items-start gap-3">
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-[--color-primary] ${
-                      dark ? "bg-[--color-primary]/20" : "bg-[--color-primary]/10"
+                      dark ? "bg-[--color-primary]/20" : "bg-[--color-primary-subtle]"
                     }`}
                   >
                     {post.author_name.charAt(0).toUpperCase()}
@@ -313,7 +313,7 @@ export default function DiscussionSection({ courseId, theme = "light" }: Props) 
                       className={
                         dark
                           ? "flex-1 rounded bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[--color-primary] min-w-0"
-                          : "flex-1 rounded-[--radius-sm] border border-[--color-border] bg-white px-3 py-1.5 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary] min-w-0"
+                          : "flex-1 min-w-0 rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-1.5 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                       }
                     />
                     <button

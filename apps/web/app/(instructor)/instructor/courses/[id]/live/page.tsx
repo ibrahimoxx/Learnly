@@ -112,16 +112,16 @@ export default function InstructorLivePage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
       <div className="flex items-center gap-3 mb-8">
         <Link href={`/instructor/courses/${courseId}/edit`} className="text-[--color-text-muted] hover:text-[--color-text-primary]">
           <ChevronLeft className="h-5 w-5" />
         </Link>
-        <h1 className="text-xl font-bold text-[--color-text-primary]">Live Sessions</h1>
+        <h1 className="text-3xl font-black tracking-tight text-[--color-text-primary]">Live Sessions</h1>
       </div>
 
       {/* Create session form */}
-      <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 shadow-[var(--shadow-xs)] mb-6">
+      <div className="premium-card mb-6 rounded-[--radius-lg] p-5">
         <h2 className="text-sm font-semibold text-[--color-text-primary] mb-3">New Session</h2>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Input
@@ -134,7 +134,7 @@ export default function InstructorLivePage() {
             type="datetime-local"
             value={newScheduledAt}
             onChange={(e) => setNewScheduledAt(e.target.value)}
-            className="rounded border border-[--color-border] bg-white px-3 py-2 text-sm text-[--color-text-secondary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-secondary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
           <Button onClick={createSession} disabled={creating || !newTitle.trim()} size="sm" className="gap-1">
             <Plus className="h-4 w-4" />
@@ -145,22 +145,22 @@ export default function InstructorLivePage() {
 
       {/* Sessions list */}
       {sessions.length === 0 ? (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] py-14 shadow-[var(--shadow-xs)] text-center">
+        <div className="premium-card rounded-[--radius-md] py-14 text-center">
           <Radio className="mx-auto h-8 w-8 text-[--color-text-muted] mb-3" />
           <p className="text-sm text-[--color-text-muted]">No live sessions yet. Create one above.</p>
         </div>
       ) : (
         <div className="space-y-3">
           {sessions.map((session) => (
-            <div key={session.id} className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]">
+            <div key={session.id} className="hover-lift premium-card rounded-[--radius-md] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold text-[--color-text-primary] truncate">{session.title}</h3>
                     <Badge variant={STATUS_BADGE[session.status]}>{session.status}</Badge>
                     {session.status === "live" && (
-                      <span className="flex items-center gap-1 text-xs text-red-500 font-medium">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" />
+                      <span className="flex items-center gap-1 text-xs text-[--color-error] font-medium">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[--color-error]" />
                         LIVE
                       </span>
                     )}
@@ -173,7 +173,7 @@ export default function InstructorLivePage() {
                       </span>
                     )}
                     {session.started_at && (
-                      <span className="flex items-center gap-1 text-green-600">
+                      <span className="flex items-center gap-1 text-[--color-success]">
                         <CheckCircle className="h-3.5 w-3.5" />
                         Started: {new Date(session.started_at).toLocaleString()}
                       </span>

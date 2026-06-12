@@ -35,10 +35,13 @@ export default async function CoursesPage({ searchParams }: Props) {
   const { items, total } = await getCourses(params);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[--color-text-primary]">
+      <div className="mx-auto mb-8 max-w-7xl">
+        <span className="inline-flex rounded-full bg-[--color-primary-subtle] px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-[--brand-800]">
+          Course catalog
+        </span>
+        <h1 className="mt-3 text-4xl font-black tracking-tight text-[--color-text-primary] sm:text-5xl">
           {params.q ? `Results for "${params.q}"` : "All Courses"}
         </h1>
         <p className="mt-1 text-sm text-[--color-text-muted]">
@@ -47,15 +50,15 @@ export default async function CoursesPage({ searchParams }: Props) {
       </div>
 
       {/* Mobile level chips */}
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden" style={{ scrollbarWidth: "none" }}>
+      <div className="mx-auto mb-4 flex max-w-7xl gap-2 overflow-x-auto pb-1 lg:hidden" style={{ scrollbarWidth: "none" }}>
         {LEVELS.map((level) => (
           <a
             key={level.value}
             href={`/courses?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), ...(level.value ? { level: level.value } : {}) })}`}
-            className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-extrabold shadow-[var(--shadow-xs)] transition-colors ${
               (params.level ?? "") === level.value
                 ? "border-[--color-primary] bg-[--color-primary] text-white"
-                : "border-[--color-border] text-[--color-text-secondary] hover:border-[--color-primary] hover:text-[--color-primary]"
+                : "border-[--color-border] bg-[--color-surface-raised] text-[--color-text-secondary] hover:border-[--color-primary] hover:text-[--color-primary]"
             }`}
           >
             {level.label}
@@ -63,19 +66,19 @@ export default async function CoursesPage({ searchParams }: Props) {
         ))}
       </div>
 
-      <div className="flex gap-8">
+      <div className="mx-auto flex max-w-7xl gap-8">
         {/* Filters sidebar — desktop only */}
         <aside className="hidden w-56 shrink-0 lg:block">
-          <div className="sticky top-24">
-            <p className="mb-3 text-sm font-semibold text-[--color-text-primary]">Level</p>
-            <div className="space-y-1">
+          <div className="premium-card sticky top-24 rounded-[--radius-lg] p-4">
+            <p className="relative mb-3 text-sm font-extrabold text-[--color-text-primary]">Level</p>
+            <div className="relative space-y-1">
               {LEVELS.map((level) => (
                 <a
                   key={level.value}
                   href={`/courses?${new URLSearchParams({ ...(params.q ? { q: params.q } : {}), ...(level.value ? { level: level.value } : {}) })}`}
-                  className={`flex min-h-11 items-center rounded-[--radius-sm] px-3 text-sm transition-colors ${
+                  className={`flex min-h-11 items-center rounded-[--radius-sm] px-3 text-sm font-bold transition-colors ${
                     (params.level ?? "") === level.value
-                      ? "bg-[--color-primary]/10 font-medium text-[--color-primary]"
+                      ? "bg-[--color-primary-subtle] text-[--brand-800]"
                       : "text-[--color-text-secondary] hover:bg-[--color-surface]"
                   }`}
                 >
@@ -95,8 +98,9 @@ export default async function CoursesPage({ searchParams }: Props) {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-20 text-center shadow-[var(--shadow-xs)]">
-              <p className="text-base font-semibold text-[--color-text-secondary]">No courses found</p>
+            <div className="premium-card flex flex-col items-center justify-center rounded-[--radius-lg] py-20 text-center">
+              <img src="/brand/empty-state.svg" alt="" className="mb-4 h-32 w-auto" />
+              <p className="relative text-base font-extrabold text-[--color-text-secondary]">No courses found</p>
               <p className="mt-1 text-sm text-[--color-text-muted]">
                 {params.q ? `Try a different search term.` : "Check back soon — new courses are added regularly."}
               </p>

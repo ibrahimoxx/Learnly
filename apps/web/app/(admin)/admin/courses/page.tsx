@@ -17,10 +17,10 @@ interface AdminCourse {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  published: "bg-green-100 text-green-700",
-  in_review: "bg-yellow-100 text-yellow-700",
-  draft: "bg-gray-100 text-gray-600",
-  archived: "bg-red-100 text-red-600",
+  published: "bg-[--color-success]/10 text-[--color-success]",
+  in_review: "bg-[--color-warning]/10 text-[--color-warning]",
+  draft: "bg-[--color-surface] text-[--color-text-secondary]",
+  archived: "bg-[--color-error]/10 text-[--color-error]",
 };
 
 const ACTIONS: Record<string, { label: string; next: string }[]> = {
@@ -83,11 +83,11 @@ export default function AdminCoursesPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl font-bold text-[--color-text-primary]">Course Moderation</h1>
+        <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Course Moderation</h1>
         <select
           value={filter}
           onChange={(e) => { setFilter(e.target.value); setLoading(true); }}
-          className="rounded-[--radius-sm] border border-[--color-border] px-3 py-1.5 text-sm focus:outline-none"
+          className="rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-1.5 text-sm focus:outline-none"
         >
           <option value="">All statuses</option>
           <option value="in_review">Pending review</option>
@@ -104,7 +104,7 @@ export default function AdminCoursesPage() {
       ) : courses.length === 0 ? (
         <p className="text-sm text-[--color-text-muted] text-center py-10">No courses found.</p>
       ) : (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
+        <div className="premium-card rounded-[--radius-lg]">
           <table className="w-full text-sm">
             <thead className="border-b border-[--color-border] bg-[--color-surface]">
               <tr>
@@ -122,7 +122,7 @@ export default function AdminCoursesPage() {
                     {c.title}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${STATUS_COLORS[c.status] ?? "bg-gray-100 text-gray-600"}`}>
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold ${STATUS_COLORS[c.status] ?? "bg-[--color-surface] text-[--color-text-secondary]"}`}>
                       {c.status}
                     </span>
                   </td>

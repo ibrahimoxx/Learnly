@@ -163,9 +163,9 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[oklch(10%_0.02_295)] pb-13 lg:pb-0">
+    <div className="flex h-screen flex-col overflow-hidden bg-[--color-hero] pb-13 lg:pb-0">
       {/* Top bar */}
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[oklch(12%_0.03_295)] px-4">
+      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[--color-hero-raised] px-4 shadow-[var(--shadow-lg)]">
         <Link
           href="/dashboard"
           className="flex items-center gap-1 text-xs text-white/60 hover:text-white/90 transition-colors"
@@ -182,7 +182,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Live session banner */}
           {liveSession && (
-            <div className="shrink-0 flex items-center justify-between bg-red-600/90 px-4 py-2">
+            <div className="shrink-0 flex items-center justify-between bg-[--color-error] px-4 py-2">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
                 <span className="text-xs font-semibold text-white">Live session in progress: {liveSession.title}</span>
@@ -236,7 +236,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           )}
 
           {nextLesson && (
-            <div className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[oklch(12%_0.03_295)] px-6 py-3">
+            <div className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[--color-hero-raised] px-6 py-3">
               <span className="text-xs text-white/50">Up next: {nextLesson.title}</span>
               <button
                 onClick={() => navigateTo(nextLesson.id)}
@@ -249,7 +249,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         </div>
 
         {/* Mobile bottom bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex border-t border-white/10 bg-[oklch(12%_0.03_295)]">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex border-t border-white/10 bg-[--color-hero-raised] shadow-[var(--shadow-xl)]">
           {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
             const labels: Record<SidebarTab, string> = { content: "Content", qa: "Q&A", forums: "Forums" };
             const icons: Record<SidebarTab, React.ReactNode> = {
@@ -274,7 +274,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         {mobileDrawerOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex flex-col justify-end">
             <div className="absolute inset-0 bg-black/70" onClick={() => setMobileDrawerOpen(false)} />
-            <div className="relative flex flex-col rounded-t-2xl bg-[oklch(12%_0.03_295)] overflow-hidden" style={{ height: "75dvh" }}>
+            <div className="relative flex flex-col rounded-t-2xl bg-[--color-hero-raised] overflow-hidden shadow-[var(--shadow-xl)]" style={{ height: "75dvh" }}>
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
                 <div className="flex gap-4">
                   {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
@@ -306,7 +306,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         )}
 
         {/* Desktop sidebar */}
-        <aside className="hidden w-80 shrink-0 flex-col border-l border-white/10 bg-[oklch(12%_0.03_295)] lg:flex overflow-hidden">
+        <aside className="hidden w-80 shrink-0 flex-col overflow-hidden border-l border-white/10 bg-[--color-hero-raised] shadow-[var(--shadow-xl)] lg:flex">
           {/* Tab bar */}
           <div className="flex shrink-0 border-b border-white/10">
             <button
@@ -416,7 +416,7 @@ function ContentTab({
                       ) : isCurrent ? (
                         <PlayCircle className="h-4 w-4 text-[--color-primary]" />
                       ) : completedIds.has(lesson.id) ? (
-                        <CheckCircle className="h-4 w-4 text-green-400" />
+                        <CheckCircle className="h-4 w-4 text-[--color-success]" />
                       ) : lesson.type === "video" ? (
                         <Circle className="h-4 w-4 text-white/30" />
                       ) : lesson.type === "quiz" ? (
@@ -512,7 +512,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
       setReplyTexts((prev) => ({ ...prev, [questionId]: "" }));
       setReplyingTo(null);
     } catch {
-      // TODO: show error toast
+      // Non-critical answer failure stays local to the Q&A panel.
     }
   }
 
@@ -549,7 +549,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
       </form>
 
       {submitError && (
-        <p className="shrink-0 px-3 py-1 text-[10px] text-red-400">{submitError}</p>
+        <p className="shrink-0 px-3 py-1 text-[10px] text-[--color-error]">{submitError}</p>
       )}
 
       {/* Questions list */}

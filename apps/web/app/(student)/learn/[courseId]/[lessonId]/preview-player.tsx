@@ -9,9 +9,9 @@ interface Props {
 
 export function PreviewPlayer({ lesson, course }: Props) {
   return (
-    <div className="flex min-h-screen flex-col bg-[oklch(10%_0.02_295)]">
+    <div className="flex min-h-screen flex-col bg-[--color-hero]">
       {/* Top bar */}
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[oklch(12%_0.03_295)] px-4">
+      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[--color-hero-raised] px-4 shadow-[var(--shadow-lg)]">
         <Link
           href={`/courses/${course.slug}`}
           className="flex items-center gap-1 text-xs text-white/60 hover:text-white/90 transition-colors"
@@ -66,7 +66,7 @@ export function PreviewPlayer({ lesson, course }: Props) {
         )}
 
         {/* CTA banner */}
-        <div className="shrink-0 border-t border-white/10 bg-[oklch(12%_0.03_295)] px-6 py-4">
+        <div className="shrink-0 border-t border-white/10 bg-[--color-hero-raised] px-6 py-4">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
             <p className="text-sm text-white/70">
               Enjoying this preview? Enroll to access all{" "}

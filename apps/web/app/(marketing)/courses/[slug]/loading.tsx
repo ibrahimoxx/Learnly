@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function CourseDetailLoading() {
   return (
     <div className="min-h-screen">
-      <div className="bg-[oklch(14%_0.03_295)] px-4 py-10 sm:px-6">
+      <div className="mesh-panel px-4 py-10 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <Skeleton className="h-4 w-32 mb-4 bg-white/20" />
           <Skeleton className="h-8 w-2/3 mb-3 bg-white/20" />
@@ -19,7 +19,7 @@ export default function CourseDetailLoading() {
         </div>
         <div className="hidden lg:block w-80">
           <Skeleton className="aspect-video w-full rounded-t-[--radius-md]" />
-          <div className="p-5 border border-t-0 border-[--color-border] rounded-b-[--radius-md] space-y-3">
+          <div className="space-y-3 rounded-b-[--radius-md] border border-t-0 border-[--color-border] p-5">
             <Skeleton className="h-8 w-24" />
             <Skeleton className="h-10 w-full" />
           </div>

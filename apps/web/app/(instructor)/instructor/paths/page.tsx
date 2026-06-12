@@ -65,10 +65,10 @@ export default function InstructorPathsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[--color-text-primary]">Learning Paths</h1>
+          <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Learning Paths</h1>
           <p className="mt-1 text-sm text-[--color-text-muted]">Create curated course sequences</p>
         </div>
         <Button size="sm" className="gap-1.5" onClick={() => setShowCreate(true)}>
@@ -77,7 +77,7 @@ export default function InstructorPathsPage() {
       </div>
 
       {showCreate && (
-        <div className="mt-6 rounded-[--radius-md] border border-[--color-primary]/30 bg-[--color-primary]/5 p-5">
+        <div className="premium-card mt-6 rounded-[--radius-lg] p-5">
           <h2 className="mb-4 text-sm font-semibold text-[--color-text-primary]">Create new path</h2>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1">
@@ -120,9 +120,10 @@ export default function InstructorPathsPage() {
             {[1, 2, 3].map((i) => <Skeleton key={i} className="h-20 w-full rounded-[--radius-md]" />)}
           </div>
         ) : paths.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-[--radius-lg] border border-[--color-border] bg-[--color-surface-raised] py-20 shadow-[var(--shadow-xs)] text-center">
-            <GraduationCap className="h-12 w-12 text-[--color-border]" />
-            <p className="mt-3 font-semibold text-[--color-text-secondary]">No paths yet</p>
+          <div className="premium-card flex flex-col items-center justify-center rounded-[--radius-lg] py-20 text-center">
+            <img src="/brand/empty-state.svg" alt="" className="mb-3 h-32 w-auto" />
+            <GraduationCap className="h-12 w-12 text-[--color-primary]" />
+            <p className="relative mt-3 font-extrabold text-[--color-text-secondary]">No paths yet</p>
             <p className="mt-1 text-sm text-[--color-text-muted]">Create a path to guide students through a learning journey.</p>
           </div>
         ) : (
@@ -130,12 +131,12 @@ export default function InstructorPathsPage() {
             {paths.map((path) => (
               <div
                 key={path.id}
-                className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-4 shadow-[var(--shadow-xs)]"
+                className="hover-lift premium-card flex items-center gap-4 rounded-[--radius-md] p-4"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary]/10">
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[--radius-sm] bg-[--color-primary-subtle]">
                   <GraduationCap className="h-5 w-5 text-[--color-primary]" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="relative flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="truncate font-semibold text-sm text-[--color-text-primary]">{path.title}</p>
                     <Badge variant={path.status === "published" ? "success" : "secondary"}>

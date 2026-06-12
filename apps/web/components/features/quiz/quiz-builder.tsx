@@ -200,7 +200,7 @@ export function QuizBuilder({ lessonId, token }: Props) {
                           key={oi}
                           className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] ${
                             oi === q.correct_index
-                              ? "bg-green-100 text-green-700 font-medium"
+                              ? "bg-[--color-success]/10 text-[--color-success] font-medium"
                               : "bg-[--color-surface] text-[--color-text-muted]"
                           }`}
                         >
@@ -279,7 +279,7 @@ function QuestionForm({
               onClick={() => setForm((f) => ({ ...f, correct_index: i }))}
               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-colors ${
                 form.correct_index === i
-                  ? "border-green-500 bg-green-500 text-white"
+                  ? "border-[--color-success] bg-[--color-success] text-white"
                   : "border-[--color-border] text-[--color-text-muted] hover:border-[--color-primary]"
               }`}
               title="Mark as correct"

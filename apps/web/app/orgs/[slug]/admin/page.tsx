@@ -60,7 +60,7 @@ export default async function OrgAdminPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <h1 className="text-2xl font-bold text-[--color-text-primary]">Organization Admin</h1>
+      <h1 className="text-4xl font-black tracking-tight text-[--color-text-primary]">Organization Admin</h1>
       <p className="mt-1 text-sm text-[--color-text-muted]">Manage your organization&apos;s learning environment.</p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -68,12 +68,12 @@ export default async function OrgAdminPage({ params }: Props) {
           <a
             key={label}
             href={href}
-            className="flex items-center gap-4 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-5 hover-lift hover:border-[--color-primary]/40 shadow-[var(--shadow-xs)]"
+            className="hover-lift premium-card flex items-center gap-4 rounded-[--radius-md] p-5 hover:border-[--color-primary]/40"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-[--radius-md] bg-[--color-primary]/10">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-[--radius-md] bg-[--color-primary-subtle]">
               <Icon className="h-5 w-5 text-[--color-primary]" />
             </div>
-            <div>
+            <div className="relative">
               <p className="text-xl font-bold text-[--color-text-primary]">{value}</p>
               <p className="text-sm text-[--color-text-muted]">{label}</p>
             </div>
@@ -82,7 +82,7 @@ export default async function OrgAdminPage({ params }: Props) {
       </div>
 
       {/* Settings shortcut */}
-      <div className="mt-8 rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] p-6 shadow-[var(--shadow-xs)]">
+      <div className="premium-card mt-8 rounded-[--radius-md] p-6">
         <h2 className="font-semibold text-[--color-text-primary]">Organization Settings</h2>
         <p className="mt-1 text-sm text-[--color-text-muted]">
           Manage branding, SSO, and seat configuration from your Clerk organization dashboard.

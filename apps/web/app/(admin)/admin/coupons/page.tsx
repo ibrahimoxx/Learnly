@@ -38,7 +38,7 @@ export default function AdminCouponsPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-xl font-bold text-[--color-text-primary] mb-5">All Coupons</h1>
+      <h1 className="mb-5 text-4xl font-black tracking-tight text-[--color-text-primary]">All Coupons</h1>
 
       {loading ? (
         <div className="space-y-2">
@@ -47,7 +47,7 @@ export default function AdminCouponsPage() {
       ) : coupons.length === 0 ? (
         <p className="text-sm text-[--color-text-muted] text-center py-10">No coupons created yet.</p>
       ) : (
-        <div className="rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] overflow-hidden shadow-[var(--shadow-xs)]">
+        <div className="premium-card rounded-[--radius-lg]">
           <table className="w-full text-sm">
             <thead className="border-b border-[--color-border] bg-[--color-surface]">
               <tr>
@@ -68,7 +68,7 @@ export default function AdminCouponsPage() {
                     {c.expires_at ? new Date(c.expires_at).toLocaleDateString() : "Never"}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs font-semibold ${c.is_active ? "text-green-600" : "text-red-500"}`}>
+                    <span className={`text-xs font-extrabold ${c.is_active ? "text-[--color-success]" : "text-[--color-error]"}`}>
                       {c.is_active ? "Active" : "Inactive"}
                     </span>
                   </td>
