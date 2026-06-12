@@ -17,7 +17,11 @@ from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.user import User
 from app.integrations import stripe_client as _stripe_init  # noqa: F401 — sets api_key
-from app.schemas.checkout import CheckoutSessionCreate, CheckoutSessionRead
+from app.schemas.checkout import (
+    CheckoutSessionCreate,
+    CheckoutSessionRead,
+    GiftCheckoutSessionCreate,
+)
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/checkout", tags=["checkout"])
@@ -140,5 +144,95 @@ async def create_checkout_session(
         course_id=str(course.id),
         coupon=applied_coupon.code if applied_coupon else None,
         final_price=final_price,
+    )
+    return CheckoutSessionRead(checkout_url=session.url, session_id=session.id)
+
+
+@router.post("/gift-sessions", response_model=CheckoutSessionRead)
+async def create_gift_checkout_session(
+    body: GiftCheckoutSessionCreate,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> CheckoutSessionRead:
+    course_result = await db.execute(
+        select(Course).where(Course.id == uuid.UUID(body.course_id))
+    )
+    course = course_result.scalar_one_or_none()
+    if not course:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
+    if course.status != "published":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course not published")
+    if course.is_free:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course is free — use enroll endpoint")
+
+    recipient_result = await db.execute(
+        select(User).where(User.email == body.recipient_email.lower())
+    )
+    recipient = recipient_result.scalar_one_or_none()
+    if not recipient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recipient must have a Learnly account before they can receive a gift",
+        )
+    if recipient.id == user.id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot gift a course to yourself")
+
+    existing = await db.execute(
+        select(Enrollment).where(
+            Enrollment.student_id == recipient.id,
+            Enrollment.course_id == course.id,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Recipient is already enrolled")
+
+    metadata: dict[str, str] = {
+        "user_id": str(user.id),
+        "course_id": str(course.id),
+        "is_gift": "true",
+        "recipient_user_id": str(recipient.id),
+        "recipient_email": recipient.email,
+        "gift_message": (body.gift_message or "")[:500],
+        "affiliate_code": "",
+    }
+
+    idempotency_key = f"gift-checkout-{user.id}-{course.id}-{uuid.uuid4().hex}"
+    cancel_url = f"{settings.app_url}/checkout/cancel?{urlencode({'course': course.slug})}"
+    try:
+        session = await _create_stripe_session(
+            payment_method_types=["card"],
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": course.price_in_cents,
+                    "product_data": {"name": f"Gift: {course.title}"},
+                },
+                "quantity": 1,
+            }],
+            mode="payment",
+            success_url=f"{settings.app_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=cancel_url,
+            metadata=metadata,
+            idempotency_key=idempotency_key,
+        )
+    except STRIPE_ERROR_TYPES as exc:
+        message = _get_stripe_error_message(exc)
+        log.error(
+            "gift_checkout_session_failed",
+            error=message,
+            user_id=str(user.id),
+            course_id=str(course.id),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Payment provider error: {message}",
+        ) from exc
+
+    log.info(
+        "gift_checkout_session_created",
+        session_id=session.id,
+        user_id=str(user.id),
+        recipient_id=str(recipient.id),
+        course_id=str(course.id),
     )
     return CheckoutSessionRead(checkout_url=session.url, session_id=session.id)

@@ -206,9 +206,13 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         log.warning("stripe_webhook_missing_metadata", session_id=session_id)
         return
 
+    is_gift = meta.get("is_gift") if isinstance(meta, dict) else getattr(meta, "is_gift", None)
+    recipient_user_id = meta.get("recipient_user_id") if isinstance(meta, dict) else getattr(meta, "recipient_user_id", None)
+    enroll_student_id = recipient_user_id if is_gift == "true" and recipient_user_id else user_id
+
     existing = await db.execute(
         select(Enrollment).where(
-            Enrollment.student_id == uuid.UUID(user_id),
+            Enrollment.student_id == uuid.UUID(enroll_student_id),
             Enrollment.course_id == uuid.UUID(course_id),
         )
     )
@@ -216,7 +220,7 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         return
 
     enrollment = Enrollment(
-        student_id=uuid.UUID(user_id),
+        student_id=uuid.UUID(enroll_student_id),
         course_id=uuid.UUID(course_id),
     )
     db.add(enrollment)
@@ -227,7 +231,13 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         course.enrollment_count = (course.enrollment_count or 0) + 1
 
     await db.commit()
-    log.info("enrollment_created_via_stripe", user_id=user_id, course_id=course_id)
+    log.info(
+        "enrollment_created_via_stripe",
+        user_id=user_id,
+        student_id=enroll_student_id,
+        course_id=course_id,
+        is_gift=is_gift == "true",
+    )
 
     raw_aff_code = meta.get("affiliate_code", "") if isinstance(meta, dict) else getattr(meta, "affiliate_code", "")
     import re as _re

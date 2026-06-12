@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "./star-rating";
+import { AddToCartButton } from "./add-to-cart-button";
 import type { Course } from "@/types";
 
 interface CourseCardProps {

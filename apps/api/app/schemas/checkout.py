@@ -10,3 +10,9 @@ class CheckoutSessionCreate(BaseModel):
 class CheckoutSessionRead(BaseModel):
     checkout_url: str
     session_id: str
+
+
+class GiftCheckoutSessionCreate(BaseModel):
+    course_id: str
+    recipient_email: str = Field(..., max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    gift_message: str | None = Field(None, max_length=500)
