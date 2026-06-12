@@ -83,7 +83,7 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[--color-primary] border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
       </div>
     );
   }
@@ -104,10 +104,10 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
 
   const verdictColor =
     result?.status === "accepted"
-      ? "text-[--color-success]"
+      ? "text-[var(--color-success)]"
       : result?.status === "wrong_answer"
-      ? "text-[--color-error]"
-      : "text-[--color-warning]";
+      ? "text-[var(--color-error)]"
+      : "text-[var(--color-warning)]";
 
   return (
     <div className="flex h-full flex-col overflow-hidden lg:flex-row">
@@ -152,7 +152,7 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
       {/* Right: editor + results */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Editor toolbar */}
-        <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[--color-hero-raised] px-3 py-2">
+        <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-[var(--color-hero-raised)] px-3 py-2">
           <div ref={langRef} className="relative">
             <button
               onClick={() => setLangOpen((v) => !v)}
@@ -162,12 +162,12 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
               <ChevronDown className="h-3 w-3 text-white/50" />
             </button>
             {langOpen && (
-              <div className="absolute left-0 top-8 z-50 min-w-30 rounded-md border border-white/15 bg-[--color-hero-raised] shadow-[var(--shadow-xl)]">
+              <div className="absolute left-0 top-8 z-50 min-w-30 rounded-md border border-white/15 bg-[var(--color-hero-raised)] shadow-[var(--shadow-xl)]">
                 {Object.entries(LANGUAGES).map(([id, lang]) => (
                   <button
                     key={id}
                     onClick={() => { setLanguageId(Number(id)); setLangOpen(false); }}
-                    className={`flex w-full items-center px-3 py-2 text-xs transition-colors hover:bg-white/10 ${Number(id) === languageId ? "text-[--color-primary] font-semibold" : "text-white/80"}`}
+                    className={`flex w-full items-center px-3 py-2 text-xs transition-colors hover:bg-white/10 ${Number(id) === languageId ? "text-[var(--color-primary)] font-semibold" : "text-white/80"}`}
                   >
                     {lang.name}
                   </button>
@@ -178,7 +178,7 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex items-center gap-1.5 rounded bg-[--color-primary] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50 hover:bg-[--color-primary-hover] transition-colors"
+            className="flex items-center gap-1.5 rounded bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50 hover:bg-[var(--color-primary-hover)] transition-colors"
           >
             <Play className="h-3.5 w-3.5" />
             {submitting ? "Running…" : "Run & Submit"}
@@ -188,7 +188,7 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
         {/* Code editor */}
         <div className="flex-1 overflow-hidden">
           <textarea
-            className="h-full w-full resize-none bg-[--color-hero] p-3 font-mono text-sm text-white/90 focus:outline-none focus:ring-1 focus:ring-[--color-primary]/50"
+            className="h-full w-full resize-none bg-[var(--color-hero)] p-3 font-mono text-sm text-white/90 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]/50"
             placeholder={`// Write your ${LANGUAGES[languageId]?.name ?? "code"} solution here…`}
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -198,9 +198,9 @@ export function CodingExercisePlayer({ lessonId, token: _serverToken }: Props) {
 
         {/* Results panel */}
         {(result || error) && (
-          <div className="shrink-0 max-h-56 overflow-y-auto border-t border-white/10 bg-[--color-hero] p-3">
+          <div className="shrink-0 max-h-56 overflow-y-auto border-t border-white/10 bg-[var(--color-hero)] p-3">
             {error && !result && (
-              <p className="text-xs text-[--color-error]">{error}</p>
+              <p className="text-xs text-[var(--color-error)]">{error}</p>
             )}
             {result && (
               <>
@@ -240,11 +240,11 @@ function TestResult({ result }: { result: TestCaseResult }) {
         className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-white/5 transition-colors"
       >
         {result.passed ? (
-          <CheckCircle2 className="h-4 w-4 shrink-0 text-[--color-success]" />
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--color-success)]" />
         ) : (
-          <XCircle className="h-4 w-4 shrink-0 text-[--color-error]" />
+          <XCircle className="h-4 w-4 shrink-0 text-[var(--color-error)]" />
         )}
-        <span className={result.passed ? "text-[--color-success]" : "text-[--color-error]"}>
+        <span className={result.passed ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}>
           Test {result.index + 1} — {result.passed ? "Passed" : "Failed"}
         </span>
         <span className="ml-auto flex items-center gap-2 text-white/30">

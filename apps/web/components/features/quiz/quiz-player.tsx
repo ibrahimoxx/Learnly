@@ -121,7 +121,7 @@ export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
     <div className="flex-1 overflow-y-auto p-8">
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex items-center gap-3">
-          <HelpCircle className="h-5 w-5 text-[--color-primary]" />
+          <HelpCircle className="h-5 w-5 text-[var(--color-primary)]" />
           <h2 className="text-lg font-bold text-white">Quiz</h2>
           <span className="text-sm text-white/40">{questions.length} question{questions.length !== 1 ? "s" : ""}</span>
         </div>
@@ -144,12 +144,12 @@ export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
                       }
                       className={`flex w-full items-center gap-3 rounded-md border px-4 py-2.5 text-left text-sm transition-colors ${
                         isSelected
-                          ? "border-[--color-primary] bg-[--color-primary]/15 text-white"
+                          ? "border-[var(--color-primary)] bg-[var(--color-primary)]/15 text-white"
                           : "border-white/10 bg-white/5 text-white/70 hover:border-white/30 hover:text-white"
                       }`}
                     >
                       <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition-colors ${
-                        isSelected ? "border-[--color-primary] bg-[--color-primary] text-white" : "border-white/20 text-white/40"
+                        isSelected ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white" : "border-white/20 text-white/40"
                       }`}>
                         {String.fromCharCode(65 + oi)}
                       </span>
@@ -162,7 +162,7 @@ export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
           ))}
         </div>
 
-        {error && <p className="mt-4 text-sm text-[--color-error]">{error}</p>}
+        {error && <p className="mt-4 text-sm text-[var(--color-error)]">{error}</p>}
 
         <div className="mt-8 flex items-center justify-between">
           <span className="text-xs text-white/40">
@@ -171,7 +171,7 @@ export function QuizPlayer({ lessonId, token: _serverToken }: Props) {
           <button
             onClick={submit}
             disabled={!allAnswered || submitting}
-            className="rounded-md bg-[--color-primary] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[--color-primary-hover] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="rounded-md bg-[var(--color-primary)] px-6 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {submitting ? "Submitting…" : "Submit quiz"}
           </button>
@@ -198,17 +198,17 @@ function QuizResults({
         {/* Score card */}
         <div className={`mb-8 rounded-xl border p-6 text-center ${
           attempt.passed
-            ? "border-[--color-success]/30 bg-[--color-success]/10"
-            : "border-[--color-error]/30 bg-[--color-error]/10"
+            ? "border-[var(--color-success)]/30 bg-[var(--color-success)]/10"
+            : "border-[var(--color-error)]/30 bg-[var(--color-error)]/10"
         }`}>
-          <Trophy className={`mx-auto mb-3 h-10 w-10 ${attempt.passed ? "text-[--color-success]" : "text-[--color-error]"}`} />
+          <Trophy className={`mx-auto mb-3 h-10 w-10 ${attempt.passed ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}`} />
           <p className="text-4xl font-bold text-white">{pct}%</p>
           <p className="mt-1 text-sm text-white/60">
             {attempt.score} / {attempt.total} correct
           </p>
           <div className="mt-3 flex items-center justify-center gap-3">
             <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-              attempt.passed ? "bg-[--color-success]/20 text-[--color-success]" : "bg-[--color-error]/20 text-[--color-error]"
+              attempt.passed ? "bg-[var(--color-success)]/20 text-[var(--color-success)]" : "bg-[var(--color-error)]/20 text-[var(--color-error)]"
             }`}>
               {attempt.passed ? "Passed" : "Try again — need 70% to pass"}
             </span>
@@ -224,14 +224,14 @@ function QuizResults({
               <div
                 key={r.question_id}
                 className={`rounded-lg border p-4 ${
-                  r.is_correct ? "border-[--color-success]/20 bg-[--color-success]/5" : "border-[--color-error]/20 bg-[--color-error]/5"
+                  r.is_correct ? "border-[var(--color-success)]/20 bg-[var(--color-success)]/5" : "border-[var(--color-error)]/20 bg-[var(--color-error)]/5"
                 }`}
               >
                 <div className="flex items-start gap-2">
                   {r.is_correct ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-success)]" />
                   ) : (
-                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-[--color-error]" />
+                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-error)]" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white leading-snug">
@@ -247,15 +247,15 @@ function QuizResults({
                             key={oi}
                             className={`flex items-center gap-2 rounded px-3 py-1.5 text-xs ${
                               isCorrect
-                                ? "bg-[--color-success]/15 text-[--color-success]"
+                                ? "bg-[var(--color-success)]/15 text-[var(--color-success)]"
                                 : isSelected && !isCorrect
-                                ? "bg-[--color-error]/15 text-[--color-error] line-through"
+                                ? "bg-[var(--color-error)]/15 text-[var(--color-error)] line-through"
                                 : "text-white/40"
                             }`}
                           >
                             <span className="font-bold">{String.fromCharCode(65 + oi)}.</span>
                             {opt}
-                            {isCorrect && <span className="ml-auto text-[--color-success]">✓ Correct</span>}
+                            {isCorrect && <span className="ml-auto text-[var(--color-success)]">✓ Correct</span>}
                           </div>
                         );
                       })}

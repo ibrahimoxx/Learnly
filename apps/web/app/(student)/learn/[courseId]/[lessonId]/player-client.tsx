@@ -163,9 +163,9 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[--color-hero] pb-13 lg:pb-0">
+    <div className="flex h-screen flex-col overflow-hidden bg-[var(--color-hero)] pb-13 lg:pb-0">
       {/* Top bar */}
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[--color-hero-raised] px-4 shadow-[var(--shadow-lg)]">
+      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[var(--color-hero-raised)] px-4 shadow-[var(--shadow-lg)]">
         <Link
           href="/dashboard"
           className="flex items-center gap-1 text-xs text-white/60 hover:text-white/90 transition-colors"
@@ -182,7 +182,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Live session banner */}
           {liveSession && (
-            <div className="shrink-0 flex items-center justify-between bg-[--color-error] px-4 py-2">
+            <div className="shrink-0 flex items-center justify-between bg-[var(--color-error)] px-4 py-2">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
                 <span className="text-xs font-semibold text-white">Live session in progress: {liveSession.title}</span>
@@ -236,11 +236,11 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           )}
 
           {nextLesson && (
-            <div className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[--color-hero-raised] px-6 py-3">
+            <div className="shrink-0 flex items-center justify-between border-t border-white/10 bg-[var(--color-hero-raised)] px-6 py-3">
               <span className="text-xs text-white/50">Up next: {nextLesson.title}</span>
               <button
                 onClick={() => navigateTo(nextLesson.id)}
-                className="rounded-sm bg-[--color-primary] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[--color-primary-hover] transition-colors"
+                className="rounded-sm bg-[var(--color-primary)] px-4 py-1.5 text-xs font-semibold text-white hover:bg-[var(--color-primary-hover)] transition-colors"
               >
                 Next lesson →
               </button>
@@ -249,7 +249,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         </div>
 
         {/* Mobile bottom bar */}
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex border-t border-white/10 bg-[--color-hero-raised] shadow-[var(--shadow-xl)]">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex border-t border-white/10 bg-[var(--color-hero-raised)] shadow-[var(--shadow-xl)]">
           {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
             const labels: Record<SidebarTab, string> = { content: "Content", qa: "Q&A", forums: "Forums" };
             const icons: Record<SidebarTab, React.ReactNode> = {
@@ -274,7 +274,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         {mobileDrawerOpen && (
           <div className="lg:hidden fixed inset-0 z-40 flex flex-col justify-end">
             <div className="absolute inset-0 bg-black/70" onClick={() => setMobileDrawerOpen(false)} />
-            <div className="relative flex flex-col rounded-t-2xl bg-[--color-hero-raised] overflow-hidden shadow-[var(--shadow-xl)]" style={{ height: "75dvh" }}>
+            <div className="relative flex flex-col rounded-t-2xl bg-[var(--color-hero-raised)] overflow-hidden shadow-[var(--shadow-xl)]" style={{ height: "75dvh" }}>
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
                 <div className="flex gap-4">
                   {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
@@ -283,7 +283,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                       <button
                         key={tab}
                         onClick={() => setMobileTab(tab)}
-                        className={`text-xs font-medium transition-colors ${mobileTab === tab ? "text-white border-b-2 border-[--color-primary] pb-0.5" : "text-white/40 hover:text-white/70"}`}
+                        className={`text-xs font-medium transition-colors ${mobileTab === tab ? "text-white border-b-2 border-[var(--color-primary)] pb-0.5" : "text-white/40 hover:text-white/70"}`}
                       >
                         {labels[tab]}
                       </button>
@@ -306,14 +306,14 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         )}
 
         {/* Desktop sidebar */}
-        <aside className="hidden w-80 shrink-0 flex-col overflow-hidden border-l border-white/10 bg-[--color-hero-raised] shadow-[var(--shadow-xl)] lg:flex">
+        <aside className="hidden w-80 shrink-0 flex-col overflow-hidden border-l border-white/10 bg-[var(--color-hero-raised)] shadow-[var(--shadow-xl)] lg:flex">
           {/* Tab bar */}
           <div className="flex shrink-0 border-b border-white/10">
             <button
               onClick={() => setActiveTab("content")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 text-xs font-medium transition-colors ${
                 activeTab === "content"
-                  ? "border-b-2 border-[--color-primary] text-white"
+                  ? "border-b-2 border-[var(--color-primary)] text-white"
                   : "text-white/40 hover:text-white/70"
               }`}
             >
@@ -324,7 +324,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
               onClick={() => setActiveTab("qa")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 text-xs font-medium transition-colors ${
                 activeTab === "qa"
-                  ? "border-b-2 border-[--color-primary] text-white"
+                  ? "border-b-2 border-[var(--color-primary)] text-white"
                   : "text-white/40 hover:text-white/70"
               }`}
             >
@@ -335,7 +335,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
               onClick={() => setActiveTab("forums")}
               className={`flex flex-1 items-center justify-center gap-1.5 py-3 text-xs font-medium transition-colors ${
                 activeTab === "forums"
-                  ? "border-b-2 border-[--color-primary] text-white"
+                  ? "border-b-2 border-[var(--color-primary)] text-white"
                   : "text-white/40 hover:text-white/70"
               }`}
             >
@@ -407,16 +407,16 @@ function ContentTab({
                     className={`flex w-full items-start gap-3 px-4 py-3 text-left text-xs transition-colors ${
                       isLocked
                         ? "cursor-not-allowed opacity-50"
-                        : `hover:bg-white/5 ${isCurrent ? "bg-[--color-primary]/20" : ""}`
+                        : `hover:bg-white/5 ${isCurrent ? "bg-[var(--color-primary)]/20" : ""}`
                     }`}
                   >
                     <span className="mt-0.5 shrink-0">
                       {isLocked ? (
                         <Lock className="h-4 w-4 text-white/30" />
                       ) : isCurrent ? (
-                        <PlayCircle className="h-4 w-4 text-[--color-primary]" />
+                        <PlayCircle className="h-4 w-4 text-[var(--color-primary)]" />
                       ) : completedIds.has(lesson.id) ? (
-                        <CheckCircle className="h-4 w-4 text-[--color-success]" />
+                        <CheckCircle className="h-4 w-4 text-[var(--color-success)]" />
                       ) : lesson.type === "video" ? (
                         <Circle className="h-4 w-4 text-white/30" />
                       ) : lesson.type === "quiz" ? (
@@ -535,12 +535,12 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
             value={newQuestion}
             onChange={(e) => setNewQuestion(e.target.value)}
             placeholder="Ask a question about this lesson…"
-            className="flex-1 rounded bg-white/10 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[--color-primary] min-w-0"
+            className="flex-1 rounded bg-white/10 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] min-w-0"
           />
           <button
             type="submit"
             disabled={submitting || !newQuestion.trim()}
-            className="shrink-0 rounded bg-[--color-primary] p-1.5 text-white disabled:opacity-40 hover:bg-[--color-primary-hover] transition-colors"
+            className="shrink-0 rounded bg-[var(--color-primary)] p-1.5 text-white disabled:opacity-40 hover:bg-[var(--color-primary-hover)] transition-colors"
             aria-label="Post question"
           >
             <Send className="h-3.5 w-3.5" />
@@ -549,7 +549,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
       </form>
 
       {submitError && (
-        <p className="shrink-0 px-3 py-1 text-[10px] text-[--color-error]">{submitError}</p>
+        <p className="shrink-0 px-3 py-1 text-[10px] text-[var(--color-error)]">{submitError}</p>
       )}
 
       {/* Questions list */}
@@ -566,7 +566,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
               <div key={q.id} className="px-3 py-3">
                 {/* Question */}
                 <div className="flex items-start gap-2">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[--color-primary]/20 text-[10px] font-bold text-[--color-primary]">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)]/20 text-[10px] font-bold text-[var(--color-primary)]">
                     {q.student_name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -614,12 +614,12 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
                       value={replyTexts[q.id] ?? ""}
                       onChange={(e) => setReplyTexts((prev) => ({ ...prev, [q.id]: e.target.value }))}
                       placeholder="Write a reply…"
-                      className="flex-1 rounded bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[--color-primary] min-w-0"
+                      className="flex-1 rounded bg-white/10 px-2 py-1 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)] min-w-0"
                     />
                     <button
                       onClick={() => submitAnswer(q.id)}
                       disabled={!replyTexts[q.id]?.trim()}
-                      className="shrink-0 rounded bg-[--color-primary] p-1 text-white disabled:opacity-40 hover:bg-[--color-primary-hover] transition-colors"
+                      className="shrink-0 rounded bg-[var(--color-primary)] p-1 text-white disabled:opacity-40 hover:bg-[var(--color-primary-hover)] transition-colors"
                     >
                       <Send className="h-3 w-3" />
                     </button>

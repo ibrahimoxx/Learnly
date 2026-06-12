@@ -9,9 +9,9 @@ interface Props {
 
 export function PreviewPlayer({ lesson, course }: Props) {
   return (
-    <div className="flex min-h-screen flex-col bg-[--color-hero]">
+    <div className="flex min-h-screen flex-col bg-[var(--color-hero)]">
       {/* Top bar */}
-      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[--color-hero-raised] px-4 shadow-[var(--shadow-lg)]">
+      <div className="flex h-12 shrink-0 items-center gap-3 border-b border-white/10 bg-[var(--color-hero-raised)] px-4 shadow-[var(--shadow-lg)]">
         <Link
           href={`/courses/${course.slug}`}
           className="flex items-center gap-1 text-xs text-white/60 hover:text-white/90 transition-colors"
@@ -20,7 +20,7 @@ export function PreviewPlayer({ lesson, course }: Props) {
         </Link>
         <span className="text-white/30">/</span>
         <span className="truncate text-xs text-white/70">{lesson.title}</span>
-        <span className="ml-1 rounded-full bg-[--color-primary]/20 px-2 py-0.5 text-[10px] font-medium text-[--color-primary]">
+        <span className="ml-1 rounded-full bg-[var(--color-primary)]/20 px-2 py-0.5 text-[10px] font-medium text-[var(--color-primary)]">
           Free Preview
         </span>
       </div>
@@ -66,7 +66,7 @@ export function PreviewPlayer({ lesson, course }: Props) {
         )}
 
         {/* CTA banner */}
-        <div className="shrink-0 border-t border-white/10 bg-[--color-hero-raised] px-6 py-4">
+        <div className="shrink-0 border-t border-white/10 bg-[var(--color-hero-raised)] px-6 py-4">
           <div className="mx-auto flex max-w-2xl items-center justify-between gap-4">
             <p className="text-sm text-white/70">
               Enjoying this preview? Enroll to access all{" "}
@@ -74,7 +74,7 @@ export function PreviewPlayer({ lesson, course }: Props) {
             </p>
             <Link
               href={`/courses/${course.slug}`}
-              className="shrink-0 rounded-md bg-[--color-primary] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[--color-primary-hover]"
+              className="shrink-0 rounded-md bg-[var(--color-primary)] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-hover)]"
             >
               Enroll now →
             </Link>
