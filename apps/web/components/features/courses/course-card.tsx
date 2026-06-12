@@ -22,28 +22,29 @@ export function CourseCard({ course }: CourseCardProps) {
 
   return (
     <Link href={`/courses/${course.slug}`} className="group block">
-      <div className="hover-lift overflow-hidden rounded-[--radius-md] border border-[--color-border] bg-[--color-surface-raised] shadow-[var(--shadow-xs)]">
+      <div className="hover-lift premium-card rounded-[--radius-lg]">
         {/* Thumbnail */}
-        <div className="relative aspect-video w-full overflow-hidden bg-[image:var(--gradient-hero)]">
+        <div className="thumbnail-fallback sheen-overlay relative aspect-video w-full overflow-hidden">
           {course.image_url ? (
             <Image
               src={course.image_url}
               alt={course.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="text-3xl font-extrabold tracking-tight text-white/25">
+              <span className="rounded-[--radius-lg] border border-white/18 bg-white/10 px-5 py-3 font-heading text-5xl font-black tracking-tight text-white shadow-[var(--shadow-lg)] backdrop-blur">
                 {course.title.slice(0, 2).toUpperCase()}
               </span>
             </div>
           )}
+          <div className="absolute inset-x-3 bottom-3 h-px bg-white/35" />
         </div>
 
         {/* Content */}
-        <div className="p-4">
-          <h2 className="line-clamp-2 text-sm font-semibold leading-snug text-[--color-text-primary] group-hover:text-[--color-primary] transition-colors">
+        <div className="relative p-4">
+          <h2 className="line-clamp-2 font-heading text-base font-black leading-tight text-[--color-text-primary] transition-colors group-hover:text-[--color-primary]">
             {course.title}
           </h2>
 
@@ -62,7 +63,7 @@ export function CourseCard({ course }: CourseCardProps) {
               <Users className="h-3 w-3" />
               <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
             </div>
-            <span className="text-sm font-extrabold text-[--color-primary]">{price}</span>
+            <span className="rounded-full bg-[--color-primary-subtle] px-2.5 py-1 text-sm font-extrabold text-[--brand-800]">{price}</span>
           </div>
         </div>
       </div>

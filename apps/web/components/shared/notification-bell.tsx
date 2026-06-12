@@ -71,7 +71,7 @@ export function NotificationBell() {
     <div ref={ref} className="relative">
       <button
         onClick={() => { setOpen(!open); if (!open && unread > 0) markAllRead(); }}
-        className="relative p-1.5 text-[--color-text-secondary] hover:text-[--color-text-primary] transition-colors"
+        className="relative rounded-full p-2 text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -83,7 +83,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-50 w-80 rounded-[--radius-md] border border-[--color-border] bg-white shadow-[0_4px_20px_rgba(0,0,0,.12)]">
+        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[--radius-lg] border border-white/70 bg-[--color-surface-glass] shadow-[var(--shadow-xl)] backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-[--color-border] px-4 py-3">
             <span className="text-sm font-semibold text-[--color-text-primary]">Notifications</span>
             {notifications.length > 0 && (
@@ -100,7 +100,7 @@ export function NotificationBell() {
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`border-b border-[--color-border] last:border-0 px-4 py-3 ${!n.is_read ? "bg-blue-50/40" : ""}`}
+                  className={`border-b border-[--color-border] last:border-0 px-4 py-3 transition-colors hover:bg-[--color-surface] ${!n.is_read ? "bg-[--color-primary-subtle]" : ""}`}
                 >
                   {n.link ? (
                     <Link href={n.link} onClick={() => setOpen(false)} className="block">

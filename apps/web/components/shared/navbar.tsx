@@ -12,8 +12,8 @@ import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 
-const navLinkClass = "rounded-[--radius-sm] px-3 py-2 text-sm font-medium text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
-const mobileNavLinkClass = "py-2 text-sm font-medium text-[--color-text-secondary]";
+const navLinkClass = "rounded-full px-3.5 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
+const mobileNavLinkClass = "rounded-[--radius-sm] px-3 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
 
 export function Navbar() {
   const { isSignedIn } = useAuth();
@@ -31,11 +31,13 @@ export function Navbar() {
 
   if (!mounted) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b border-[--color-border] bg-[--color-background]/90 backdrop-blur-md shadow-[var(--shadow-xs)]">
+      <header className="sticky top-0 z-50 w-full border-b border-white/60 bg-[--color-surface-glass] shadow-[var(--shadow-sm)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
-          <div className="flex shrink-0 items-center gap-2 font-bold text-[--color-text-primary]">
-            <BookOpen className="h-6 w-6 text-[--color-primary]" />
-            <span className="text-lg">Learnly</span>
+          <div className="flex shrink-0 items-center gap-2 font-extrabold text-[--color-text-primary]">
+            <span className="flex h-9 w-9 items-center justify-center rounded-[--radius-sm] bg-[image:var(--gradient-brand)] text-white shadow-[var(--shadow-brand)]">
+              <BookOpen className="h-5 w-5" />
+            </span>
+            <span className="font-heading text-xl">Learnly</span>
           </div>
         </div>
       </header>
@@ -56,12 +58,14 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[--color-border] bg-[--color-background]/90 backdrop-blur-md shadow-[var(--shadow-xs)]">
+    <header className="sticky top-0 z-50 w-full border-b border-white/60 bg-[--color-surface-glass] shadow-[var(--shadow-sm)] backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         {/* Logo */}
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-bold text-[--color-text-primary]">
-          <BookOpen className="h-6 w-6 text-[--color-primary]" />
-          <span className="text-lg">Learnly</span>
+        <Link href="/" className="group flex shrink-0 items-center gap-2 font-extrabold text-[--color-text-primary]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-[--radius-sm] bg-[image:var(--gradient-brand)] text-white shadow-[var(--shadow-brand)] transition-transform group-hover:-rotate-3 group-hover:scale-105">
+            <BookOpen className="h-5 w-5" />
+          </span>
+          <span className="font-heading text-xl">Learnly</span>
         </Link>
 
         {/* Search — desktop */}
@@ -72,7 +76,7 @@ export function Navbar() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t("searchPlaceholder")}
-              className="pl-9 rounded-full border-[--color-border] bg-[--color-surface] focus-visible:bg-[--color-background] transition-colors"
+              className="h-10 rounded-full border-[--color-border] bg-[--color-surface-glass] pl-9 shadow-[var(--shadow-xs)] backdrop-blur focus-visible:bg-[--color-background] transition-colors"
             />
           </div>
         </form>
@@ -89,7 +93,7 @@ export function Navbar() {
                 <Link href="/instructor/courses" className={navLinkClass}>{t("teach")}</Link>
               )}
               {isAdmin && (
-                <Link href="/admin" className="px-3 py-2 text-sm font-medium text-[--color-error] hover:opacity-80 transition-colors">
+                <Link href="/admin" className="rounded-full px-3.5 py-2 text-sm font-extrabold text-[--color-error] hover:bg-[--color-error]/10 transition-colors">
                   Admin
                 </Link>
               )}
@@ -127,7 +131,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-[--color-border] bg-[--color-background] px-4 pb-4 lg:hidden">
+        <div className="border-t border-white/60 bg-[--color-surface-glass] px-4 pb-4 shadow-[var(--shadow-lg)] backdrop-blur-xl lg:hidden">
           <form onSubmit={handleSearch} className="py-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[--color-text-muted]" />
@@ -135,7 +139,7 @@ export function Navbar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={t("searchPlaceholder")}
-                className="pl-9 rounded-full"
+                className="h-10 rounded-full bg-[--color-surface-raised] pl-9 shadow-[var(--shadow-xs)]"
               />
             </div>
           </form>
