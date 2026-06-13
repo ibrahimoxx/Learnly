@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { ShieldCheck, Lock, ShoppingCart, AlertCircle } from "lucide-react";
+import { ShieldCheck, Lock, ShoppingCart, AlertCircle, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { useCartStore, type CartItem } from "@/lib/stores/cart-store";
@@ -63,12 +63,14 @@ function PayButton({
 }
 
 function OrderSummaryCard({
+  courseId,
   title,
   imageUrl,
   priceInCents,
   onPay,
   paying,
 }: {
+  courseId: string;
   title: string;
   imageUrl?: string;
   priceInCents: number;
@@ -96,6 +98,14 @@ function OrderSummaryCard({
       <div className="mt-5">
         <PayButton label={`Pay ${formatPrice(priceInCents)}`} onClick={onPay} loading={paying} />
       </div>
+
+      <Link
+        href={`/payment/checkout/gift?courseId=${courseId}`}
+        className="mt-3 flex items-center justify-center gap-1.5 text-sm font-bold text-[--color-primary] transition-colors hover:underline"
+      >
+        <Gift className="h-4 w-4" />
+        Gift this course instead
+      </Link>
 
       <TrustNotice />
     </div>
@@ -260,6 +270,7 @@ function CheckoutContent() {
         </h1>
         <div className="mt-6">
           <OrderSummaryCard
+            courseId={course.id}
             title={course.title}
             imageUrl={course.image_url}
             priceInCents={course.price_in_cents}
@@ -283,6 +294,7 @@ function CheckoutContent() {
         </h1>
         <div className="mt-6">
           <OrderSummaryCard
+            courseId={item.courseId}
             title={item.title}
             imageUrl={item.imageUrl}
             priceInCents={item.priceInCents}
