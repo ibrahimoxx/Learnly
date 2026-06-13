@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
@@ -10,10 +10,12 @@ import { Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
+import { hasEnrollmentForCourse } from "@/lib/server/enrollment-course-ids";
 import type { Enrollment } from "@/types";
 
 interface Props {
   courseId: string;
+  courseSlug?: string;
   isFree: boolean;
   priceInCents: number;
   isEnrolled: boolean;
@@ -34,16 +36,41 @@ function getAffiliateCookie(): string | undefined {
   return match ? match[1] : undefined;
 }
 
-export function EnrollButton({ courseId, isFree, priceInCents, isEnrolled }: Props) {
+export function EnrollButton({ courseId, courseSlug, isFree, priceInCents, isEnrolled }: Props) {
   const { isSignedIn, getToken } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const posthog = usePostHog();
+  const [owned, setOwned] = useState(isEnrolled);
   const [loading, setLoading] = useState(false);
   const [showCoupon, setShowCoupon] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+
+  useEffect(() => {
+    setOwned(isEnrolled);
+  }, [isEnrolled]);
+
+  useEffect(() => {
+    if (!isSignedIn || owned) return;
+
+    async function loadOwnedState() {
+      try {
+        const token = await getToken();
+        const enrollments = await apiFetch<Enrollment[]>("/api/v1/enrollments", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (hasEnrollmentForCourse(enrollments, courseId, courseSlug)) {
+          setOwned(true);
+        }
+      } catch {
+        // Non-critical fallback check.
+      }
+    }
+
+    void loadOwnedState();
+  }, [courseId, courseSlug, getToken, isSignedIn, owned]);
 
   if (!isSignedIn) {
     return (
@@ -58,7 +85,7 @@ export function EnrollButton({ courseId, isFree, priceInCents, isEnrolled }: Pro
     );
   }
 
-  if (isEnrolled) {
+  if (owned) {
     return (
       <Link href={`/learn/${courseId}`} className="mt-4 block">
         <Button

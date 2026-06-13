@@ -18,6 +18,7 @@ import DiscussionSection from "@/components/features/courses/discussion-section"
 import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
 import { apiFetch } from "@/lib/api";
 import { getViewerEnrollments } from "@/lib/server/enrollments";
+import { hasEnrollmentForCourse } from "@/lib/server/enrollment-course-ids";
 import type { Course, Enrollment, Section, Lesson } from "@/types";
 import { Suspense } from "react";
 
@@ -151,7 +152,7 @@ export default async function CourseDetailPage({ params }: Props) {
   if (!course || course.status !== "published") notFound();
 
   const enrollments: Enrollment[] = await getViewerEnrollments();
-  const isEnrolled = enrollments.some((enrollment) => enrollment.course_id === course.id);
+  const isEnrolled = hasEnrollmentForCourse(enrollments, course.id, course.slug);
 
   const price = isEnrolled ? "Owned" : course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
   const totalLessons = course.total_lessons ?? 0;
@@ -367,6 +368,7 @@ export default async function CourseDetailPage({ params }: Props) {
 
                 <EnrollButton
                   courseId={course.id}
+                  courseSlug={course.slug}
                   isFree={course.is_free}
                   priceInCents={course.price_in_cents}
                   isEnrolled={isEnrolled}
