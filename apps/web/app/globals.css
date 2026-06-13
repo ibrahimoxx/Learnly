@@ -233,7 +233,6 @@ html {
   body {
     @apply bg-background text-foreground;
     background-image: var(--gradient-page);
-    background-attachment: fixed;
   }
   html {
     @apply font-sans;
