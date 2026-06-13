@@ -1,8 +1,9 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest } from "next/server";
 
-const isPublicRoute = createRouteMatcher([
+export const publicRoutes = [
   "/",
+  "/cart(.*)",
   "/courses(.*)",
   "/orgs(.*)",
   "/sign-in(.*)",
@@ -13,7 +14,9 @@ const isPublicRoute = createRouteMatcher([
   "/manifest.json",
   "/icons(.*)",
   "/swe-worker(.*)",
-]);
+] as const;
+
+const isPublicRoute = createRouteMatcher(publicRoutes);
 
 function getSubdomain(request: NextRequest): string | null {
   const host = request.headers.get("host") ?? "";

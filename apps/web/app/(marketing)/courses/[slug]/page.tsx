@@ -21,6 +21,8 @@ import { getViewerEnrollments } from "@/lib/server/enrollments";
 import type { Course, Enrollment, Section, Lesson } from "@/types";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ slug: string }>;
   searchParams?: Promise<Record<string, string>>;

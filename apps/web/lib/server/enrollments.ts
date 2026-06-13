@@ -1,14 +1,14 @@
 import "server-only";
 
-import { auth } from "@clerk/nextjs/server";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment } from "@/types";
+import { getOptionalAuth } from "./optional-auth";
 
 export async function getViewerEnrollments(): Promise<Enrollment[]> {
-  const { userId, getToken } = await auth();
-  if (!userId) return [];
+  const authResult = await getOptionalAuth();
+  if (!authResult?.userId) return [];
 
-  const token = (await getToken()) ?? "";
+  const token = (await authResult.getToken()) ?? "";
   try {
     return await apiFetch<Enrollment[]>("/api/v1/enrollments", {
       headers: { Authorization: `Bearer ${token}` },
