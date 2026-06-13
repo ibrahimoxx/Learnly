@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
@@ -16,6 +16,7 @@ interface Props {
   courseId: string;
   isFree: boolean;
   priceInCents: number;
+  isEnrolled: boolean;
 }
 
 interface CouponResult {
@@ -33,7 +34,7 @@ function getAffiliateCookie(): string | undefined {
   return match ? match[1] : undefined;
 }
 
-export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
+export function EnrollButton({ courseId, isFree, priceInCents, isEnrolled }: Props) {
   const { isSignedIn, getToken } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -43,57 +44,27 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   const [couponCode, setCouponCode] = useState("");
   const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
-  const [isEnrolled, setIsEnrolled] = useState(false);
-  const [enrollmentChecked, setEnrollmentChecked] = useState(false);
-
-  useEffect(() => {
-    if (!isSignedIn) return;
-    let cancelled = false;
-
-    async function checkEnrollment() {
-      try {
-        const token = await getToken();
-        const enrollments = await apiFetch<Enrollment[]>("/api/v1/enrollments", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!cancelled) {
-          setIsEnrolled(enrollments.some((e) => e.course_id === courseId));
-        }
-      } catch {
-        // Not enrolled or error — fall back to purchase flow
-      } finally {
-        if (!cancelled) setEnrollmentChecked(true);
-      }
-    }
-
-    void checkEnrollment();
-    return () => {
-      cancelled = true;
-    };
-  }, [isSignedIn, getToken, courseId]);
 
   if (!isSignedIn) {
     return (
       <SignInButton mode="modal" forceRedirectUrl={pathname}>
-        <Button className="mt-4 w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]" size="lg">
+        <Button
+          className="mt-4 w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]"
+          size="lg"
+        >
           {isFree ? "Enroll for free" : "Buy now"}
         </Button>
       </SignInButton>
     );
   }
 
-  if (!enrollmentChecked) {
-    return (
-      <Button className="mt-4 w-full text-sm font-semibold shadow-[var(--shadow-brand)]" size="lg" disabled>
-        Loading…
-      </Button>
-    );
-  }
-
   if (isEnrolled) {
     return (
       <Link href={`/learn/${courseId}`} className="mt-4 block">
-        <Button className="w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]" size="lg">
+        <Button
+          className="w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]"
+          size="lg"
+        >
           Go to course
         </Button>
       </Link>
@@ -127,7 +98,6 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
     setLoading(true);
     try {
       const token = await getToken();
-
       const affiliateCode = getAffiliateCookie();
 
       if (!isFree) {
@@ -174,12 +144,17 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
 
   return (
     <div className="mt-4 space-y-2">
-      <Button className="w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]" size="lg" onClick={handleEnroll} disabled={loading}>
+      <Button
+        className="w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]"
+        size="lg"
+        onClick={handleEnroll}
+        disabled={loading}
+      >
         {loading
-          ? "Processing…"
+          ? "Processing\u2026"
           : isFree
-          ? "Enroll for free"
-          : `Buy now — $${(finalPrice / 100).toFixed(2)}`}
+            ? "Enroll for free"
+            : `Buy now \u2014 $${(finalPrice / 100).toFixed(2)}`}
       </Button>
 
       {!isFree && (
@@ -187,7 +162,7 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
           {!showCoupon ? (
             <button
               onClick={() => setShowCoupon(true)}
-              className="flex items-center gap-1.5 text-xs text-[--color-text-muted] hover:text-[--color-primary] transition-colors w-full justify-center"
+              className="flex w-full justify-center gap-1.5 text-xs text-[--color-text-muted] transition-colors hover:text-[--color-primary]"
             >
               <Tag className="h-3 w-3" /> Have a coupon?
             </button>
@@ -207,17 +182,22 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
                 <button
                   onClick={applyCoupon}
                   disabled={couponLoading || !couponCode.trim()}
-                  className="rounded border border-[--color-border] px-3 text-xs font-semibold text-[--color-text-secondary] hover:bg-[--color-surface] disabled:opacity-50 transition-colors"
+                  className="rounded border border-[--color-border] px-3 text-xs font-semibold text-[--color-text-secondary] transition-colors hover:bg-[--color-surface] disabled:opacity-50"
                 >
-                  {couponLoading ? "…" : "Apply"}
+                  {couponLoading ? "\u2026" : "Apply"}
                 </button>
-                <button onClick={clearCoupon} className="text-[--color-text-muted] hover:text-[--color-text-primary]">
+                <button
+                  onClick={clearCoupon}
+                  className="text-[--color-text-muted] hover:text-[--color-text-primary]"
+                >
                   <X className="h-4 w-4" />
                 </button>
               </div>
               {couponResult?.valid && (
-                <p className="text-xs text-[--color-success] font-medium">
-                  ✓ {couponResult.message} — ${(couponResult.discounted_price_cents / 100).toFixed(2)} (was ${(priceInCents / 100).toFixed(2)})
+                <p className="text-xs font-medium text-[--color-success]">
+                  {"\u2713"} {couponResult.message} \u2014 $
+                  {(couponResult.discounted_price_cents / 100).toFixed(2)} (was $
+                  {(priceInCents / 100).toFixed(2)})
                 </p>
               )}
             </div>

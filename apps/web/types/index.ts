@@ -97,11 +97,6 @@ export interface Enrollment {
   total_lessons?: number;
 }
 
-export interface CheckoutSessionStatus {
-  course_id: string | null;
-  payment_status: string;
-}
-
 export interface LessonProgress {
   id: string;
   enrollment_id: string;

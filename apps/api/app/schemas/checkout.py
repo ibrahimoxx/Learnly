@@ -16,8 +16,3 @@ class GiftCheckoutSessionCreate(BaseModel):
     course_id: str
     recipient_email: str = Field(..., max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     gift_message: str | None = Field(None, max_length=500)
-
-
-class CheckoutSessionStatus(BaseModel):
-    course_id: str | None = None
-    payment_status: str

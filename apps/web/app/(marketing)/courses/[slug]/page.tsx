@@ -17,7 +17,8 @@ import AffiliateTracker from "@/components/shared/affiliate-tracker";
 import DiscussionSection from "@/components/features/courses/discussion-section";
 import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
 import { apiFetch } from "@/lib/api";
-import type { Course, Section, Lesson } from "@/types";
+import { getViewerEnrollments } from "@/lib/server/enrollments";
+import type { Course, Enrollment, Section, Lesson } from "@/types";
 import { Suspense } from "react";
 
 interface Props {
@@ -146,6 +147,9 @@ export default async function CourseDetailPage({ params }: Props) {
   ]);
 
   if (!course || course.status !== "published") notFound();
+
+  const enrollments: Enrollment[] = await getViewerEnrollments();
+  const isEnrolled = enrollments.some((enrollment) => enrollment.course_id === course.id);
 
   const price = course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
   const totalLessons = course.total_lessons ?? 0;
@@ -359,7 +363,12 @@ export default async function CourseDetailPage({ params }: Props) {
                   <span className="text-3xl font-extrabold tracking-tight text-[--color-text-primary]">{price}</span>
                 </div>
 
-                <EnrollButton courseId={course.id} isFree={course.is_free} priceInCents={course.price_in_cents} />
+                <EnrollButton
+                  courseId={course.id}
+                  isFree={course.is_free}
+                  priceInCents={course.price_in_cents}
+                  isEnrolled={isEnrolled}
+                />
                 <div className="mt-2">
                   <WishlistButton courseId={course.id} />
                 </div>
