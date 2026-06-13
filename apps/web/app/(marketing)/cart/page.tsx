@@ -23,8 +23,8 @@ export default function CartPage() {
   }
 
   const subtotal = items.reduce((sum, item) => sum + item.priceInCents, 0);
-  const checkoutHref =
-    items.length === 1 ? `/payment/checkout?courseId=${items[0].courseId}` : "/payment/checkout";
+  const soloItem = items.length === 1 ? items[0] : undefined;
+  const checkoutHref = soloItem ? `/payment/checkout?courseId=${soloItem.courseId}` : "/payment/checkout";
 
   if (items.length === 0) {
     return (
