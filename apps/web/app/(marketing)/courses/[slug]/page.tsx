@@ -6,6 +6,7 @@ import {
   Clock, Users, Award, Globe, CheckCircle, PlayCircle, FileText, BarChart,
 } from "lucide-react";
 import { StarRating } from "@/components/features/courses/star-rating";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PreviewCurriculum } from "@/components/features/courses/preview-curriculum";
@@ -194,6 +195,15 @@ export default async function CourseDetailPage({ params }: Props) {
               <Badge variant="default" className="border-0 bg-[image:var(--gradient-brand)] px-3 py-1 text-xs font-extrabold text-white shadow-[var(--shadow-brand)]">
                 {levelLabels[course.level] ?? course.level}
               </Badge>
+              {course.category && (
+                <Link
+                  href={`/topic/${course.category.slug}`}
+                  title={t("browseTopic", { name: course.category.name })}
+                  className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold text-white/80 backdrop-blur transition-colors hover:border-white/40 hover:text-white"
+                >
+                  {course.category.name}
+                </Link>
+              )}
               {course.review_count > 0 && (
                 <StarRating rating={course.rating} count={course.review_count} />
               )}
@@ -265,6 +275,40 @@ export default async function CourseDetailPage({ params }: Props) {
                 />
               </Suspense>
             </section>
+
+            {course.instructor && (
+              <>
+                <Separator className="my-10" />
+                <section className="animate-fade-up">
+                  <h2 className="text-xl font-bold tracking-tight text-[--color-text-primary]">
+                    {t("instructorHeading")}
+                  </h2>
+                  <Link
+                    href={`/user/${course.instructor.id}`}
+                    className="hover-lift premium-card mt-4 flex items-center gap-4 rounded-[--radius-lg] p-6"
+                  >
+                    <Avatar className="h-16 w-16 shrink-0">
+                      {course.instructor.image_url && (
+                        <AvatarImage
+                          src={course.instructor.image_url}
+                          alt={`${course.instructor.first_name} ${course.instructor.last_name}`}
+                        />
+                      )}
+                      <AvatarFallback className="text-lg font-bold">
+                        {course.instructor.first_name.charAt(0)}
+                        {course.instructor.last_name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-bold text-[--color-text-primary]">
+                        {course.instructor.first_name} {course.instructor.last_name}
+                      </p>
+                      <p className="mt-0.5 text-sm font-semibold text-[--color-primary]">{t("viewProfile")}</p>
+                    </div>
+                  </Link>
+                </section>
+              </>
+            )}
 
             <Separator className="my-10" />
 

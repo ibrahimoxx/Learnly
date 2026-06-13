@@ -51,7 +51,33 @@
     "goToCourse": "Go to Course",
     "reviews": "Reviews",
     "preview": "Preview",
-    "courses": "Courses"
+    "courses": "Courses",
+    "instructorHeading": "Instructor",
+    "viewProfile": "View full profile",
+    "browseTopic": "Browse {name} courses"
+  },
+  "topic": {
+    "breadcrumb": "Courses",
+    "heroEyebrow": "Topic",
+    "heroDescription": "Explore our {name} courses, taught by expert instructors.",
+    "coursesCount": "{count} courses",
+    "relatedTopics": "Related topics",
+    "browseAll": "Browse all courses",
+    "emptyTitle": "No courses yet",
+    "emptyDescription": "Check back soon — new courses are added regularly."
+  },
+  "instructor": {
+    "breadcrumb": "Courses",
+    "memberSince": "Instructor since {year}",
+    "courses": "Courses",
+    "students": "Students",
+    "rating": "Rating",
+    "reviews": "Reviews",
+    "coursesByLabel": "Courses by {name}",
+    "browseAll": "Browse all courses",
+    "emptyTitle": "No published courses yet",
+    "emptyDescription": "This instructor hasn't published any courses yet.",
+    "website": "Website"
   },
   "common": {
     "loading": "Loading...",

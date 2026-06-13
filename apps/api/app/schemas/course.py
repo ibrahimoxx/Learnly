@@ -4,6 +4,9 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.category import CategoryRead
+from app.schemas.user import InstructorBriefRead
+
 
 class CourseCreate(BaseModel):
     title: str = Field(..., min_length=10, max_length=255)
@@ -57,6 +60,11 @@ class CourseRead(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class CourseDetailRead(CourseRead):
+    instructor: InstructorBriefRead | None = None
+    category: CategoryRead | None = None
 
 
 class CourseListRead(BaseModel):

@@ -51,7 +51,33 @@
     "goToCourse": "Accéder au cours",
     "reviews": "Avis",
     "preview": "Aperçu",
-    "courses": "Cours"
+    "courses": "Cours",
+    "instructorHeading": "Instructeur",
+    "viewProfile": "Voir le profil complet",
+    "browseTopic": "Voir les cours de {name}"
+  },
+  "topic": {
+    "breadcrumb": "Cours",
+    "heroEyebrow": "Sujet",
+    "heroDescription": "Découvrez nos cours de {name}, enseignés par des experts.",
+    "coursesCount": "{count} cours",
+    "relatedTopics": "Sujets associés",
+    "browseAll": "Voir tous les cours",
+    "emptyTitle": "Aucun cours pour l'instant",
+    "emptyDescription": "Revenez bientôt — de nouveaux cours sont ajoutés régulièrement."
+  },
+  "instructor": {
+    "breadcrumb": "Cours",
+    "memberSince": "Instructeur depuis {year}",
+    "courses": "Cours",
+    "students": "Étudiants",
+    "rating": "Note",
+    "reviews": "Avis",
+    "coursesByLabel": "Cours de {name}",
+    "browseAll": "Voir tous les cours",
+    "emptyTitle": "Aucun cours publié",
+    "emptyDescription": "Cet instructeur n'a pas encore publié de cours.",
+    "website": "Site web"
   },
   "common": {
     "loading": "Chargement...",

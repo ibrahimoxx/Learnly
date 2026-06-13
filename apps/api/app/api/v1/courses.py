@@ -6,12 +6,20 @@ import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.auth import get_current_user, require_instructor
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.user import User
-from app.schemas.course import CourseCreate, CourseListRead, CourseRead, CourseUpdate, PaginatedCourses
+from app.schemas.course import (
+    CourseCreate,
+    CourseDetailRead,
+    CourseListRead,
+    CourseRead,
+    CourseUpdate,
+    PaginatedCourses,
+)
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/courses", tags=["courses"])
@@ -112,16 +120,24 @@ async def get_course(
     return CourseRead.model_validate(course)
 
 
-@router.get("/slug/{slug}", response_model=CourseRead)
+@router.get("/slug/{slug}", response_model=CourseDetailRead)
 async def get_course_by_slug(
     slug: str,
     db: AsyncSession = Depends(get_db),
-) -> CourseRead:
-    result = await db.execute(select(Course).where(Course.slug == slug))
+) -> CourseDetailRead:
+    result = await db.execute(
+        select(Course)
+        .options(selectinload(Course.instructor), selectinload(Course.category))
+        .where(
+            Course.slug == slug,
+            Course.status == "published",
+            Course.organization_id.is_(None),
+        )
+    )
     course = result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
-    return CourseRead.model_validate(course)
+    return CourseDetailRead.model_validate(course)
 
 
 async def _run_embed_bg(course_id: str) -> None:

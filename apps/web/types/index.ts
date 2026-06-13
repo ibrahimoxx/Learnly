@@ -27,6 +27,41 @@ export interface Course {
   category_id?: string;
   created_at: string;
   updated_at: string;
+  instructor?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    image_url?: string;
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface CategoryWithCount extends Category {
+  course_count: number;
+}
+
+export interface InstructorProfile {
+  id: string;
+  first_name: string;
+  last_name: string;
+  image_url?: string;
+  bio?: string;
+  website?: string;
+  created_at: string;
+  total_courses: number;
+  total_students: number;
+  avg_rating: number;
+  total_reviews: number;
 }
 
 export interface Section {

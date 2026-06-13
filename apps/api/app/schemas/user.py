@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr
 
@@ -30,3 +31,28 @@ class UserUpdate(BaseModel):
 
 class UserRoleUpdate(BaseModel):
     role: str
+
+
+class InstructorBriefRead(BaseModel):
+    id: uuid.UUID
+    first_name: str
+    last_name: str
+    image_url: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class InstructorProfileRead(BaseModel):
+    id: uuid.UUID
+    first_name: str
+    last_name: str
+    image_url: str | None
+    bio: str | None
+    website: str | None
+    created_at: datetime
+    total_courses: int
+    total_students: int
+    avg_rating: Decimal
+    total_reviews: int
+
+    model_config = {"from_attributes": True}
