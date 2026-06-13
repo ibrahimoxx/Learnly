@@ -285,7 +285,7 @@ function CheckoutContent() {
   // Cart-based checkout
   if (items.length === 0) return <EmptyState />;
 
-  if (items.length === 1) {
+  if (items.length === 1 && items[0]) {
     const item = items[0];
     return (
       <div className="premium-shell mx-auto max-w-2xl px-4 py-12 sm:px-6">
