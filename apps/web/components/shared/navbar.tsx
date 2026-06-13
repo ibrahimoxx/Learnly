@@ -107,6 +107,18 @@ export function Navbar() {
         {/* Auth + language — desktop */}
         <div className="ml-auto hidden items-center gap-2 lg:flex">
           <LanguageSwitcher />
+          <Link
+            href="/cart"
+            aria-label="Cart"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[--color-primary] px-1 text-[10px] font-bold text-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
           <NotificationBell />
           {signedIn ? (
             <UserButton />
@@ -149,6 +161,9 @@ export function Navbar() {
           <nav className="flex flex-col gap-1">
             <Link href="/courses" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("explore")}</Link>
             <Link href="/paths" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>Paths</Link>
+            <Link href="/cart" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>
+              Cart{cartCount > 0 ? ` (${cartCount})` : ""}
+            </Link>
             {signedIn && (
               <>
                 <Link href="/dashboard" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("myLearning")}</Link>
