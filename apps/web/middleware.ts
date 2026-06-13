@@ -14,7 +14,7 @@ export const publicRoutes = [
   "/manifest.json",
   "/icons(.*)",
   "/swe-worker(.*)",
-] as const;
+];
 
 const isPublicRoute = createRouteMatcher(publicRoutes);
 

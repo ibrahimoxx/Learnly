@@ -12,14 +12,23 @@ interface AddToCartButtonProps {
   imageUrl?: string;
   priceInCents: number;
   isFree: boolean;
+  isOwned?: boolean;
 }
 
-export function AddToCartButton({ courseId, slug, title, imageUrl, priceInCents, isFree }: AddToCartButtonProps) {
+export function AddToCartButton({
+  courseId,
+  slug,
+  title,
+  imageUrl,
+  priceInCents,
+  isFree,
+  isOwned = false,
+}: AddToCartButtonProps) {
   const { items, addItem } = useCartStore();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  if (isFree) return null;
+  if (isFree || isOwned) return null;
 
   const inCart = mounted && items.some((item) => item.courseId === courseId);
 

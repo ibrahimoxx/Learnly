@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { apiFetch } from "@/lib/api";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { CourseListResponse } from "@/types";
 import { BookOpen } from "lucide-react";
 
@@ -27,7 +28,11 @@ async function getOrgCourses(slug: string, q?: string, page = 1) {
 export default async function OrgCoursesPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { q, page } = await searchParams;
-  const data = await getOrgCourses(slug, q, Number(page ?? 1));
+  const [data, ownedCourseIds] = await Promise.all([
+    getOrgCourses(slug, q, Number(page ?? 1)),
+    getViewerEnrollmentCourseIds(),
+  ]);
+  const ownedCourseIdSet = new Set(ownedCourseIds);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
@@ -49,7 +54,7 @@ export default async function OrgCoursesPage({ params, searchParams }: Props) {
       {data.items.length > 0 ? (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {data.items.map((course) => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
           ))}
         </div>
       ) : (

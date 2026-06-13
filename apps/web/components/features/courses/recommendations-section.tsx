@@ -4,27 +4,36 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch } from "@/lib/api";
-import type { Course } from "@/types";
+import type { Course, Enrollment } from "@/types";
 
 export function RecommendationsSection({ currentCourseId = "" }: { currentCourseId?: string }) {
   const { getToken, isSignedIn } = useAuth();
   const [courses, setCourses] = useState<Course[]>([]);
+  const [ownedCourseIds, setOwnedCourseIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isSignedIn) return;
+
     async function load() {
       const token = await getToken();
       try {
-        const data = await apiFetch<Course[]>("/api/v1/recommendations?limit=4", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setCourses(data.filter((c) => c.id !== currentCourseId));
+        const [data, enrollments] = await Promise.all([
+          apiFetch<Course[]>("/api/v1/recommendations?limit=4", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          apiFetch<Enrollment[]>("/api/v1/enrollments", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+        setCourses(data.filter((course) => course.id !== currentCourseId));
+        setOwnedCourseIds(Array.from(new Set(enrollments.map((enrollment) => enrollment.course_id))));
       } catch {
-        // silent — recommendations are non-critical
+        // Recommendations are non-critical.
       }
     }
-    load();
-  }, [isSignedIn, getToken, currentCourseId]);
+
+    void load();
+  }, [currentCourseId, getToken, isSignedIn]);
 
   if (courses.length === 0) return null;
 
@@ -38,10 +47,14 @@ export function RecommendationsSection({ currentCourseId = "" }: { currentCourse
             href={`/courses/${course.slug}`}
             className="hover-lift premium-card flex gap-3 rounded-[--radius-md] p-3 transition-colors hover:border-[--color-primary]"
           >
-            <div className="relative flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[--color-text-primary] line-clamp-2">{course.title}</p>
+            <div className="relative min-w-0 flex-1">
+              <p className="line-clamp-2 text-sm font-semibold text-[--color-text-primary]">{course.title}</p>
               <p className="mt-1 text-xs text-[--color-text-muted]">
-                {course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`}
+                {ownedCourseIds.includes(course.id)
+                  ? "Owned"
+                  : course.is_free
+                    ? "Free"
+                    : `$${(course.price_in_cents / 100).toFixed(2)}`}
                 {course.rating ? ` · ${Number(course.rating).toFixed(1)}★` : ""}
               </p>
             </div>

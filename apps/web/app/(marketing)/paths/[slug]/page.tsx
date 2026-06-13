@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { GraduationCap, BookOpen, Users } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { CourseCard } from "@/components/features/courses/course-card";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { LearningPathDetail } from "@/types";
 import { PathFollowButton } from "./path-follow-button";
 
@@ -26,8 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PathDetailPage({ params }: Props) {
   const { slug } = await params;
-  const path = await getPath(slug);
+  const [path, ownedCourseIds] = await Promise.all([
+    getPath(slug),
+    getViewerEnrollmentCourseIds(),
+  ]);
   if (!path) notFound();
+  const ownedCourseIdSet = new Set(ownedCourseIds);
 
   return (
     <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
@@ -77,7 +82,7 @@ export default async function PathDetailPage({ params }: Props) {
                 {idx + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <CourseCard course={course} />
+                <CourseCard course={course} isOwned={ownedCourseIdSet.has(course.id)} />
               </div>
             </div>
           ))}

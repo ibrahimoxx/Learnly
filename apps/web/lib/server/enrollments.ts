@@ -2,6 +2,7 @@ import "server-only";
 
 import { apiFetch } from "@/lib/api";
 import type { Enrollment } from "@/types";
+import { getEnrollmentCourseIds } from "./enrollment-course-ids";
 import { getOptionalAuth } from "./optional-auth";
 
 export async function getViewerEnrollments(): Promise<Enrollment[]> {
@@ -16,4 +17,8 @@ export async function getViewerEnrollments(): Promise<Enrollment[]> {
   } catch {
     return [];
   }
+}
+
+export async function getViewerEnrollmentCourseIds(): Promise<string[]> {
+  return getEnrollmentCourseIds(await getViewerEnrollments());
 }

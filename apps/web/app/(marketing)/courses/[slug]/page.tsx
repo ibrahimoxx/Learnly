@@ -153,7 +153,7 @@ export default async function CourseDetailPage({ params }: Props) {
   const enrollments: Enrollment[] = await getViewerEnrollments();
   const isEnrolled = enrollments.some((enrollment) => enrollment.course_id === course.id);
 
-  const price = course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
+  const price = isEnrolled ? "Owned" : course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
   const totalLessons = course.total_lessons ?? 0;
 
   const learnItems = [
@@ -376,7 +376,7 @@ export default async function CourseDetailPage({ params }: Props) {
                 </div>
 
                 <p className="mt-4 text-center text-xs text-[--color-text-muted]">
-                  {t("moneyBack")}
+                  {isEnrolled ? "You already own this course." : t("moneyBack")}
                 </p>
 
                 <Separator className="my-5" />

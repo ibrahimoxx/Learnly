@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { apiFetch } from "@/lib/api";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { CourseListResponse } from "@/types";
 
 export const metadata: Metadata = {
@@ -33,10 +34,12 @@ async function getFeaturedCourses() {
 }
 
 export default async function HomePage() {
-  const [featured, t] = await Promise.all([
+  const [featured, ownedCourseIds, t] = await Promise.all([
     getFeaturedCourses(),
+    getViewerEnrollmentCourseIds(),
     getTranslations("home"),
   ]);
+  const ownedCourseIdSet = new Set(ownedCourseIds);
 
   const STATS = [
     { icon: Users, value: "10K+", label: t("statsStudents") },
@@ -149,7 +152,7 @@ export default async function HomePage() {
           {featured.length > 0 ? (
             <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
               {featured.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
               ))}
             </div>
           ) : (

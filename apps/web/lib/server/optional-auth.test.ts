@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getOptionalAuth } from "./optional-auth";
 
-const authMock = vi.fn();
+const { authMock } = vi.hoisted(() => ({
+  authMock: vi.fn(),
+}));
+
+vi.mock("server-only", () => ({}));
 
 vi.mock("@clerk/nextjs/server", () => ({
   auth: authMock,

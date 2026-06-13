@@ -8,6 +8,7 @@ import type { Course } from "@/types";
 
 interface CourseCardProps {
   course: Course;
+  isOwned?: boolean;
 }
 
 const levelLabels: Record<string, string> = {
@@ -17,9 +18,8 @@ const levelLabels: Record<string, string> = {
   all: "All Levels",
 };
 
-export function CourseCard({ course }: CourseCardProps) {
-  const price =
-    course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
+export function CourseCard({ course, isOwned = false }: CourseCardProps) {
+  const price = isOwned ? "Owned" : course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
 
   return (
     <Link href={`/courses/${course.slug}`} className="group block">
@@ -65,7 +65,15 @@ export function CourseCard({ course }: CourseCardProps) {
               <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="rounded-full bg-[--color-primary-subtle] px-2.5 py-1 text-sm font-extrabold text-[--brand-800]">{price}</span>
+              <span
+                className={`rounded-full px-2.5 py-1 text-sm font-extrabold ${
+                  isOwned
+                    ? "bg-[--color-success]/12 text-[--color-success]"
+                    : "bg-[--color-primary-subtle] text-[--brand-800]"
+                }`}
+              >
+                {price}
+              </span>
               <AddToCartButton
                 courseId={course.id}
                 slug={course.slug}
@@ -73,6 +81,7 @@ export function CourseCard({ course }: CourseCardProps) {
                 imageUrl={course.image_url}
                 priceInCents={course.price_in_cents}
                 isFree={course.is_free}
+                isOwned={isOwned}
               />
             </div>
           </div>

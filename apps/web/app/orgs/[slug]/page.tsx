@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { apiFetch } from "@/lib/api";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { CourseListResponse } from "@/types";
 
 interface Props {
@@ -33,7 +34,12 @@ async function getOrgStats(slug: string): Promise<OrgStats> {
 
 export default async function OrgHomePage({ params }: Props) {
   const { slug } = await params;
-  const [courses, stats] = await Promise.all([getOrgCourses(slug), getOrgStats(slug)]);
+  const [courses, stats, ownedCourseIds] = await Promise.all([
+    getOrgCourses(slug),
+    getOrgStats(slug),
+    getViewerEnrollmentCourseIds(),
+  ]);
+  const ownedCourseIdSet = new Set(ownedCourseIds);
 
   return (
     <>
@@ -82,7 +88,7 @@ export default async function OrgHomePage({ params }: Props) {
         {courses.length > 0 ? (
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {courses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
             ))}
           </div>
         ) : (

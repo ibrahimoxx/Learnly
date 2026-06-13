@@ -6,6 +6,7 @@ import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { Category, CategoryWithCount, CourseListResponse } from "@/types";
 
 interface Props {
@@ -53,10 +54,12 @@ export default async function TopicPage({ params }: Props) {
 
   if (!category) notFound();
 
-  const [{ items: courses, total }, relatedCategories] = await Promise.all([
+  const [{ items: courses, total }, relatedCategories, ownedCourseIds] = await Promise.all([
     getCategoryCourses(slug),
     getRelatedCategories(slug),
+    getViewerEnrollmentCourseIds(),
   ]);
+  const ownedCourseIdSet = new Set(ownedCourseIds);
 
   return (
     <div className="premium-shell min-h-screen">
@@ -101,7 +104,7 @@ export default async function TopicPage({ params }: Props) {
           <>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 stagger-children">
               {courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
               ))}
             </div>
 

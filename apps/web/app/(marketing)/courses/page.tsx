@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { apiFetch } from "@/lib/api";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { CourseListResponse } from "@/types";
 
 export const metadata: Metadata = { title: "All Courses" };
@@ -32,7 +33,11 @@ const LEVELS = [
 
 export default async function CoursesPage({ searchParams }: Props) {
   const params = await searchParams;
-  const { items, total } = await getCourses(params);
+  const [{ items, total }, ownedCourseIds] = await Promise.all([
+    getCourses(params),
+    getViewerEnrollmentCourseIds(),
+  ]);
+  const ownedCourseIdSet = new Set(ownedCourseIds);
 
   return (
     <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
@@ -94,7 +99,7 @@ export default async function CoursesPage({ searchParams }: Props) {
           {items.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 stagger-children">
               {items.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
               ))}
             </div>
           ) : (

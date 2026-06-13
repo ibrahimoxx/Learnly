@@ -7,6 +7,7 @@ import { CourseCard } from "@/components/features/courses/course-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
+import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { CourseListResponse, InstructorProfile } from "@/types";
 
 interface Props {
@@ -50,7 +51,11 @@ export default async function InstructorProfilePage({ params }: Props) {
 
   if (!profile) notFound();
 
-  const { items: courses } = await getInstructorCourses(id);
+  const [{ items: courses }, ownedCourseIds] = await Promise.all([
+    getInstructorCourses(id),
+    getViewerEnrollmentCourseIds(),
+  ]);
+  const ownedCourseIdSet = new Set(ownedCourseIds);
   const name = `${profile.first_name} ${profile.last_name}`.trim();
   const memberSinceYear = new Date(profile.created_at).getFullYear();
 
@@ -142,7 +147,7 @@ export default async function InstructorProfilePage({ params }: Props) {
           <>
             <div className="stagger-children mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {courses.map((course) => (
-                <CourseCard key={course.id} course={course} />
+                <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
               ))}
             </div>
 
