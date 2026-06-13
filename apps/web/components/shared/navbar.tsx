@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
-import { Search, BookOpen, Menu, X } from "lucide-react";
+import { Search, BookOpen, Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/shared/notification-bell";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
+import { useCartStore } from "@/lib/stores/cart-store";
 
 const navLinkClass = "rounded-full px-3.5 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
 const mobileNavLinkClass = "rounded-[--radius-sm] px-3 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
@@ -28,6 +29,8 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
   const signedIn = mounted && isSignedIn;
+  const { items } = useCartStore();
+  const cartCount = mounted ? items.length : 0;
 
   if (!mounted) {
     return (
