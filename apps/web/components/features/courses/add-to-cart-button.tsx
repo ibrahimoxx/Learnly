@@ -28,9 +28,9 @@ export function AddToCartButton({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  if (isFree || isOwned) return null;
+  if (isFree || isOwned || !mounted) return null;
 
-  const inCart = mounted && items.some((item) => item.courseId === courseId);
+  const inCart = items.some((item) => item.courseId === courseId);
 
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();

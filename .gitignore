@@ -87,6 +87,7 @@ apps/web/public/fallback-*.js
 .claude/plans/
 .claude/projects/
 *.claude.json
+PROJECT_MEMORY_LEARNLY.md
 
 # Generated reports
 *.report.html
