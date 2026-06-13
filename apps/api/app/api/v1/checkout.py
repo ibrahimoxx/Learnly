@@ -20,6 +20,7 @@ from app.integrations import stripe_client as _stripe_init  # noqa: F401 — set
 from app.schemas.checkout import (
     CheckoutSessionCreate,
     CheckoutSessionRead,
+    CheckoutSessionStatus,
     GiftCheckoutSessionCreate,
 )
 
@@ -46,6 +47,13 @@ async def _create_stripe_session(**params: object) -> stripe.checkout.Session:
     if create_async:
         return await create_async(**params)
     return await asyncio.to_thread(stripe.checkout.Session.create, **params)
+
+
+async def _retrieve_stripe_session(session_id: str) -> stripe.checkout.Session:
+    retrieve_async = getattr(stripe.checkout.Session, "retrieve_async", None)
+    if retrieve_async:
+        return await retrieve_async(session_id)
+    return await asyncio.to_thread(stripe.checkout.Session.retrieve, session_id)
 
 
 def _get_stripe_error_message(exc: BaseException) -> str:
@@ -236,3 +244,25 @@ async def create_gift_checkout_session(
         course_id=str(course.id),
     )
     return CheckoutSessionRead(checkout_url=session.url, session_id=session.id)
+
+
+@router.get("/sessions/{session_id}", response_model=CheckoutSessionStatus)
+async def get_checkout_session(
+    session_id: str,
+    user: User = Depends(get_current_user),
+) -> CheckoutSessionStatus:
+    try:
+        session = await _retrieve_stripe_session(session_id)
+    except STRIPE_ERROR_TYPES as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Checkout session not found"
+        ) from exc
+
+    metadata = session.get("metadata") or {}
+    if metadata.get("user_id") != str(user.id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your checkout session")
+
+    return CheckoutSessionStatus(
+        course_id=metadata.get("course_id"),
+        payment_status=session.get("payment_status", "unknown"),
+    )

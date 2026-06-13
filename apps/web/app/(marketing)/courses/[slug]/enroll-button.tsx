@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePostHog } from "posthog-js/react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,34 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
   const [couponCode, setCouponCode] = useState("");
   const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrollmentChecked, setEnrollmentChecked] = useState(false);
+
+  useEffect(() => {
+    if (!isSignedIn) return;
+    let cancelled = false;
+
+    async function checkEnrollment() {
+      try {
+        const token = await getToken();
+        const enrollments = await apiFetch<Enrollment[]>("/api/v1/enrollments", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!cancelled) {
+          setIsEnrolled(enrollments.some((e) => e.course_id === courseId));
+        }
+      } catch {
+        // Not enrolled or error — fall back to purchase flow
+      } finally {
+        if (!cancelled) setEnrollmentChecked(true);
+      }
+    }
+
+    void checkEnrollment();
+    return () => {
+      cancelled = true;
+    };
+  }, [isSignedIn, getToken, courseId]);
 
   if (!isSignedIn) {
     return (
@@ -50,6 +79,24 @@ export function EnrollButton({ courseId, isFree, priceInCents }: Props) {
           {isFree ? "Enroll for free" : "Buy now"}
         </Button>
       </SignInButton>
+    );
+  }
+
+  if (!enrollmentChecked) {
+    return (
+      <Button className="mt-4 w-full text-sm font-semibold shadow-[var(--shadow-brand)]" size="lg" disabled>
+        Loading…
+      </Button>
+    );
+  }
+
+  if (isEnrolled) {
+    return (
+      <Link href={`/learn/${courseId}`} className="mt-4 block">
+        <Button className="w-full text-sm font-semibold shadow-[var(--shadow-brand)] transition-shadow hover:shadow-[var(--shadow-lg)]" size="lg">
+          Go to course
+        </Button>
+      </Link>
     );
   }
 
