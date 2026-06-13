@@ -69,7 +69,7 @@ const plans: Plan[] = [
       "Dedicated account manager",
     ],
     cta: "Contact sales",
-    href: "#",
+    href: "mailto:sales@learnly.app?subject=Business%20plan%20inquiry",
   },
 ];
 
