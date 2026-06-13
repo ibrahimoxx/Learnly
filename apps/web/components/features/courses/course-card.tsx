@@ -22,8 +22,8 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
   const price = isOwned ? "Owned" : course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
 
   return (
-    <Link href={`/courses/${course.slug}`} className="group block">
-      <div className="hover-lift premium-card rounded-[--radius-lg]">
+    <div className="group hover-lift premium-card rounded-[--radius-lg]">
+      <Link href={`/courses/${course.slug}`} className="block">
         {/* Thumbnail */}
         <div className="thumbnail-fallback sheen-overlay relative aspect-video w-full overflow-hidden">
           {course.image_url ? (
@@ -44,7 +44,7 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
         </div>
 
         {/* Content */}
-        <div className="relative p-4">
+        <div className="relative px-4 pb-2 pt-4">
           <h2 className="line-clamp-2 font-heading text-base font-black leading-tight text-[--color-text-primary] transition-colors group-hover:text-[--color-primary]">
             {course.title}
           </h2>
@@ -58,35 +58,35 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
               <StarRating rating={Number(course.rating)} count={course.review_count} />
             </div>
           )}
+        </div>
+      </Link>
 
-          <div className="mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-1 text-xs text-[--color-text-muted]">
-              <Users className="h-3 w-3" />
-              <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span
-                className={`rounded-full px-2.5 py-1 text-sm font-extrabold ${
-                  isOwned
-                    ? "bg-[--color-success]/12 text-[--color-success]"
-                    : "bg-[--color-primary-subtle] text-[--brand-800]"
-                }`}
-              >
-                {price}
-              </span>
-              <AddToCartButton
-                courseId={course.id}
-                slug={course.slug}
-                title={course.title}
-                imageUrl={course.image_url}
-                priceInCents={course.price_in_cents}
-                isFree={course.is_free}
-                isOwned={isOwned}
-              />
-            </div>
-          </div>
+      <div className="mt-2 flex items-center justify-between px-4 pb-4">
+        <div className="flex items-center gap-1 text-xs text-[--color-text-muted]">
+          <Users className="h-3 w-3" />
+          <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`rounded-full px-2.5 py-1 text-sm font-extrabold ${
+              isOwned
+                ? "bg-[--color-success]/12 text-[--color-success]"
+                : "bg-[--color-primary-subtle] text-[--brand-800]"
+            }`}
+          >
+            {price}
+          </span>
+          <AddToCartButton
+            courseId={course.id}
+            slug={course.slug}
+            title={course.title}
+            imageUrl={course.image_url}
+            priceInCents={course.price_in_cents}
+            isFree={course.is_free}
+            isOwned={isOwned}
+          />
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
