@@ -64,7 +64,17 @@ export function CourseCard({ course }: CourseCardProps) {
               <Users className="h-3 w-3" />
               <span>{(course.enrollment_count ?? 0).toLocaleString()} students</span>
             </div>
-            <span className="rounded-full bg-[--color-primary-subtle] px-2.5 py-1 text-sm font-extrabold text-[--brand-800]">{price}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-full bg-[--color-primary-subtle] px-2.5 py-1 text-sm font-extrabold text-[--brand-800]">{price}</span>
+              <AddToCartButton
+                courseId={course.id}
+                slug={course.slug}
+                title={course.title}
+                imageUrl={course.image_url}
+                priceInCents={course.price_in_cents}
+                isFree={course.is_free}
+              />
+            </div>
           </div>
         </div>
       </div>
