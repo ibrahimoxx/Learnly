@@ -314,24 +314,6 @@ function CheckoutContent() {
     }
   }
 
-  function toggleSelected(id: string) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }
-
-  function giftSelected() {
-    const ids = items.filter((item) => selectedIds.has(item.courseId)).map((item) => item.courseId);
-    if (ids.length === 0) return;
-    router.push(`/payment/checkout/gift?courseIds=${ids.join(",")}`);
-  }
-
   if (!mounted || loadingCourse) {
     return <CheckoutSkeleton />;
   }
