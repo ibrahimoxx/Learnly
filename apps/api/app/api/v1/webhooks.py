@@ -15,6 +15,7 @@ from app.db.session import get_db
 from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
+from app.db.tables.notification import Notification
 from app.db.tables.organization import Organization
 from app.db.tables.user import User
 from app.email import service as email_service
@@ -229,6 +230,33 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
     course = course_result.scalar_one_or_none()
     if course:
         course.enrollment_count = (course.enrollment_count or 0) + 1
+        if is_gift == "true" and recipient_user_id and recipient_user_id != user_id:
+            notification = Notification(
+                user_id=uuid.UUID(recipient_user_id),
+                type="gift_received",
+                title="You received a gift course!",
+                body=f"You have been gifted '{course.title}'.",
+                link=f"/courses/{course.slug}",
+            )
+            db.add(notification)
+
+            notification = Notification(
+                user_id=uuid.UUID(user_id),
+                type="gift_sent",
+                title="Gift delivered",
+                body=f"Your gift of '{course.title}' was delivered.",
+                link=f"/courses/{course.slug}",
+            )
+            db.add(notification)
+        else:
+            notification = Notification(
+                user_id=uuid.UUID(user_id),
+                type="enrollment",
+                title=f"You are enrolled in {course.title}",
+                body="Start learning now.",
+                link=f"/courses/{course.slug}",
+            )
+            db.add(notification)
 
     await db.commit()
     log.info(
