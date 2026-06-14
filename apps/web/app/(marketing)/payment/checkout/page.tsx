@@ -163,25 +163,18 @@ function MultiItemCheckout({
   items,
   onPay,
   payingId,
-  selectedIds,
-  onToggle,
-  onPaySelected,
-  onGiftSelected,
+  onPayAll,
+  onGiftAll,
   payingMulti,
 }: {
   items: CartItem[];
   onPay: (id: string) => void;
   payingId: string | null;
-  selectedIds: Set<string>;
-  onToggle: (id: string) => void;
-  onPaySelected: () => void;
-  onGiftSelected: () => void;
+  onPayAll: () => void;
+  onGiftAll: () => void;
   payingMulti: boolean;
 }) {
-  const selectedItems = items.filter((item) => selectedIds.has(item.courseId));
-  const selectedTotal = selectedItems.reduce((sum, item) => sum + item.priceInCents, 0);
-  const anySelected = selectedItems.length > 0;
-  const multiSelected = selectedItems.length > 1;
+  const total = items.reduce((sum, item) => sum + item.priceInCents, 0);
   const busy = payingId !== null || payingMulti;
 
   return (
@@ -197,13 +190,6 @@ function MultiItemCheckout({
         <div className="stagger-children space-y-4">
           {items.map((item) => (
             <div key={item.courseId} className="premium-card flex items-center gap-4 rounded-[--radius-lg] p-4">
-              <input
-                type="checkbox"
-                checked={selectedIds.has(item.courseId)}
-                onChange={() => onToggle(item.courseId)}
-                className="h-5 w-5 shrink-0 rounded border-[--color-border] accent-[--color-primary]"
-                aria-label={`Select ${item.title}`}
-              />
               <div className="thumbnail-fallback relative h-14 w-24 shrink-0 overflow-hidden rounded-[--radius-sm]">
                 {item.imageUrl && <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />}
               </div>
@@ -225,42 +211,33 @@ function MultiItemCheckout({
         <div className="premium-card animate-fade-up sticky top-24 rounded-[--radius-lg] p-5">
           <h2 className="font-heading text-lg font-black text-[--color-text-primary]">Order summary</h2>
 
-          {anySelected ? (
-            <ul className="mt-4 space-y-2">
-              {selectedItems.map((item) => (
-                <li key={item.courseId} className="flex items-start justify-between gap-3 text-sm">
-                  <span className="line-clamp-2 font-bold text-[--color-text-secondary]">{item.title}</span>
-                  <span className="shrink-0 font-extrabold text-[--color-text-primary]">{formatPrice(item.priceInCents)}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-4 text-sm text-[--color-text-muted]">Select courses to pay or gift together.</p>
-          )}
+          <ul className="mt-4 space-y-2">
+            {items.map((item) => (
+              <li key={item.courseId} className="flex items-start justify-between gap-3 text-sm">
+                <span className="line-clamp-2 font-bold text-[--color-text-secondary]">{item.title}</span>
+                <span className="shrink-0 font-extrabold text-[--color-text-primary]">{formatPrice(item.priceInCents)}</span>
+              </li>
+            ))}
+          </ul>
 
           <div className="mt-4 flex items-baseline justify-between border-t border-[--color-border] pt-4">
             <span className="text-sm font-bold text-[--color-text-secondary]">
-              {selectedItems.length} selected
+              {items.length} courses
             </span>
             <span className="font-heading text-2xl font-black text-[--color-text-primary]">
-              {formatPrice(selectedTotal)}
+              {formatPrice(total)}
             </span>
           </div>
 
           <div className="mt-4 space-y-2">
-            <Button className="w-full" onClick={onPaySelected} disabled={!multiSelected || busy}>
-              {payingMulti ? "Processing…" : `Pay selected (${formatPrice(selectedTotal)})`}
+            <Button className="w-full" onClick={onPayAll} disabled={busy}>
+              {payingMulti ? "Processing…" : `Pay all (${formatPrice(total)})`}
             </Button>
-            <Button variant="outline" className="w-full" onClick={onGiftSelected} disabled={!multiSelected || busy}>
+            <Button variant="outline" className="w-full" onClick={onGiftAll} disabled={busy}>
               <Gift className="mr-1.5 h-4 w-4" />
-              Gift selected
+              Gift all
             </Button>
           </div>
-          {!multiSelected && (
-            <p className="mt-2 text-center text-xs text-[--color-text-muted]">
-              Select 2 or more courses to pay or gift together.
-            </p>
-          )}
         </div>
       </div>
     </div>
