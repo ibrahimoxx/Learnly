@@ -35,44 +35,61 @@ function MultiGiftCard({ gift, isSent }: { gift: GiftRead; isSent: boolean }) {
   const courses = gift.courses ?? [];
 
   return (
-    <div className="hover-lift premium-card flex items-start gap-4 rounded-[--radius-md] p-4">
-      <div className="thumbnail-fallback flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
-        <Gift className="h-8 w-8 text-white/80" />
+    <div className="hover-lift premium-card overflow-hidden rounded-[--radius-md]">
+      <div className="flex items-start gap-4 border-b border-[--color-border] bg-[--color-primary-subtle] p-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[image:var(--gradient-brand)] shadow-[var(--shadow-brand)]">
+          <Gift className="h-5 w-5 text-white" />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="font-extrabold text-[--color-text-primary]">
+            {courses.length} courses {isSent ? "gifted" : "received as a gift"}
+          </p>
+          <p className="mt-1 text-sm text-[--color-text-secondary]">
+            <span className="font-semibold text-[--color-text-primary]">
+              {isSent ? "To:" : "From:"} {gift.other_user.first_name} {gift.other_user.last_name}
+            </span>{" "}
+            <span className="text-xs text-[--color-text-muted]">({gift.other_user.email})</span>
+          </p>
+          {gift.message ? (
+            <p className="mt-1 text-sm italic text-[--color-text-secondary]">"{gift.message}"</p>
+          ) : null}
+          <p className="mt-2 text-xs text-[--color-text-muted]">
+            {new Date(gift.created_at).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}
+          </p>
+        </div>
       </div>
 
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold text-[--color-text-primary]">
-          {courses.length} courses {isSent ? "gifted" : "received as a gift"}
-        </p>
-        <p className="mt-1 text-sm text-[--color-text-secondary]">
-          <span className="font-semibold text-[--color-text-primary]">
-            {isSent ? "To:" : "From:"} {gift.other_user.first_name} {gift.other_user.last_name}
-          </span>{" "}
-          <span className="text-xs text-[--color-text-muted]">({gift.other_user.email})</span>
-        </p>
-        {gift.message ? (
-          <p className="mt-1 text-sm italic text-[--color-text-secondary]">"{gift.message}"</p>
-        ) : null}
-        <ul className="mt-2 space-y-1">
-          {courses.map((course) => (
-            <li key={course.id}>
-              <Link
-                href={`/courses/${course.slug}`}
-                className="line-clamp-1 text-sm text-[--color-text-secondary] transition-colors hover:text-[--color-primary]"
-              >
-                • {course.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-2 text-xs text-[--color-text-muted]">
-          {new Date(gift.created_at).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </p>
-      </div>
+      <ul className="divide-y divide-[--color-border]">
+        {courses.map((course) => (
+          <li key={course.id} className="flex items-center gap-4 p-4">
+            <div className="thumbnail-fallback flex h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
+              {course.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={course.image_url} alt={course.title} className="h-full w-full object-cover" />
+              ) : (
+                <BookOpen className="h-6 w-6 text-white/80" />
+              )}
+            </div>
+            <Link
+              href={`/courses/${course.slug}`}
+              className="line-clamp-2 min-w-0 flex-1 text-sm font-semibold text-[--color-text-primary] transition-colors hover:text-[--color-primary]"
+            >
+              {course.title}
+            </Link>
+            <Link
+              href={`/courses/${course.slug}`}
+              className="shrink-0 rounded-[--radius-sm] bg-[--color-primary] px-4 py-1.5 text-center text-xs font-extrabold text-white transition-colors hover:bg-[--color-primary-hover]"
+            >
+              View course
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
