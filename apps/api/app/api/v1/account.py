@@ -20,6 +20,8 @@ from app.schemas.user import (
 
 router = APIRouter(prefix="/users/me", tags=["account"])
 
+ALLOWED_USER_UPDATE_FIELDS = {"first_name", "last_name", "bio", "website", "image_url", "timezone"}
+
 
 @router.get("", response_model=UserRead)
 async def get_my_account(user: User = Depends(get_current_user)) -> UserRead:
@@ -34,6 +36,8 @@ async def update_my_account(
 ) -> UserRead:
     updates = body.model_dump(exclude_unset=True)
     for field, value in updates.items():
+        if field not in ALLOWED_USER_UPDATE_FIELDS:
+            continue
         setattr(user, field, value)
     await db.commit()
     await db.refresh(user)

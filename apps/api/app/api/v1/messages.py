@@ -6,12 +6,47 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
 from app.db.session import get_db
+from app.db.tables.course import Course
+from app.db.tables.enrollment import Enrollment
 from app.db.tables.message import Message
 from app.db.tables.notification import Notification
 from app.db.tables.user import User
 from app.schemas.message import ConversationRead, MessageCreate, MessageRead, MessageUserBrief
 
 router = APIRouter(prefix="/messages", tags=["messages"])
+
+
+async def _has_existing_conversation(db: AsyncSession, user_a: uuid.UUID, user_b: uuid.UUID) -> bool:
+    result = await db.execute(
+        select(Message.id)
+        .where(
+            or_(
+                (Message.sender_id == user_a) & (Message.recipient_id == user_b),
+                (Message.sender_id == user_b) & (Message.recipient_id == user_a),
+            )
+        )
+        .limit(1)
+    )
+    return result.scalar_one_or_none() is not None
+
+
+async def _has_course_relationship(
+    db: AsyncSession, user_a: uuid.UUID, user_b: uuid.UUID, course_id: uuid.UUID | None
+) -> bool:
+    query = (
+        select(Enrollment.id)
+        .join(Course, Course.id == Enrollment.course_id)
+        .where(
+            or_(
+                (Enrollment.student_id == user_a) & (Course.instructor_id == user_b),
+                (Enrollment.student_id == user_b) & (Course.instructor_id == user_a),
+            )
+        )
+    )
+    if course_id is not None:
+        query = query.where(Enrollment.course_id == course_id)
+    result = await db.execute(query.limit(1))
+    return result.scalar_one_or_none() is not None
 
 
 @router.get("/conversations", response_model=list[ConversationRead])
@@ -63,9 +98,8 @@ async def get_thread(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[MessageRead]:
-    other_result = await db.execute(select(User).where(User.id == user_id))
-    if not other_result.scalar_one_or_none():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    if not await _has_existing_conversation(db, user.id, user_id):
+        return []
 
     result = await db.execute(
         select(Message)
@@ -102,6 +136,18 @@ async def send_message(
     recipient = recipient_result.scalar_one_or_none()
     if not recipient:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recipient not found")
+
+    if not await _has_existing_conversation(db, user.id, body.recipient_id):
+        if body.course_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="course_id is required to start a new conversation",
+            )
+        if not await _has_course_relationship(db, user.id, body.recipient_id, body.course_id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You can only message your course instructors or enrolled students",
+            )
 
     message = Message(
         sender_id=user.id,
