@@ -258,19 +258,8 @@ function CheckoutContent() {
   const [loadingCourse, setLoadingCourse] = useState(Boolean(courseId));
   const [payingId, setPayingId] = useState<string | null>(null);
   const [payingMulti, setPayingMulti] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => setMounted(true), []);
-
-  useEffect(() => {
-    if (courseIdsParam) {
-      const requested = new Set(courseIdsParam.split(",").filter(Boolean));
-      const valid = new Set(items.map((item) => item.courseId).filter((id) => requested.has(id)));
-      setSelectedIds(valid.size > 0 ? valid : new Set(items.map((item) => item.courseId)));
-      return;
-    }
-    setSelectedIds(new Set(items.map((item) => item.courseId)));
-  }, [items, courseIdsParam]);
 
   useEffect(() => {
     if (!courseId) return;
