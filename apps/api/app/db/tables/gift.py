@@ -22,6 +22,7 @@ class Gift(Base):
         UUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True
     )
     message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    batch_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     sender: Mapped["User"] = relationship("User", foreign_keys=[sender_id])  # type: ignore[name-defined]
