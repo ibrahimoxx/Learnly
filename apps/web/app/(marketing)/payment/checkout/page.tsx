@@ -271,6 +271,7 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const courseId = searchParams.get("courseId");
+  const courseIdsParam = searchParams.get("courseIds");
   const { getToken } = useAuth();
   const { items } = useCartStore();
 
@@ -285,8 +286,14 @@ function CheckoutContent() {
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
+    if (courseIdsParam) {
+      const requested = new Set(courseIdsParam.split(",").filter(Boolean));
+      const valid = new Set(items.map((item) => item.courseId).filter((id) => requested.has(id)));
+      setSelectedIds(valid.size > 0 ? valid : new Set(items.map((item) => item.courseId)));
+      return;
+    }
     setSelectedIds(new Set(items.map((item) => item.courseId)));
-  }, [items]);
+  }, [items, courseIdsParam]);
 
   useEffect(() => {
     if (!courseId) return;

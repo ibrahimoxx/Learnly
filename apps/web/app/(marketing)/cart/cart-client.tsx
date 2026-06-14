@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Trash2, Tag, ShieldCheck } from "lucide-react";
+import { ShoppingCart, Trash2, Tag, ShieldCheck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/lib/stores/cart-store";
@@ -21,6 +21,7 @@ export function CartClient({ enrolledCourseIds }: Props) {
   const { items, removeItem } = useCartStore();
   const [mounted, setMounted] = useState(false);
   const [couponCode, setCouponCode] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => setMounted(true), []);
 
@@ -29,13 +30,33 @@ export function CartClient({ enrolledCourseIds }: Props) {
     courseIdsToRemove.forEach((courseId) => removeItem(courseId));
   }, [enrolledCourseIds, items, removeItem]);
 
+  useEffect(() => {
+    setSelectedIds(new Set(items.map((item) => item.courseId)));
+  }, [items]);
+
+  function toggleSelected(courseId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(courseId)) {
+        next.delete(courseId);
+      } else {
+        next.add(courseId);
+      }
+      return next;
+    });
+  }
+
   if (!mounted) {
     return <div className="premium-shell mx-auto max-w-5xl px-4 py-16 sm:px-6" />;
   }
 
-  const subtotal = items.reduce((sum, item) => sum + item.priceInCents, 0);
-  const soloItem = items.length === 1 ? items[0] : undefined;
-  const checkoutHref = soloItem ? `/payment/checkout?courseId=${soloItem.courseId}` : "/payment/checkout";
+  const selectedItems = items.filter((item) => selectedIds.has(item.courseId));
+  const subtotal = selectedItems.reduce((sum, item) => sum + item.priceInCents, 0);
+  const soloItem = selectedItems.length === 1 ? selectedItems[0] : undefined;
+  const checkoutHref = soloItem
+    ? `/payment/checkout?courseId=${soloItem.courseId}`
+    : `/payment/checkout?courseIds=${selectedItems.map((item) => item.courseId).join(",")}`;
+  const noneSelected = selectedItems.length === 0;
 
   if (items.length === 0) {
     return (
@@ -67,38 +88,66 @@ export function CartClient({ enrolledCourseIds }: Props) {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
         <div className="stagger-children space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.courseId}
-              className="premium-card flex items-center gap-4 rounded-[--radius-lg] p-4"
-            >
-              <div className="thumbnail-fallback relative h-16 w-28 shrink-0 overflow-hidden rounded-[--radius-sm]">
-                {item.imageUrl && (
-                  <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <Link
-                  href={`/courses/${item.slug}`}
-                  className="line-clamp-2 text-sm font-bold text-[--color-text-primary] transition-colors hover:text-[--color-primary]"
-                >
-                  {item.title}
-                </Link>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="font-heading text-base font-black text-[--color-text-primary]">
-                  {formatPrice(item.priceInCents)}
-                </p>
-              </div>
-              <button
-                onClick={() => removeItem(item.courseId)}
-                aria-label={`Remove ${item.title} from cart`}
-                className="shrink-0 rounded-[--radius-sm] p-2 text-[--color-text-muted] transition-colors hover:bg-[--color-error]/10 hover:text-[--color-error]"
+          {items.map((item) => {
+            const isSelected = selectedIds.has(item.courseId);
+            return (
+              <div
+                key={item.courseId}
+                className={`premium-card flex items-center gap-4 rounded-[--radius-lg] p-4 transition-all duration-300 ease-out ${
+                  isSelected
+                    ? "ring-2 ring-[--color-primary] ring-offset-2 ring-offset-[--color-background]"
+                    : "opacity-50 saturate-50"
+                }`}
               >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+                <button
+                  type="button"
+                  onClick={() => toggleSelected(item.courseId)}
+                  aria-pressed={isSelected}
+                  aria-label={isSelected ? `Deselect ${item.title}` : `Select ${item.title}`}
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 ease-out ${
+                    isSelected
+                      ? "border-[--color-primary] bg-[--color-primary] shadow-[var(--shadow-brand)]"
+                      : "border-[--color-border] bg-transparent hover:border-[--color-primary]"
+                  }`}
+                >
+                  <Check
+                    className={`h-3.5 w-3.5 text-white transition-all duration-300 ease-out ${
+                      isSelected ? "scale-100 opacity-100" : "scale-0 opacity-0"
+                    }`}
+                  />
+                </button>
+                <div
+                  className={`thumbnail-fallback relative h-16 w-28 shrink-0 overflow-hidden rounded-[--radius-sm] transition-all duration-300 ${
+                    isSelected ? "" : "grayscale"
+                  }`}
+                >
+                  {item.imageUrl && (
+                    <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Link
+                    href={`/courses/${item.slug}`}
+                    className="line-clamp-2 text-sm font-bold text-[--color-text-primary] transition-colors hover:text-[--color-primary]"
+                  >
+                    {item.title}
+                  </Link>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-heading text-base font-black text-[--color-text-primary]">
+                    {formatPrice(item.priceInCents)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => removeItem(item.courseId)}
+                  aria-label={`Remove ${item.title} from cart`}
+                  className="shrink-0 rounded-[--radius-sm] p-2 text-[--color-text-muted] transition-colors hover:bg-[--color-error]/10 hover:text-[--color-error]"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         <div className="premium-card animate-fade-up h-fit rounded-[--radius-lg] p-6">
@@ -123,15 +172,27 @@ export function CartClient({ enrolledCourseIds }: Props) {
           </div>
 
           <div className="mt-4 flex items-baseline justify-between border-t border-[--color-border] pt-4">
-            <span className="text-sm font-bold text-[--color-text-secondary]">Subtotal</span>
+            <span className="text-sm font-bold text-[--color-text-secondary]">
+              Subtotal · {selectedItems.length} of {items.length} selected
+            </span>
             <span className="font-heading text-2xl font-black text-[--color-text-primary]">
               {formatPrice(subtotal)}
             </span>
           </div>
 
-          <Link href={checkoutHref} className="mt-5 block">
-            <Button size="lg" className="w-full">Proceed to checkout</Button>
-          </Link>
+          {noneSelected ? (
+            <Button size="lg" className="mt-5 w-full" disabled>
+              Select a course to continue
+            </Button>
+          ) : (
+            <Link href={checkoutHref} className="mt-5 block">
+              <Button size="lg" className="w-full">
+                {selectedItems.length > 1
+                  ? `Checkout ${selectedItems.length} courses`
+                  : "Proceed to checkout"}
+              </Button>
+            </Link>
+          )}
 
           <div className="mt-4 flex items-start gap-2 text-xs text-[--color-text-muted]">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
