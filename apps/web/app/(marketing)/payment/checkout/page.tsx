@@ -356,8 +356,12 @@ function CheckoutContent() {
   // Cart-based checkout
   if (items.length === 0) return <EmptyState />;
 
-  if (items.length === 1 && items[0]) {
-    const item = items[0];
+  const requestedIds = courseIdsParam ? new Set(courseIdsParam.split(",").filter(Boolean)) : null;
+  const filteredItems = requestedIds ? items.filter((item) => requestedIds.has(item.courseId)) : items;
+  const checkoutItems = filteredItems.length > 0 ? filteredItems : items;
+
+  if (checkoutItems.length === 1 && checkoutItems[0]) {
+    const item = checkoutItems[0];
     return (
       <div className="premium-shell mx-auto max-w-2xl px-4 py-12 sm:px-6">
         <h1 className="animate-fade-up font-heading text-3xl font-black tracking-tight text-[--color-text-primary]">
@@ -379,13 +383,11 @@ function CheckoutContent() {
 
   return (
     <MultiItemCheckout
-      items={items}
+      items={checkoutItems}
       onPay={pay}
       payingId={payingId}
-      selectedIds={selectedIds}
-      onToggle={toggleSelected}
-      onPaySelected={() => payMany(Array.from(selectedIds))}
-      onGiftSelected={giftSelected}
+      onPayAll={() => payMany(checkoutItems.map((item) => item.courseId))}
+      onGiftAll={() => router.push(`/payment/checkout/gift?courseIds=${checkoutItems.map((item) => item.courseId).join(",")}`)}
       payingMulti={payingMulti}
     />
   );
