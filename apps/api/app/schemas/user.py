@@ -16,6 +16,8 @@ class UserRead(BaseModel):
     bio: str | None
     website: str | None
     is_active: bool
+    timezone: str | None = None
+    is_profile_public: bool = True
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -27,10 +29,51 @@ class UserUpdate(BaseModel):
     bio: str | None = None
     website: str | None = None
     image_url: str | None = None
+    timezone: str | None = None
 
 
 class UserRoleUpdate(BaseModel):
     role: str
+
+
+class EmailNotificationPrefs(BaseModel):
+    enrollment: bool = True
+    qa_reply: bool = True
+    review: bool = True
+    gift: bool = True
+    announcement: bool = True
+    message: bool = True
+    marketing: bool = True
+
+
+class UserPrivacyRead(BaseModel):
+    is_profile_public: bool
+    email_notification_prefs: EmailNotificationPrefs
+
+
+class UserPrivacyUpdate(BaseModel):
+    is_profile_public: bool | None = None
+    email_notification_prefs: EmailNotificationPrefs | None = None
+
+
+class SubscriptionRead(BaseModel):
+    plan: str
+    status: str
+    description: str
+    renews_at: datetime | None = None
+
+
+class PurchaseHistoryItem(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: str
+    course_slug: str
+    amount_cents: int
+    currency: str
+    is_gift_purchase: bool
+    purchased_at: datetime
+
+    model_config = {"from_attributes": True}
 
 
 class InstructorBriefRead(BaseModel):

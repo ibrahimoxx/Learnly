@@ -20,5 +20,6 @@ from app.db.tables.learning_path import LearningPath, LearningPathCourse, Learni
 from app.db.tables.affiliate import AffiliateLink, AffiliateConversion
 from app.db.tables.coding_exercise import CodingExercise, CodeSubmission
 from app.db.tables.live_session import LiveSession
+from app.db.tables.message import Message
 
-__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "Gift", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment", "AffiliateLink", "AffiliateConversion", "CodingExercise", "CodeSubmission", "LiveSession"]
+__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "Gift", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment", "AffiliateLink", "AffiliateConversion", "CodingExercise", "CodeSubmission", "LiveSession", "Message"]
