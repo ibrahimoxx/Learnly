@@ -65,12 +65,30 @@ export function NotificationBell() {
     }
   }
 
+  async function markNotificationRead(notification: Notification) {
+    if (notification.is_read) return;
+
+    const token = await getToken();
+    try {
+      await apiFetch(`/api/v1/notifications/${notification.id}/read`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotifications((prev) =>
+        prev.map((item) => (item.id === notification.id ? { ...item, is_read: true } : item)),
+      );
+      setUnread((prev) => Math.max(0, notification.is_read ? prev : prev - 1));
+    } catch {
+      // ignore
+    }
+  }
+
   if (!isSignedIn) return null;
 
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => { setOpen(!open); if (!open && unread > 0) markAllRead(); }}
+        onClick={() => setOpen(!open)}
         className="relative rounded-full p-2 text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
         aria-label="Notifications"
       >
@@ -100,22 +118,39 @@ export function NotificationBell() {
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`border-b border-[--color-border] last:border-0 px-4 py-3 transition-colors hover:bg-[--color-surface] ${!n.is_read ? "bg-[--color-primary-subtle]" : ""}`}
+                  className={`relative border-b border-[--color-border] last:border-0 px-4 py-3 transition-colors hover:bg-[--color-surface] ${!n.is_read ? "bg-[--color-primary-subtle]" : ""}`}
                 >
+                  {!n.is_read && (
+                    <span className="absolute left-4 top-4 h-2 w-2 rounded-full bg-[--color-primary]" aria-hidden="true" />
+                  )}
                   {n.link ? (
-                    <Link href={n.link} onClick={() => setOpen(false)} className="block">
+                    <Link
+                      href={n.link}
+                      onClick={() => {
+                        markNotificationRead(n);
+                        setOpen(false);
+                      }}
+                      className={`block ${!n.is_read ? "pl-3" : ""}`}
+                    >
                       <p className="text-sm font-medium text-[--color-text-primary] line-clamp-1">{n.title}</p>
                       {n.body && <p className="mt-0.5 text-xs text-[--color-text-muted] line-clamp-2">{n.body}</p>}
+                      <p className="mt-1 text-[10px] text-[--color-text-muted]">
+                        {new Date(n.created_at).toLocaleDateString()}
+                      </p>
                     </Link>
                   ) : (
-                    <>
+                    <button
+                      type="button"
+                      onClick={() => markNotificationRead(n)}
+                      className={`block w-full text-left ${!n.is_read ? "pl-3" : ""}`}
+                    >
                       <p className="text-sm font-medium text-[--color-text-primary] line-clamp-1">{n.title}</p>
                       {n.body && <p className="mt-0.5 text-xs text-[--color-text-muted] line-clamp-2">{n.body}</p>}
-                    </>
+                      <p className="mt-1 text-[10px] text-[--color-text-muted]">
+                        {new Date(n.created_at).toLocaleDateString()}
+                      </p>
+                    </button>
                   )}
-                  <p className="mt-1 text-[10px] text-[--color-text-muted]">
-                    {new Date(n.created_at).toLocaleDateString()}
-                  </p>
                 </div>
               ))
             )}
