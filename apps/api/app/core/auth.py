@@ -1,3 +1,4 @@
+import time
 import uuid
 
 import httpx
@@ -6,6 +7,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -17,6 +19,7 @@ bearer = HTTPBearer()
 optional_bearer = HTTPBearer(auto_error=False)
 
 _jwks_cache: dict | None = None
+_self_heal_attempts: dict[str, float] = {}
 
 
 async def _get_jwks() -> dict:
@@ -102,19 +105,27 @@ async def get_current_user(
         log.info("user_auto_provisioned", clerk_id=clerk_id, email=email, role=clerk_role)
     else:
         if user.email.endswith("@unknown.local"):
-            clerk_user = await _fetch_clerk_user(clerk_id)
-            email: str = (
-                (clerk_user.get("email_addresses") or [{}])[0].get("email_address", "")
-                or payload.get("email")
-                or (payload.get("email_addresses") or [{}])[0].get("email_address", "")
-                or ""
-            )
-            if email and not email.endswith("@unknown.local"):
-                user.email = email
-                user.first_name = clerk_user.get("first_name") or payload.get("first_name") or user.first_name
-                user.last_name = clerk_user.get("last_name") or payload.get("last_name") or user.last_name
-                await db.commit()
-                log.info("user_email_self_healed", clerk_id=clerk_id, email=email)
+            last_attempt = _self_heal_attempts.get(clerk_id)
+            if last_attempt is None or time.time() - last_attempt >= 300:
+                clerk_user = await _fetch_clerk_user(clerk_id)
+                email: str = (
+                    (clerk_user.get("email_addresses") or [{}])[0].get("email_address", "")
+                    or payload.get("email")
+                    or (payload.get("email_addresses") or [{}])[0].get("email_address", "")
+                    or ""
+                )
+                if email and not email.endswith("@unknown.local"):
+                    user.email = email
+                    user.first_name = clerk_user.get("first_name") or payload.get("first_name") or user.first_name
+                    user.last_name = clerk_user.get("last_name") or payload.get("last_name") or user.last_name
+                    try:
+                        await db.commit()
+                    except IntegrityError:
+                        await db.rollback()
+                        log.warning("user_email_self_heal_conflict", clerk_id=clerk_id, email=email)
+                    else:
+                        log.info("user_email_self_healed", clerk_id=clerk_id, email=email)
+                _self_heal_attempts[clerk_id] = time.time()
 
         if clerk_role != "student" and user.role != clerk_role:
             # Clerk is source of truth — sync role changes that arrived via JWT
