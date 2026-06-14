@@ -370,3 +370,90 @@ export interface LiveSessionToken {
   url: string;
   room_name: string;
 }
+
+export interface UserAccount {
+  id: string;
+  clerk_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  image_url: string | null;
+  role: UserRole;
+  bio: string | null;
+  website: string | null;
+  is_active: boolean;
+  timezone: string | null;
+  is_profile_public: boolean;
+  created_at: string;
+}
+
+export interface UserAccountUpdate {
+  first_name?: string;
+  last_name?: string;
+  bio?: string;
+  website?: string;
+  image_url?: string;
+  timezone?: string;
+}
+
+export interface EmailNotificationPrefs {
+  enrollment: boolean;
+  qa_reply: boolean;
+  review: boolean;
+  gift: boolean;
+  announcement: boolean;
+  message: boolean;
+  marketing: boolean;
+}
+
+export interface UserPrivacy {
+  is_profile_public: boolean;
+  email_notification_prefs: EmailNotificationPrefs;
+}
+
+export interface UserPrivacyUpdate {
+  is_profile_public?: boolean;
+  email_notification_prefs?: Partial<EmailNotificationPrefs>;
+}
+
+export interface SubscriptionRead {
+  plan: string;
+  status: string;
+  description: string;
+  renews_at: string | null;
+}
+
+export interface PurchaseHistoryItem {
+  id: string;
+  course_id: string;
+  course_title: string;
+  course_slug: string;
+  amount_cents: number;
+  currency: string;
+  is_gift_purchase: boolean;
+  purchased_at: string;
+}
+
+export interface MessageUserBrief {
+  id: string;
+  first_name: string;
+  last_name: string;
+  image_url: string | null;
+  role: UserRole;
+}
+
+export interface MessageRead {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  course_id: string | null;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface ConversationRead {
+  participant: MessageUserBrief;
+  last_message: MessageRead;
+  unread_count: number;
+}

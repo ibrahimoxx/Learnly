@@ -257,7 +257,12 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         if not course:
             continue
 
-        enrollment = Enrollment(student_id=uuid.UUID(enroll_student_id), course_id=course_uuid)
+        enrollment = Enrollment(
+            student_id=uuid.UUID(enroll_student_id),
+            course_id=course_uuid,
+            amount_paid_cents=course.price_in_cents,
+            currency=str(_get(session, "currency") or "usd"),
+        )
         db.add(enrollment)
         course.enrollment_count = (course.enrollment_count or 0) + 1
         fulfilled.append((course, enrollment))

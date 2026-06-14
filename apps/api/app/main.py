@@ -30,6 +30,8 @@ from app.api.v1.affiliate import router as affiliate_router
 from app.api.v1.coding_exercises import router as coding_exercises_router
 from app.api.v1.live_sessions import router as live_sessions_router
 from app.api.v1.categories import router as categories_router
+from app.api.v1.account import router as account_router
+from app.api.v1.messages import router as messages_router
 from app.api.v1.users import router as users_router
 from app.core.config import settings
 
@@ -84,6 +86,8 @@ app.include_router(affiliate_router, prefix="/api/v1")
 app.include_router(coding_exercises_router, prefix="/api/v1")
 app.include_router(live_sessions_router, prefix="/api/v1")
 app.include_router(categories_router, prefix="/api/v1")
+app.include_router(account_router, prefix="/api/v1")
+app.include_router(messages_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 
 
