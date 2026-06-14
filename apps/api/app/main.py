@@ -18,6 +18,7 @@ from app.api.v1.coupons import router as coupons_router
 from app.api.v1.payouts import router as payouts_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.notifications import router as notifications_router
+from app.api.v1.gifts import router as gifts_router
 from app.api.v1.organizations import router as organizations_router
 from app.api.v1.quiz import router as quiz_router
 from app.api.v1.discussions import router as discussions_router
@@ -71,6 +72,7 @@ app.include_router(coupons_router, prefix="/api/v1")
 app.include_router(payouts_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(notifications_router, prefix="/api/v1")
+app.include_router(gifts_router, prefix="/api/v1")
 app.include_router(organizations_router, prefix="/api/v1")
 app.include_router(quiz_router, prefix="/api/v1")
 app.include_router(discussions_router, prefix="/api/v1")

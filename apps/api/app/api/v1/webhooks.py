@@ -15,6 +15,7 @@ from app.db.session import get_db
 from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
+from app.db.tables.gift import Gift
 from app.db.tables.notification import Notification
 from app.db.tables.organization import Organization
 from app.db.tables.user import User
@@ -231,12 +232,21 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
     if course:
         course.enrollment_count = (course.enrollment_count or 0) + 1
         if is_gift == "true" and recipient_user_id and recipient_user_id != user_id:
+            gift_message = meta.get("gift_message") if isinstance(meta, dict) else getattr(meta, "gift_message", None)
+            gift = Gift(
+                sender_id=uuid.UUID(user_id),
+                recipient_id=uuid.UUID(recipient_user_id),
+                course_id=course.id,
+                message=gift_message or None,
+            )
+            db.add(gift)
+
             notification = Notification(
                 user_id=uuid.UUID(recipient_user_id),
                 type="gift_received",
                 title="You received a gift course!",
                 body=f"You have been gifted '{course.title}'.",
-                link=f"/courses/{course.slug}",
+                link="/gifts",
             )
             db.add(notification)
 
@@ -245,7 +255,7 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
                 type="gift_sent",
                 title="Gift delivered",
                 body=f"Your gift of '{course.title}' was delivered.",
-                link=f"/courses/{course.slug}",
+                link="/gifts",
             )
             db.add(notification)
         else:

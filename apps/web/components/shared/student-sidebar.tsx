@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Heart, Bell, Trophy } from "lucide-react";
+import { BookOpen, Heart, Gift, Bell, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
   { href: "/dashboard",      label: "My Learning",    icon: BookOpen },
   { href: "/wishlist",       label: "Wishlist",        icon: Heart },
+  { href: "/gifts",          label: "Gifts",           icon: Gift },
   { href: "/notifications",  label: "Notifications",   icon: Bell },
   { href: "/achievements",   label: "Achievements",    icon: Trophy },
 ];

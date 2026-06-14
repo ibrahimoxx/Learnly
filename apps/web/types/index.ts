@@ -118,6 +118,33 @@ export interface WishlistItem {
   course_rating: number;
 }
 
+export interface GiftCourseInfo {
+  id: string;
+  title: string;
+  slug: string;
+  image_url?: string;
+}
+
+export interface GiftUserInfo {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+export interface GiftRead {
+  id: string;
+  course: GiftCourseInfo;
+  other_user: GiftUserInfo;
+  message: string | null;
+  created_at: string;
+}
+
+export interface GiftListRead {
+  sent: GiftRead[];
+  received: GiftRead[];
+}
+
 export interface Answer {
   id: string;
   question_id: string;
