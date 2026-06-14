@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth, SignInButton } from "@clerk/nextjs";
@@ -159,19 +159,49 @@ function CourseNotFound() {
   );
 }
 
-function MultiItemCheckout({ items, onPay, payingId }: { items: CartItem[]; onPay: (id: string) => void; payingId: string | null }) {
+function MultiItemCheckout({
+  items,
+  onPay,
+  payingId,
+  selectedIds,
+  onToggle,
+  onPaySelected,
+  onGiftSelected,
+  payingMulti,
+}: {
+  items: CartItem[];
+  onPay: (id: string) => void;
+  payingId: string | null;
+  selectedIds: Set<string>;
+  onToggle: (id: string) => void;
+  onPaySelected: () => void;
+  onGiftSelected: () => void;
+  payingMulti: boolean;
+}) {
+  const selectedItems = items.filter((item) => selectedIds.has(item.courseId));
+  const selectedTotal = selectedItems.reduce((sum, item) => sum + item.priceInCents, 0);
+  const anySelected = selectedItems.length > 0;
+  const busy = payingId !== null || payingMulti;
+
   return (
-    <div className="premium-shell mx-auto max-w-2xl px-4 py-12 sm:px-6">
+    <div className="premium-shell mx-auto max-w-2xl px-4 py-12 sm:px-6 pb-32">
       <h1 className="animate-fade-up font-heading text-3xl font-black tracking-tight text-[--color-text-primary]">
         Checkout
       </h1>
       <p className="mt-2 text-sm text-[--color-text-secondary]">
-        Courses are purchased one at a time. Choose which one to pay for now — the rest will stay in your cart.
+        Pay for one, several, or all at once — your choice.
       </p>
 
       <div className="stagger-children mt-6 space-y-4">
         {items.map((item) => (
           <div key={item.courseId} className="premium-card flex items-center gap-4 rounded-[--radius-lg] p-4">
+            <input
+              type="checkbox"
+              checked={selectedIds.has(item.courseId)}
+              onChange={() => onToggle(item.courseId)}
+              className="h-5 w-5 shrink-0 rounded border-[--color-border] accent-[--color-primary]"
+              aria-label={`Select ${item.title}`}
+            />
             <div className="thumbnail-fallback relative h-14 w-24 shrink-0 overflow-hidden rounded-[--radius-sm]">
               {item.imageUrl && <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />}
             </div>
@@ -179,7 +209,7 @@ function MultiItemCheckout({ items, onPay, payingId }: { items: CartItem[]; onPa
               <p className="line-clamp-2 text-sm font-bold text-[--color-text-primary]">{item.title}</p>
               <p className="mt-1 text-sm font-extrabold text-[--color-text-secondary]">{formatPrice(item.priceInCents)}</p>
             </div>
-            <Button onClick={() => onPay(item.courseId)} disabled={payingId !== null}>
+            <Button onClick={() => onPay(item.courseId)} disabled={busy}>
               {payingId === item.courseId ? "Processing…" : "Pay"}
             </Button>
           </div>
@@ -189,12 +219,30 @@ function MultiItemCheckout({ items, onPay, payingId }: { items: CartItem[]; onPa
       <Link href="/cart" className="mt-6 inline-block text-sm font-bold text-[--color-primary] hover:underline">
         ← Back to cart
       </Link>
+
+      <div className="fixed inset-x-0 bottom-0 border-t border-[--color-border] bg-[--color-surface] p-4 shadow-[var(--shadow-lg)]">
+        <div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm font-bold text-[--color-text-primary]">
+            {selectedItems.length} selected — {formatPrice(selectedTotal)}
+          </p>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onGiftSelected} disabled={!anySelected || busy}>
+              <Gift className="mr-1.5 h-4 w-4" />
+              Gift selected
+            </Button>
+            <Button onClick={onPaySelected} disabled={!anySelected || busy}>
+              {payingMulti ? "Processing…" : `Pay selected (${formatPrice(selectedTotal)})`}
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const courseId = searchParams.get("courseId");
   const { getToken } = useAuth();
   const { items } = useCartStore();
@@ -204,8 +252,14 @@ function CheckoutContent() {
   const [courseLoadFailed, setCourseLoadFailed] = useState(false);
   const [loadingCourse, setLoadingCourse] = useState(Boolean(courseId));
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [payingMulti, setPayingMulti] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    setSelectedIds(new Set(items.map((item) => item.courseId)));
+  }, [items]);
 
   useEffect(() => {
     if (!courseId) return;
@@ -241,6 +295,41 @@ function CheckoutContent() {
       toast.error(msg);
       setPayingId(null);
     }
+  }
+
+  async function payMany(courseIds: string[]) {
+    setPayingMulti(true);
+    try {
+      const token = await getToken();
+      const { checkout_url } = await apiFetch<CheckoutSessionResponse>("/api/v1/checkout/sessions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ course_ids: courseIds }),
+      });
+      window.location.href = checkout_url;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Checkout failed";
+      toast.error(msg);
+      setPayingMulti(false);
+    }
+  }
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function giftSelected() {
+    const ids = items.filter((item) => selectedIds.has(item.courseId)).map((item) => item.courseId);
+    if (ids.length === 0) return;
+    router.push(`/payment/checkout/gift?courseIds=${ids.join(",")}`);
   }
 
   if (!mounted || loadingCourse) {
@@ -306,7 +395,18 @@ function CheckoutContent() {
     );
   }
 
-  return <MultiItemCheckout items={items} onPay={pay} payingId={payingId} />;
+  return (
+    <MultiItemCheckout
+      items={items}
+      onPay={pay}
+      payingId={payingId}
+      selectedIds={selectedIds}
+      onToggle={toggleSelected}
+      onPaySelected={() => payMany(Array.from(selectedIds))}
+      onGiftSelected={giftSelected}
+      payingMulti={payingMulti}
+    />
+  );
 }
 
 export default function CheckoutPage() {

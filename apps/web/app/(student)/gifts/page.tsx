@@ -31,6 +31,52 @@ function GiftSkeletonRows() {
   );
 }
 
+function MultiGiftCard({ gift, isSent }: { gift: GiftRead; isSent: boolean }) {
+  const courses = gift.courses ?? [];
+
+  return (
+    <div className="hover-lift premium-card flex items-start gap-4 rounded-[--radius-md] p-4">
+      <div className="thumbnail-fallback flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
+        <Gift className="h-8 w-8 text-white/80" />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-[--color-text-primary]">
+          {courses.length} courses {isSent ? "gifted" : "received as a gift"}
+        </p>
+        <p className="mt-1 text-sm text-[--color-text-secondary]">
+          <span className="font-semibold text-[--color-text-primary]">
+            {isSent ? "To:" : "From:"} {gift.other_user.first_name} {gift.other_user.last_name}
+          </span>{" "}
+          <span className="text-xs text-[--color-text-muted]">({gift.other_user.email})</span>
+        </p>
+        {gift.message ? (
+          <p className="mt-1 text-sm italic text-[--color-text-secondary]">"{gift.message}"</p>
+        ) : null}
+        <ul className="mt-2 space-y-1">
+          {courses.map((course) => (
+            <li key={course.id}>
+              <Link
+                href={`/courses/${course.slug}`}
+                className="line-clamp-1 text-sm text-[--color-text-secondary] transition-colors hover:text-[--color-primary]"
+              >
+                • {course.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-[--color-text-muted]">
+          {new Date(gift.created_at).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          })}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function GiftSection({ items, kind }: GiftSectionProps) {
   const isSent = kind === "sent";
 
@@ -51,7 +97,10 @@ function GiftSection({ items, kind }: GiftSectionProps) {
         </div>
       ) : (
         <div className="space-y-3">
-          {items.map((gift) => (
+          {items.map((gift) =>
+            gift.courses && gift.courses.length > 1 ? (
+              <MultiGiftCard key={gift.id} gift={gift} isSent={isSent} />
+            ) : (
             <div
               key={gift.id}
               className="hover-lift premium-card flex items-center gap-4 rounded-[--radius-md] p-4"
@@ -99,7 +148,8 @@ function GiftSection({ items, kind }: GiftSectionProps) {
                 </Link>
               </div>
             </div>
-          ))}
+            )
+          )}
         </div>
       )}
     </>

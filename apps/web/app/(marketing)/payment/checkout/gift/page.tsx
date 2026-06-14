@@ -98,9 +98,168 @@ function CourseNotFound() {
   );
 }
 
+function MultiGiftContent({ courseIds }: { courseIds: string[] }) {
+  const { getToken, isSignedIn } = useAuth();
+
+  const [mounted, setMounted] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingCourses(true);
+    Promise.all(
+      courseIds.map((id) =>
+        apiFetch<Course>(`/api/v1/courses/${id}`).catch(() => null)
+      )
+    )
+      .then((results) => {
+        if (!cancelled) {
+          setCourses(results.filter((course): course is Course => course !== null));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingCourses(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseIds]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<GiftFormValues>({
+    resolver: zodResolver(giftSchema),
+    defaultValues: { recipientEmail: "", giftMessage: "" },
+  });
+
+  const payableCourses = courses.filter((course) => !course.is_free);
+  const total = payableCourses.reduce((sum, course) => sum + course.price_in_cents, 0);
+
+  async function onSubmit(values: GiftFormValues) {
+    if (payableCourses.length === 0) return;
+    setSubmitting(true);
+    try {
+      const token = await getToken();
+      const { checkout_url } = await apiFetch<CheckoutSessionResponse>("/api/v1/checkout/gift-sessions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          course_ids: payableCourses.map((course) => course.id),
+          recipient_email: values.recipientEmail,
+          gift_message: values.giftMessage || null,
+        }),
+      });
+      window.location.href = checkout_url;
+    } catch (err: unknown) {
+      toast.error(extractErrorMessage(err, "Couldn't start gift checkout. Please try again."));
+      setSubmitting(false);
+    }
+  }
+
+  if (!mounted || loadingCourses) return <GiftSkeleton />;
+  if (payableCourses.length === 0) return <MissingCourse />;
+
+  return (
+    <div className="premium-shell mx-auto max-w-2xl px-4 py-12 sm:px-6">
+      <div className="animate-fade-up flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[--color-primary-subtle] text-[--color-primary] shadow-[var(--shadow-brand)]">
+          <Gift className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="font-heading text-3xl font-black tracking-tight text-[--color-text-primary]">
+            Gift these courses
+          </h1>
+          <p className="text-sm text-[--color-text-secondary]">
+            Send {payableCourses.length} course{payableCourses.length > 1 ? "s" : ""} to someone learning
+          </p>
+        </div>
+      </div>
+
+      <div className="premium-card animate-fade-up mt-6 rounded-[--radius-lg] p-6">
+        <div className="space-y-3">
+          {payableCourses.map((course) => (
+            <div key={course.id} className="flex items-center gap-4">
+              <div className="thumbnail-fallback relative h-14 w-24 shrink-0 overflow-hidden rounded-[--radius-sm]">
+                {course.image_url && <Image src={course.image_url} alt={course.title} fill className="object-cover" />}
+              </div>
+              <p className="line-clamp-2 flex-1 text-sm font-bold text-[--color-text-primary]">{course.title}</p>
+              <span className="text-sm font-extrabold text-[--color-text-secondary]">
+                {formatPrice(course.price_in_cents)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex items-baseline justify-between border-t border-[--color-border] pt-4">
+          <span className="text-sm font-bold text-[--color-text-secondary]">Gift price</span>
+          <span className="font-heading text-2xl font-black text-[--color-text-primary]">
+            {formatPrice(total)}
+          </span>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="recipientEmail">Recipient&apos;s email</Label>
+            <Input
+              id="recipientEmail"
+              type="email"
+              placeholder="friend@example.com"
+              autoComplete="email"
+              {...register("recipientEmail")}
+            />
+            <p className="text-xs text-[--color-text-muted]">
+              They&apos;ll need an existing Learnly account to receive this gift.
+            </p>
+            {errors.recipientEmail && (
+              <p className="text-xs font-semibold text-[--color-error]">{errors.recipientEmail.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="giftMessage">Personal message (optional)</Label>
+            <Textarea
+              id="giftMessage"
+              placeholder="Enjoy these courses — thought you'd love them!"
+              rows={4}
+              {...register("giftMessage")}
+            />
+            {errors.giftMessage && (
+              <p className="text-xs font-semibold text-[--color-error]">{errors.giftMessage.message}</p>
+            )}
+          </div>
+
+          {isSignedIn ? (
+            <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+              {submitting ? "Processing…" : `Pay ${formatPrice(total)} as a gift`}
+            </Button>
+          ) : (
+            <SignInButton mode="modal">
+              <Button type="button" size="lg" className="w-full">
+                Sign in to send a gift
+              </Button>
+            </SignInButton>
+          )}
+
+          <div className="flex items-start gap-2 text-xs text-[--color-text-muted]">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[--color-success]" />
+            <span>Secure payment powered by Stripe. 30-day money-back guarantee.</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function GiftContent() {
   const searchParams = useSearchParams();
   const courseId = searchParams.get("courseId");
+  const courseIdsParam = searchParams.get("courseIds");
   const { getToken, isSignedIn } = useAuth();
 
   const [mounted, setMounted] = useState(false);
@@ -158,6 +317,11 @@ function GiftContent() {
       toast.error(extractErrorMessage(err, "Couldn't start gift checkout. Please try again."));
       setSubmitting(false);
     }
+  }
+
+  if (!courseId && courseIdsParam) {
+    const ids = courseIdsParam.split(",").map((id) => id.trim()).filter(Boolean);
+    if (ids.length > 1) return <MultiGiftContent courseIds={ids} />;
   }
 
   if (!mounted || loadingCourse) return <GiftSkeleton />;
