@@ -309,7 +309,7 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         is_gift=is_gift == "true",
     )
 
-    if len(course_id_list) == 1 and len(fulfilled) == 1:
+    if len(course_id_list) == 1 and len(fulfilled) == 1 and is_gift != "true":
         course, enrollment = fulfilled[0]
         raw_aff_code = _meta_get("affiliate_code", "") or ""
         import re as _re
