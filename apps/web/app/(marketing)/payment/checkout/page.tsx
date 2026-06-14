@@ -181,10 +181,11 @@ function MultiItemCheckout({
   const selectedItems = items.filter((item) => selectedIds.has(item.courseId));
   const selectedTotal = selectedItems.reduce((sum, item) => sum + item.priceInCents, 0);
   const anySelected = selectedItems.length > 0;
+  const multiSelected = selectedItems.length > 1;
   const busy = payingId !== null || payingMulti;
 
   return (
-    <div className="premium-shell mx-auto max-w-2xl px-4 py-12 sm:px-6 pb-32">
+    <div className="premium-shell mx-auto max-w-5xl px-4 py-12 sm:px-6">
       <h1 className="animate-fade-up font-heading text-3xl font-black tracking-tight text-[--color-text-primary]">
         Checkout
       </h1>
@@ -192,48 +193,74 @@ function MultiItemCheckout({
         Pay for one, several, or all at once — your choice.
       </p>
 
-      <div className="stagger-children mt-6 space-y-4">
-        {items.map((item) => (
-          <div key={item.courseId} className="premium-card flex items-center gap-4 rounded-[--radius-lg] p-4">
-            <input
-              type="checkbox"
-              checked={selectedIds.has(item.courseId)}
-              onChange={() => onToggle(item.courseId)}
-              className="h-5 w-5 shrink-0 rounded border-[--color-border] accent-[--color-primary]"
-              aria-label={`Select ${item.title}`}
-            />
-            <div className="thumbnail-fallback relative h-14 w-24 shrink-0 overflow-hidden rounded-[--radius-sm]">
-              {item.imageUrl && <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />}
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+        <div className="stagger-children space-y-4">
+          {items.map((item) => (
+            <div key={item.courseId} className="premium-card flex items-center gap-4 rounded-[--radius-lg] p-4">
+              <input
+                type="checkbox"
+                checked={selectedIds.has(item.courseId)}
+                onChange={() => onToggle(item.courseId)}
+                className="h-5 w-5 shrink-0 rounded border-[--color-border] accent-[--color-primary]"
+                aria-label={`Select ${item.title}`}
+              />
+              <div className="thumbnail-fallback relative h-14 w-24 shrink-0 overflow-hidden rounded-[--radius-sm]">
+                {item.imageUrl && <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="line-clamp-2 text-sm font-bold text-[--color-text-primary]">{item.title}</p>
+                <p className="mt-1 text-sm font-extrabold text-[--color-text-secondary]">{formatPrice(item.priceInCents)}</p>
+              </div>
+              <Button onClick={() => onPay(item.courseId)} disabled={busy}>
+                {payingId === item.courseId ? "Processing…" : "Pay"}
+              </Button>
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 text-sm font-bold text-[--color-text-primary]">{item.title}</p>
-              <p className="mt-1 text-sm font-extrabold text-[--color-text-secondary]">{formatPrice(item.priceInCents)}</p>
-            </div>
-            <Button onClick={() => onPay(item.courseId)} disabled={busy}>
-              {payingId === item.courseId ? "Processing…" : "Pay"}
-            </Button>
+          ))}
+
+          <Link href="/cart" className="inline-block text-sm font-bold text-[--color-primary] hover:underline">
+            ← Back to cart
+          </Link>
+        </div>
+
+        <div className="premium-card animate-fade-up sticky top-24 rounded-[--radius-lg] p-5">
+          <h2 className="font-heading text-lg font-black text-[--color-text-primary]">Order summary</h2>
+
+          {anySelected ? (
+            <ul className="mt-4 space-y-2">
+              {selectedItems.map((item) => (
+                <li key={item.courseId} className="flex items-start justify-between gap-3 text-sm">
+                  <span className="line-clamp-2 font-bold text-[--color-text-secondary]">{item.title}</span>
+                  <span className="shrink-0 font-extrabold text-[--color-text-primary]">{formatPrice(item.priceInCents)}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-4 text-sm text-[--color-text-muted]">Select courses to pay or gift together.</p>
+          )}
+
+          <div className="mt-4 flex items-baseline justify-between border-t border-[--color-border] pt-4">
+            <span className="text-sm font-bold text-[--color-text-secondary]">
+              {selectedItems.length} selected
+            </span>
+            <span className="font-heading text-2xl font-black text-[--color-text-primary]">
+              {formatPrice(selectedTotal)}
+            </span>
           </div>
-        ))}
-      </div>
 
-      <Link href="/cart" className="mt-6 inline-block text-sm font-bold text-[--color-primary] hover:underline">
-        ← Back to cart
-      </Link>
-
-      <div className="fixed inset-x-0 bottom-0 border-t border-[--color-border] bg-[--color-surface] p-4 shadow-[var(--shadow-lg)]">
-        <div className="mx-auto flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-bold text-[--color-text-primary]">
-            {selectedItems.length} selected — {formatPrice(selectedTotal)}
-          </p>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={onGiftSelected} disabled={!anySelected || busy}>
+          <div className="mt-4 space-y-2">
+            <Button className="w-full" onClick={onPaySelected} disabled={!multiSelected || busy}>
+              {payingMulti ? "Processing…" : `Pay selected (${formatPrice(selectedTotal)})`}
+            </Button>
+            <Button variant="outline" className="w-full" onClick={onGiftSelected} disabled={!multiSelected || busy}>
               <Gift className="mr-1.5 h-4 w-4" />
               Gift selected
             </Button>
-            <Button onClick={onPaySelected} disabled={!anySelected || busy}>
-              {payingMulti ? "Processing…" : `Pay selected (${formatPrice(selectedTotal)})`}
-            </Button>
           </div>
+          {!multiSelected && (
+            <p className="mt-2 text-center text-xs text-[--color-text-muted]">
+              Select 2 or more courses to pay or gift together.
+            </p>
+          )}
         </div>
       </div>
     </div>
