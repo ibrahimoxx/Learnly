@@ -29,8 +29,10 @@ function StarPicker({ value, onChange }: { value: number; onChange: (v: number) 
           aria-label={`${star} star${star > 1 ? "s" : ""}`}
         >
           <Star
-            className={`h-7 w-7 fill-current transition-colors ${
-              star <= active ? "text-[--color-star]" : "text-[--color-border-strong]"
+            className={`h-7 w-7 fill-current transition-all ${
+              star <= active
+                ? "text-[--color-star] drop-shadow-[0_0_6px_color-mix(in_oklch,var(--color-star)_45%,transparent)]"
+                : "text-[--color-border-strong]"
             }`}
           />
         </button>

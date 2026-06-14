@@ -286,6 +286,8 @@ html {
   .text-\[--color-warning\] { color: var(--color-warning); }
   .text-\[--color-accent-sky\] { color: var(--color-accent-sky); }
   .text-\[--color-border\] { color: var(--color-border); }
+  .text-\[--color-star\] { color: var(--color-star); }
+  .text-\[--color-border-strong\] { color: var(--color-border-strong); }
 
   .border-\[--color-border\] { border-color: var(--color-border); }
   .border-\[--color-primary\] { border-color: var(--color-primary); }
