@@ -1,3 +1,5 @@
+import uuid
+
 import structlog
 from fastapi import APIRouter, Depends
 from sqlalchemy import select
@@ -12,6 +14,35 @@ from app.schemas.gift import GiftCourseInfo, GiftListRead, GiftRead, GiftUserInf
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/gifts", tags=["gifts"])
+
+
+def _build_gift_reads(gifts: list[Gift], other_user_attr: str) -> list[GiftRead]:
+    groups: dict[uuid.UUID, list[Gift]] = {}
+    order: list[uuid.UUID] = []
+    for gift in gifts:
+        key = gift.batch_id or gift.id
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(gift)
+
+    reads: list[GiftRead] = []
+    for key in order:
+        group = groups[key]
+        head = group[0]
+        other_user = getattr(head, other_user_attr)
+        courses = [GiftCourseInfo.model_validate(gift.course) for gift in group]
+        reads.append(
+            GiftRead(
+                id=head.id,
+                course=courses[0],
+                other_user=GiftUserInfo.model_validate(other_user),
+                message=head.message,
+                created_at=head.created_at,
+                courses=courses if len(group) > 1 else None,
+            )
+        )
+    return reads
 
 
 @router.get("", response_model=GiftListRead)
@@ -36,24 +67,6 @@ async def list_gifts(
     received_gifts = received_result.scalars().all()
 
     return GiftListRead(
-        sent=[
-            GiftRead(
-                id=gift.id,
-                course=GiftCourseInfo.model_validate(gift.course),
-                other_user=GiftUserInfo.model_validate(gift.recipient),
-                message=gift.message,
-                created_at=gift.created_at,
-            )
-            for gift in sent_gifts
-        ],
-        received=[
-            GiftRead(
-                id=gift.id,
-                course=GiftCourseInfo.model_validate(gift.course),
-                other_user=GiftUserInfo.model_validate(gift.sender),
-                message=gift.message,
-                created_at=gift.created_at,
-            )
-            for gift in received_gifts
-        ],
+        sent=_build_gift_reads(list(sent_gifts), "recipient"),
+        received=_build_gift_reads(list(received_gifts), "sender"),
     )

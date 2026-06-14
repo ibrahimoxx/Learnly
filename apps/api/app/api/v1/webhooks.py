@@ -194,6 +194,14 @@ async def stripe_webhook(
     return {"received": True}
 
 
+def _format_gift_titles(titles: list[str]) -> str:
+    if len(titles) == 1:
+        return f"'{titles[0]}'"
+    if len(titles) == 2:
+        return f"'{titles[0]}' and '{titles[1]}'"
+    return f"'{titles[0]}', '{titles[1]}', and {len(titles) - 2} more"
+
+
 async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
     def _get(obj: object, key: str, default: object = None) -> object:
         if isinstance(obj, dict):
@@ -201,106 +209,132 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         return getattr(obj, key, default)
 
     meta = _get(session, "metadata") or {}
-    user_id = meta.get("user_id") if isinstance(meta, dict) else getattr(meta, "user_id", None)
-    course_id = meta.get("course_id") if isinstance(meta, dict) else getattr(meta, "course_id", None)
+
+    def _meta_get(key: str, default: object = None) -> object:
+        if isinstance(meta, dict):
+            return meta.get(key, default)
+        return getattr(meta, key, default)
+
     session_id = _get(session, "id")
-    if not user_id or not course_id:
+    user_id = _meta_get("user_id")
+
+    raw_course_ids = _meta_get("course_ids")
+    if raw_course_ids:
+        course_id_list = [cid for cid in str(raw_course_ids).split(",") if cid]
+    else:
+        single_course_id = _meta_get("course_id")
+        course_id_list = [str(single_course_id)] if single_course_id else []
+
+    if not user_id or not course_id_list:
         log.warning("stripe_webhook_missing_metadata", session_id=session_id)
         return
 
-    is_gift = meta.get("is_gift") if isinstance(meta, dict) else getattr(meta, "is_gift", None)
-    recipient_user_id = meta.get("recipient_user_id") if isinstance(meta, dict) else getattr(meta, "recipient_user_id", None)
+    is_gift = _meta_get("is_gift")
+    recipient_user_id = _meta_get("recipient_user_id")
+    gift_message = _meta_get("gift_message")
     enroll_student_id = recipient_user_id if is_gift == "true" and recipient_user_id else user_id
+    is_gift_to_other = is_gift == "true" and bool(recipient_user_id) and recipient_user_id != user_id
+    batch_id = uuid.uuid4() if is_gift_to_other and len(course_id_list) > 1 else None
 
-    existing = await db.execute(
-        select(Enrollment).where(
-            Enrollment.student_id == uuid.UUID(enroll_student_id),
-            Enrollment.course_id == uuid.UUID(course_id),
+    fulfilled: list[tuple[Course, Enrollment]] = []
+    for course_id_str in course_id_list:
+        try:
+            course_uuid = uuid.UUID(course_id_str)
+        except (ValueError, AttributeError, TypeError):
+            continue
+
+        existing = await db.execute(
+            select(Enrollment).where(
+                Enrollment.student_id == uuid.UUID(enroll_student_id),
+                Enrollment.course_id == course_uuid,
+            )
         )
-    )
-    if existing.scalar_one_or_none():
-        return
+        if existing.scalar_one_or_none():
+            continue
 
-    enrollment = Enrollment(
-        student_id=uuid.UUID(enroll_student_id),
-        course_id=uuid.UUID(course_id),
-    )
-    db.add(enrollment)
+        course_result = await db.execute(select(Course).where(Course.id == course_uuid))
+        course = course_result.scalar_one_or_none()
+        if not course:
+            continue
 
-    course_result = await db.execute(select(Course).where(Course.id == uuid.UUID(course_id)))
-    course = course_result.scalar_one_or_none()
-    if course:
+        enrollment = Enrollment(student_id=uuid.UUID(enroll_student_id), course_id=course_uuid)
+        db.add(enrollment)
         course.enrollment_count = (course.enrollment_count or 0) + 1
-        if is_gift == "true" and recipient_user_id and recipient_user_id != user_id:
-            gift_message = meta.get("gift_message") if isinstance(meta, dict) else getattr(meta, "gift_message", None)
-            gift = Gift(
+        fulfilled.append((course, enrollment))
+
+        if is_gift_to_other:
+            db.add(Gift(
                 sender_id=uuid.UUID(user_id),
                 recipient_id=uuid.UUID(recipient_user_id),
                 course_id=course.id,
                 message=gift_message or None,
-            )
-            db.add(gift)
-
-            notification = Notification(
-                user_id=uuid.UUID(recipient_user_id),
-                type="gift_received",
-                title="You received a gift course!",
-                body=f"You have been gifted '{course.title}'.",
-                link="/gifts",
-            )
-            db.add(notification)
-
-            notification = Notification(
-                user_id=uuid.UUID(user_id),
-                type="gift_sent",
-                title="Gift delivered",
-                body=f"Your gift of '{course.title}' was delivered.",
-                link="/gifts",
-            )
-            db.add(notification)
+                batch_id=batch_id,
+            ))
         else:
-            notification = Notification(
+            db.add(Notification(
                 user_id=uuid.UUID(user_id),
                 type="enrollment",
                 title=f"You are enrolled in {course.title}",
                 body="Start learning now.",
                 link=f"/courses/{course.slug}",
-            )
-            db.add(notification)
+            ))
+
+    if not fulfilled:
+        return
+
+    if is_gift_to_other:
+        titles = [course.title for course, _ in fulfilled]
+        summary = _format_gift_titles(titles)
+        db.add(Notification(
+            user_id=uuid.UUID(recipient_user_id),
+            type="gift_received",
+            title="You received a gift course!" if len(titles) == 1 else "You received gift courses!",
+            body=f"You have been gifted {summary}.",
+            link="/gifts",
+        ))
+        db.add(Notification(
+            user_id=uuid.UUID(user_id),
+            type="gift_sent",
+            title="Gift delivered",
+            body=f"Your gift of {summary} was delivered.",
+            link="/gifts",
+        ))
 
     await db.commit()
     log.info(
         "enrollment_created_via_stripe",
         user_id=user_id,
         student_id=enroll_student_id,
-        course_id=course_id,
+        course_ids=[str(course.id) for course, _ in fulfilled],
         is_gift=is_gift == "true",
     )
 
-    raw_aff_code = meta.get("affiliate_code", "") if isinstance(meta, dict) else getattr(meta, "affiliate_code", "")
-    import re as _re
-    affiliate_code = raw_aff_code.upper() if raw_aff_code and _re.match(r'^[A-Z0-9]{1,20}$', raw_aff_code.upper()) else ""
-    if affiliate_code:
-        link_result = await db.execute(
-            select(AffiliateLink).where(
-                AffiliateLink.code == affiliate_code,
-                AffiliateLink.is_active == True,  # noqa: E712
+    if len(course_id_list) == 1 and len(fulfilled) == 1:
+        course, enrollment = fulfilled[0]
+        raw_aff_code = _meta_get("affiliate_code", "") or ""
+        import re as _re
+        affiliate_code = raw_aff_code.upper() if raw_aff_code and _re.match(r'^[A-Z0-9]{1,20}$', raw_aff_code.upper()) else ""
+        if affiliate_code:
+            link_result = await db.execute(
+                select(AffiliateLink).where(
+                    AffiliateLink.code == affiliate_code,
+                    AffiliateLink.is_active == True,  # noqa: E712
+                )
             )
-        )
-        aff_link = link_result.scalar_one_or_none()
-        if aff_link and aff_link.instructor_id != uuid.UUID(user_id):
-            from decimal import Decimal, ROUND_HALF_UP
-            amount = int(_get(session, "amount_total") or 0)
-            commission = int(
-                (Decimal(amount) * Decimal(aff_link.commission_pct) / Decimal(100))
-                .quantize(Decimal("1"), rounding=ROUND_HALF_UP)
-            )
-            db.add(AffiliateConversion(
-                link_id=aff_link.id,
-                enrollment_id=enrollment.id,
-                course_id=uuid.UUID(course_id),
-                student_id=uuid.UUID(user_id),
-                amount_cents=amount,
-                commission_cents=commission,
-            ))
-            await db.commit()
+            aff_link = link_result.scalar_one_or_none()
+            if aff_link and aff_link.instructor_id != uuid.UUID(user_id):
+                from decimal import Decimal, ROUND_HALF_UP
+                amount = int(_get(session, "amount_total") or 0)
+                commission = int(
+                    (Decimal(amount) * Decimal(aff_link.commission_pct) / Decimal(100))
+                    .quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+                )
+                db.add(AffiliateConversion(
+                    link_id=aff_link.id,
+                    enrollment_id=enrollment.id,
+                    course_id=course.id,
+                    student_id=uuid.UUID(user_id),
+                    amount_cents=amount,
+                    commission_cents=commission,
+                ))
+                await db.commit()

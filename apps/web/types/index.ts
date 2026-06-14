@@ -138,6 +138,7 @@ export interface GiftRead {
   other_user: GiftUserInfo;
   message: string | null;
   created_at: string;
+  courses?: GiftCourseInfo[] | null;
 }
 
 export interface GiftListRead {

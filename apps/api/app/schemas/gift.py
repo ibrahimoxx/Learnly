@@ -28,6 +28,7 @@ class GiftRead(BaseModel):
     other_user: GiftUserInfo
     message: str | None
     created_at: datetime
+    courses: list[GiftCourseInfo] | None = None
 
 
 class GiftListRead(BaseModel):

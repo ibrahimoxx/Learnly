@@ -2,7 +2,8 @@ from pydantic import BaseModel, Field
 
 
 class CheckoutSessionCreate(BaseModel):
-    course_id: str
+    course_id: str | None = None
+    course_ids: list[str] | None = None
     coupon_code: str | None = None
     affiliate_code: str | None = Field(None, max_length=20, pattern=r"^[A-Z0-9]+$")
 
@@ -13,6 +14,7 @@ class CheckoutSessionRead(BaseModel):
 
 
 class GiftCheckoutSessionCreate(BaseModel):
-    course_id: str
+    course_id: str | None = None
+    course_ids: list[str] | None = None
     recipient_email: str = Field(..., max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
     gift_message: str | None = Field(None, max_length=500)
