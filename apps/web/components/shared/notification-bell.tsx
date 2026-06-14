@@ -2,7 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Bell } from "lucide-react";
+import {
+  Award,
+  Bell,
+  BookOpen,
+  Gift,
+  Megaphone,
+  MessageCircle,
+  Star,
+  type LucideIcon,
+} from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { apiFetch } from "@/lib/api";
 
@@ -14,6 +23,54 @@ interface Notification {
   link: string | null;
   is_read: boolean;
   created_at: string;
+}
+
+function getNotificationVisual(type: string): { Icon: LucideIcon; bg: string; color: string } {
+  switch (type) {
+    case "gift_received":
+    case "gift_sent":
+      return {
+        Icon: Gift,
+        bg: "bg-[--color-primary-subtle]",
+        color: "text-[--color-primary]",
+      };
+    case "badge_earned":
+      return {
+        Icon: Award,
+        bg: "bg-[--color-warning]/15",
+        color: "text-[--color-warning]",
+      };
+    case "enrollment":
+      return {
+        Icon: BookOpen,
+        bg: "bg-[--color-success]/15",
+        color: "text-[--color-success]",
+      };
+    case "review":
+      return {
+        Icon: Star,
+        bg: "bg-[--color-star]/15",
+        color: "text-[--color-star]",
+      };
+    case "qa_reply":
+      return {
+        Icon: MessageCircle,
+        bg: "bg-[--color-primary-subtle]",
+        color: "text-[--color-primary]",
+      };
+    case "announcement":
+      return {
+        Icon: Megaphone,
+        bg: "bg-[--color-primary-subtle]",
+        color: "text-[--color-primary]",
+      };
+    default:
+      return {
+        Icon: Bell,
+        bg: "bg-[--color-surface]",
+        color: "text-[--color-text-muted]",
+      };
+  }
 }
 
 export function NotificationBell() {
@@ -101,65 +158,102 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[--radius-lg] border border-white/70 bg-[--color-surface-glass] shadow-[var(--shadow-xl)] backdrop-blur-xl">
+        <div className="animate-scale-in absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[--radius-lg] border border-white/70 bg-[--color-surface-glass] shadow-[var(--shadow-xl)] backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-[--color-border] px-4 py-3">
-            <span className="text-sm font-semibold text-[--color-text-primary]">Notifications</span>
+            <span className="text-sm font-extrabold text-[--color-text-primary]">Notifications</span>
             {notifications.length > 0 && (
-              <button onClick={markAllRead} className="text-xs text-[--color-primary] hover:underline">
+              <button
+                onClick={markAllRead}
+                className="rounded-full px-2.5 py-1 text-[11px] font-semibold text-[--color-primary] transition-colors hover:bg-[--color-primary-subtle]"
+              >
                 Mark all read
               </button>
             )}
           </div>
 
-          <div className="max-h-72 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto p-2 space-y-1">
             {notifications.length === 0 ? (
-              <p className="px-4 py-6 text-center text-sm text-[--color-text-muted]">No notifications yet</p>
+              <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[--color-primary-subtle]">
+                  <Bell className="h-5 w-5 text-[--color-primary]" />
+                </div>
+                <p className="text-sm font-semibold text-[--color-text-primary]">No notifications yet</p>
+                <p className="text-xs text-[--color-text-muted]">
+                  We&apos;ll let you know when something arrives.
+                </p>
+              </div>
             ) : (
-              notifications.map((n) => (
-                <div
-                  key={n.id}
-                  className={`relative border-b border-[--color-border] last:border-0 px-4 py-3 transition-colors hover:bg-[--color-surface] ${!n.is_read ? "bg-[--color-primary-subtle]" : ""}`}
-                >
-                  {!n.is_read && (
-                    <span className="absolute left-4 top-4 h-2 w-2 rounded-full bg-[--color-primary]" aria-hidden="true" />
-                  )}
-                  {n.link ? (
+              notifications.map((n) => {
+                const { Icon, bg, color } = getNotificationVisual(n.type);
+
+                if (n.link) {
+                  return (
                     <Link
+                      key={n.id}
                       href={n.link}
                       onClick={() => {
                         markNotificationRead(n);
                         setOpen(false);
                       }}
-                      className={`block ${!n.is_read ? "pl-3" : ""}`}
+                      className={`relative flex gap-3 rounded-[--radius-md] p-2.5 transition-colors hover:bg-[--color-surface-raised] ${!n.is_read ? "bg-[--color-primary-subtle]" : ""}`}
                     >
-                      <p className="text-sm font-medium text-[--color-text-primary] line-clamp-1">{n.title}</p>
-                      {n.body && <p className="mt-0.5 text-xs text-[--color-text-muted] line-clamp-2">{n.body}</p>}
-                      <p className="mt-1 text-[10px] text-[--color-text-muted]">
-                        {new Date(n.created_at).toLocaleDateString()}
-                      </p>
+                      <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${bg}`}>
+                        {!n.is_read && (
+                          <span
+                            className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[--color-primary] ring-2 ring-[--color-surface-glass]"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <Icon className={`h-4 w-4 ${color}`} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-1 text-sm font-semibold text-[--color-text-primary]">{n.title}</p>
+                        {n.body && (
+                          <p className="mt-0.5 line-clamp-2 text-xs text-[--color-text-secondary]">{n.body}</p>
+                        )}
+                        <p className="mt-1 text-[10px] text-[--color-text-muted]">
+                          {new Date(n.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
                     </Link>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => markNotificationRead(n)}
-                      className={`block w-full text-left ${!n.is_read ? "pl-3" : ""}`}
-                    >
-                      <p className="text-sm font-medium text-[--color-text-primary] line-clamp-1">{n.title}</p>
-                      {n.body && <p className="mt-0.5 text-xs text-[--color-text-muted] line-clamp-2">{n.body}</p>}
+                  );
+                }
+
+                return (
+                  <button
+                    key={n.id}
+                    type="button"
+                    onClick={() => markNotificationRead(n)}
+                    className={`relative flex w-full gap-3 rounded-[--radius-md] p-2.5 text-left transition-colors hover:bg-[--color-surface-raised] ${!n.is_read ? "bg-[--color-primary-subtle]" : ""}`}
+                  >
+                    <div className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${bg}`}>
+                      {!n.is_read && (
+                        <span
+                          className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-[--color-primary] ring-2 ring-[--color-surface-glass]"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <Icon className={`h-4 w-4 ${color}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-1 text-sm font-semibold text-[--color-text-primary]">{n.title}</p>
+                      {n.body && (
+                        <p className="mt-0.5 line-clamp-2 text-xs text-[--color-text-secondary]">{n.body}</p>
+                      )}
                       <p className="mt-1 text-[10px] text-[--color-text-muted]">
                         {new Date(n.created_at).toLocaleDateString()}
                       </p>
-                    </button>
-                  )}
-                </div>
-              ))
+                    </div>
+                  </button>
+                );
+              })
             )}
           </div>
           <div className="border-t border-[--color-border] px-4 py-2">
             <Link
               href="/notifications"
               onClick={() => setOpen(false)}
-              className="block text-center text-xs text-[--color-primary] hover:underline"
+              className="block rounded-[--radius-sm] px-4 py-2.5 text-center text-xs font-semibold text-[--color-primary] transition-colors hover:bg-[--color-primary-subtle]"
             >
               View all notifications
             </Link>
