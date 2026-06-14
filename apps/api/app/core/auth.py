@@ -33,6 +33,20 @@ async def _get_jwks() -> dict:
     return _jwks_cache
 
 
+async def _fetch_clerk_user(clerk_id: str) -> dict:
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"https://api.clerk.com/v1/users/{clerk_id}",
+                headers={"Authorization": f"Bearer {settings.clerk_secret_key}"},
+            )
+        if resp.status_code != status.HTTP_200_OK:
+            return {}
+        return resp.json()
+    except Exception:
+        return {}
+
+
 async def verify_clerk_token(
     credentials: HTTPAuthorizationCredentials = Depends(bearer),
 ) -> dict:
@@ -64,14 +78,16 @@ async def get_current_user(
     clerk_role: str = (payload.get("public_metadata") or {}).get("role") or "student"
 
     if not user:
+        clerk_user = await _fetch_clerk_user(clerk_id)
         # Webhook may not have fired yet — auto-provision on first API call
         email: str = (
-            payload.get("email")
+            (clerk_user.get("email_addresses") or [{}])[0].get("email_address", "")
+            or payload.get("email")
             or (payload.get("email_addresses") or [{}])[0].get("email_address", "")
             or f"{clerk_id}@unknown.local"
         )
-        first_name: str = payload.get("first_name") or ""
-        last_name: str = payload.get("last_name") or ""
+        first_name: str = clerk_user.get("first_name") or payload.get("first_name") or ""
+        last_name: str = clerk_user.get("last_name") or payload.get("last_name") or ""
         user = User(
             clerk_id=clerk_id,
             email=email,
@@ -84,11 +100,27 @@ async def get_current_user(
         await db.commit()
         await db.refresh(user)
         log.info("user_auto_provisioned", clerk_id=clerk_id, email=email, role=clerk_role)
-    elif clerk_role != "student" and user.role != clerk_role:
-        # Clerk is source of truth — sync role changes that arrived via JWT
-        user.role = clerk_role
-        await db.commit()
-        log.info("user_role_synced", clerk_id=clerk_id, role=clerk_role)
+    else:
+        if user.email.endswith("@unknown.local"):
+            clerk_user = await _fetch_clerk_user(clerk_id)
+            email: str = (
+                (clerk_user.get("email_addresses") or [{}])[0].get("email_address", "")
+                or payload.get("email")
+                or (payload.get("email_addresses") or [{}])[0].get("email_address", "")
+                or ""
+            )
+            if email and not email.endswith("@unknown.local"):
+                user.email = email
+                user.first_name = clerk_user.get("first_name") or payload.get("first_name") or user.first_name
+                user.last_name = clerk_user.get("last_name") or payload.get("last_name") or user.last_name
+                await db.commit()
+                log.info("user_email_self_healed", clerk_id=clerk_id, email=email)
+
+        if clerk_role != "student" and user.role != clerk_role:
+            # Clerk is source of truth — sync role changes that arrived via JWT
+            user.role = clerk_role
+            await db.commit()
+            log.info("user_role_synced", clerk_id=clerk_id, role=clerk_role)
 
     if not user.is_active:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account suspended")
