@@ -39,6 +39,8 @@ async def list_reviews(
             rating=r.rating,
             comment=r.comment,
             student_name=f"{r.student.first_name} {r.student.last_name}".strip() or r.student.email,
+            instructor_response=r.instructor_response,
+            instructor_response_at=r.instructor_response_at,
             created_at=r.created_at,
         )
         for r in reviews

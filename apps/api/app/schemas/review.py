@@ -16,6 +16,13 @@ class ReviewRead(BaseModel):
     rating: int
     comment: str | None
     student_name: str
+    course_title: str | None = None
+    instructor_response: str | None = None
+    instructor_response_at: datetime | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ReviewRespond(BaseModel):
+    response: str = Field(..., min_length=1, max_length=2000)
