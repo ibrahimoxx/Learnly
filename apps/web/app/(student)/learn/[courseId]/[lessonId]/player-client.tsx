@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock, Code, StickyNote, Pencil, Trash2 } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock, Code, StickyNote, Pencil, Trash2, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment, Lesson, LessonProgress, Section, Question, LiveSession, Note } from "@/types";
