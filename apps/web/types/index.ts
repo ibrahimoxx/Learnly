@@ -542,3 +542,134 @@ export interface TrafficRow {
   enrollment_count: number;
   conversion_rate: number;
 }
+
+export interface AnnouncementCreate {
+  title: string;
+  body: string;
+}
+
+export interface AnnouncementRead {
+  id: string;
+  course_id: string;
+  course_title: string;
+  title: string;
+  body: string;
+  recipient_count: number;
+  created_at: string;
+}
+
+export type AssignmentSubmissionStatus = "submitted" | "reviewed";
+
+export interface AssignmentSubmissionCreate {
+  content?: string | null;
+  file_url?: string | null;
+}
+
+export interface AssignmentSubmissionRead {
+  id: string;
+  lesson_id: string;
+  course_id: string;
+  student_id: string;
+  content: string | null;
+  file_url: string | null;
+  status: AssignmentSubmissionStatus;
+  grade: number | null;
+  feedback: string | null;
+  submitted_at: string;
+  reviewed_at: string | null;
+  updated_at: string;
+}
+
+export interface AssignmentSubmissionWithContext extends AssignmentSubmissionRead {
+  student_name: string;
+  student_email: string;
+  lesson_title: string;
+  course_title: string;
+}
+
+export interface AssignmentGrade {
+  grade: number;
+  feedback: string;
+}
+
+export interface TestVideoUploadResponse {
+  upload_url: string;
+  video_key: string;
+}
+
+export type TestVideoRequestStatus = "pending" | "reviewed";
+
+export interface TestVideoRequestRead {
+  id: string;
+  video_url: string;
+  note: string | null;
+  status: TestVideoRequestStatus;
+  feedback: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+}
+
+export interface MarketplaceInsightRow {
+  category_id: string;
+  category_name: string;
+  course_count: number;
+  average_rating: number;
+  average_price_cents: number;
+  currency: string;
+  total_enrollments: number;
+}
+
+export type RevenueTransactionType = "purchase" | "refund";
+
+export interface RevenueTransactionRow {
+  enrollment_id: string;
+  course_id: string;
+  course_title: string;
+  student_name: string;
+  type: RevenueTransactionType;
+  amount_cents: number;
+  currency: string;
+  created_at: string;
+}
+
+export interface RevenueReport {
+  total_revenue_cents: number;
+  currency: string;
+  transaction_count: number;
+  transactions: RevenueTransactionRow[];
+}
+
+export type CoInstructorStatus = "pending" | "active" | "removed";
+
+export interface CoInstructorInvite {
+  email: string;
+  can_manage_content: boolean;
+  can_respond_qa: boolean;
+  can_respond_reviews: boolean;
+  can_view_revenue: boolean;
+  revenue_share_percent: number;
+}
+
+export interface CoInstructorUpdate {
+  can_manage_content?: boolean;
+  can_respond_qa?: boolean;
+  can_respond_reviews?: boolean;
+  can_view_revenue?: boolean;
+  revenue_share_percent?: number;
+}
+
+export interface CoInstructorRead {
+  id: string;
+  course_id: string;
+  user_id: string;
+  name: string;
+  email: string;
+  can_manage_content: boolean;
+  can_respond_qa: boolean;
+  can_respond_reviews: boolean;
+  can_view_revenue: boolean;
+  revenue_share_percent: number;
+  status: CoInstructorStatus;
+  invited_at: string;
+  accepted_at: string | null;
+}
