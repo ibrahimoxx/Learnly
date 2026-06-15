@@ -33,6 +33,12 @@ class CourseUpdate(BaseModel):
     currency: str | None = None
     category_id: uuid.UUID | None = None
     status: str | None = None
+    learning_objectives: list[str] | None = None
+    prerequisites: list[str] | None = None
+    target_audience: list[str] | None = None
+    welcome_message: str | None = None
+    completion_message: str | None = None
+    image_alt_text: str | None = Field(None, max_length=500)
 
 
 class CourseRead(BaseModel):
@@ -58,6 +64,12 @@ class CourseRead(BaseModel):
     category_id: uuid.UUID | None
     created_at: datetime
     updated_at: datetime
+    learning_objectives: list[str] | None = None
+    prerequisites: list[str] | None = None
+    target_audience: list[str] | None = None
+    welcome_message: str | None = None
+    completion_message: str | None = None
+    image_alt_text: str | None = None
 
     model_config = {"from_attributes": True}
 

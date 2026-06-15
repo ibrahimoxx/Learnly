@@ -156,3 +156,22 @@ async def get_video_upload_url(
     except Exception:
         log.warning("arq_enqueue_failed", lesson_id=str(lesson_id))
     return VideoUploadURL(upload_url=upload_url, key=key)
+
+
+@router.post("/{lesson_id}/captions-upload-url", response_model=VideoUploadURL)
+async def get_captions_upload_url(
+    section_id: uuid.UUID,
+    lesson_id: uuid.UUID,
+    instructor: User = Depends(require_instructor),
+    db: AsyncSession = Depends(get_db),
+) -> VideoUploadURL:
+    await _verify_section_ownership(section_id, instructor, db)
+    result = await db.execute(
+        select(Lesson).where(Lesson.id == lesson_id, Lesson.section_id == section_id)
+    )
+    lesson = result.scalar_one_or_none()
+    if not lesson:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
+    key = f"captions/{lesson_id}.srt"
+    upload_url = await get_upload_url(key)
+    return VideoUploadURL(upload_url=upload_url, key=key)

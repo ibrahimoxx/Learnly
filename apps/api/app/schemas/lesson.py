@@ -25,6 +25,7 @@ class LessonUpdate(BaseModel):
     is_free_preview: bool | None = None
     is_downloadable: bool | None = None
     unlock_at: datetime | None = None
+    captions_url: str | None = None
 
 
 class LessonRead(BaseModel):
@@ -39,6 +40,7 @@ class LessonRead(BaseModel):
     is_free_preview: bool
     is_downloadable: bool
     unlock_at: datetime | None
+    captions_url: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

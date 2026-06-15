@@ -28,6 +28,7 @@ class Lesson(Base):
     is_free_preview: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_downloadable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     unlock_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    captions_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

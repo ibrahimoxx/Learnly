@@ -14,7 +14,7 @@ from sqlalchemy import (
     func,
 )
 from pgvector.sqlalchemy import Vector
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -50,6 +50,13 @@ class Course(Base):
     rating: Mapped[Decimal] = mapped_column(Numeric(3, 2), nullable=False, default=Decimal("0.00"))
     review_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     enrollment_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+    learning_objectives: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+    prerequisites: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+    target_audience: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+    welcome_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    completion_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    image_alt_text: Mapped[str | None] = mapped_column(String(500), nullable=True)
 
     # Phase 3: 768 dims (nomic-embed-text via Ollama)
     # Phase 4: change to Vector(1536) for OpenAI text-embedding-3-small
