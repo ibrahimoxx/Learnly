@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 class UserRead(BaseModel):
@@ -30,6 +30,15 @@ class UserUpdate(BaseModel):
     website: str | None = None
     image_url: str | None = None
     timezone: str | None = None
+
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, value: str | None) -> str | None:
+        if value is None or value == "":
+            return value
+        if not value.startswith("https://"):
+            raise ValueError("image_url must be an https:// URL")
+        return value
 
 
 class UserRoleUpdate(BaseModel):
