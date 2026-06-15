@@ -9,8 +9,11 @@ import app.db.tables  # noqa: F401 — registers all models with SQLAlchemy mapp
 from app.api.v1.account import router as account_router
 from app.api.v1.admin import router as admin_router
 from app.api.v1.affiliate import router as affiliate_router
+from app.api.v1.announcements import router as announcements_router
+from app.api.v1.assignments import router as assignments_router
 from app.api.v1.categories import router as categories_router
 from app.api.v1.checkout import router as checkout_router
+from app.api.v1.co_instructors import router as co_instructors_router
 from app.api.v1.coding_exercises import router as coding_exercises_router
 from app.api.v1.coupons import router as coupons_router
 from app.api.v1.courses import router as courses_router
@@ -19,7 +22,9 @@ from app.api.v1.enrollments import router as enrollments_router
 from app.api.v1.gamification import router as gamification_router
 from app.api.v1.gifts import router as gifts_router
 from app.api.v1.health import router as health_router
+from app.api.v1.instructor_finances import router as instructor_finances_router
 from app.api.v1.instructor_performance import router as instructor_performance_router
+from app.api.v1.instructor_tools import router as instructor_tools_router
 from app.api.v1.learning_paths import router as learning_paths_router
 from app.api.v1.lessons import router as lessons_router
 from app.api.v1.live_sessions import router as live_sessions_router
@@ -99,6 +104,11 @@ app.include_router(messages_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(notes_router, prefix="/api/v1")
 app.include_router(instructor_performance_router, prefix="/api/v1")
+app.include_router(announcements_router, prefix="/api/v1")
+app.include_router(assignments_router, prefix="/api/v1")
+app.include_router(instructor_tools_router, prefix="/api/v1")
+app.include_router(instructor_finances_router, prefix="/api/v1")
+app.include_router(co_instructors_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
