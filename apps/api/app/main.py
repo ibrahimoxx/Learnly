@@ -6,35 +6,35 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 import app.db.tables  # noqa: F401 — registers all models with SQLAlchemy mapper
-from app.api.v1.health import router as health_router
-from app.api.v1.webhooks import router as webhooks_router
-from app.api.v1.courses import router as courses_router
-from app.api.v1.sections import router as sections_router
-from app.api.v1.lessons import router as lessons_router
-from app.api.v1.enrollments import router as enrollments_router
-from app.api.v1.checkout import router as checkout_router
-from app.api.v1.reviews import router as reviews_router
-from app.api.v1.questions import router as questions_router
-from app.api.v1.wishlist import router as wishlist_router
-from app.api.v1.coupons import router as coupons_router
-from app.api.v1.payouts import router as payouts_router
-from app.api.v1.admin import router as admin_router
-from app.api.v1.notifications import router as notifications_router
-from app.api.v1.gifts import router as gifts_router
-from app.api.v1.organizations import router as organizations_router
-from app.api.v1.quiz import router as quiz_router
-from app.api.v1.discussions import router as discussions_router
-from app.api.v1.gamification import router as gamification_router
-from app.api.v1.push import router as push_router
-from app.api.v1.recommendations import router as recommendations_router
-from app.api.v1.learning_paths import router as learning_paths_router
-from app.api.v1.affiliate import router as affiliate_router
-from app.api.v1.coding_exercises import router as coding_exercises_router
-from app.api.v1.live_sessions import router as live_sessions_router
-from app.api.v1.categories import router as categories_router
 from app.api.v1.account import router as account_router
+from app.api.v1.admin import router as admin_router
+from app.api.v1.affiliate import router as affiliate_router
+from app.api.v1.categories import router as categories_router
+from app.api.v1.checkout import router as checkout_router
+from app.api.v1.coding_exercises import router as coding_exercises_router
+from app.api.v1.coupons import router as coupons_router
+from app.api.v1.courses import router as courses_router
+from app.api.v1.discussions import router as discussions_router
+from app.api.v1.enrollments import router as enrollments_router
+from app.api.v1.gamification import router as gamification_router
+from app.api.v1.gifts import router as gifts_router
+from app.api.v1.health import router as health_router
+from app.api.v1.learning_paths import router as learning_paths_router
+from app.api.v1.lessons import router as lessons_router
+from app.api.v1.live_sessions import router as live_sessions_router
 from app.api.v1.messages import router as messages_router
+from app.api.v1.notifications import router as notifications_router
+from app.api.v1.organizations import router as organizations_router
+from app.api.v1.payouts import router as payouts_router
+from app.api.v1.push import router as push_router
+from app.api.v1.questions import router as questions_router
+from app.api.v1.quiz import router as quiz_router
+from app.api.v1.recommendations import router as recommendations_router
+from app.api.v1.reviews import router as reviews_router
+from app.api.v1.sections import router as sections_router
 from app.api.v1.users import router as users_router
+from app.api.v1.webhooks import router as webhooks_router
+from app.api.v1.wishlist import router as wishlist_router
 from app.core.config import settings
 from app.core.rate_limit import limiter
 
