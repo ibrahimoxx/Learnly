@@ -305,6 +305,9 @@ export default function CourseEditorPage() {
           </Badge>
         </div>
         <div className="flex gap-2">
+          <Link href={`/instructor/courses/${id}/manage/goals`}>
+            <Button variant="outline" size="sm">Course Setup</Button>
+          </Link>
           <Link href={`/instructor/courses/${id}/live`}>
             <Button variant="outline" size="sm">Live</Button>
           </Link>
