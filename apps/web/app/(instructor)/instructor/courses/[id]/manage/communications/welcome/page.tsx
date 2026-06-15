@@ -94,8 +94,8 @@ export default function CourseWelcomeMessagePage() {
           <Button variant="outline" size="sm">Back: Pricing</Button>
         </Link>
         <div className="flex gap-2">
-          <Link href={`/instructor/courses/${id}/manage/review/submit`}>
-            <Button variant="outline" size="sm">Next: Submit for Review</Button>
+          <Link href={`/instructor/courses/${id}/manage/co-instructors`}>
+            <Button variant="outline" size="sm">Next: Co-Instructors</Button>
           </Link>
           <Button onClick={save} disabled={saving} size="sm">
             {saving ? "Saving…" : "Save messages"}
