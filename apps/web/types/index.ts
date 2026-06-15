@@ -38,6 +38,12 @@ export interface Course {
     name: string;
     slug: string;
   };
+  learning_objectives?: string[] | null;
+  prerequisites?: string[] | null;
+  target_audience?: string[] | null;
+  welcome_message?: string | null;
+  completion_message?: string | null;
+  image_alt_text?: string | null;
 }
 
 export interface Category {
@@ -82,6 +88,7 @@ export interface Lesson {
   content?: string;
   type: LessonType;
   unlock_at?: string | null;
+  captions_url?: string | null;
 }
 
 export interface Enrollment {
