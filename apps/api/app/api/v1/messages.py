@@ -1,10 +1,11 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
+from app.core.rate_limit import limiter
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
@@ -50,7 +51,9 @@ async def _has_course_relationship(
 
 
 @router.get("/conversations", response_model=list[ConversationRead])
+@limiter.limit("60/minute")
 async def list_conversations(
+    request: Request,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[ConversationRead]:
@@ -93,7 +96,9 @@ async def list_conversations(
 
 
 @router.get("/thread/{user_id}", response_model=list[MessageRead])
+@limiter.limit("60/minute")
 async def get_thread(
+    request: Request,
     user_id: uuid.UUID,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -124,7 +129,9 @@ async def get_thread(
 
 
 @router.post("", response_model=MessageRead, status_code=status.HTTP_201_CREATED)
+@limiter.limit("20/minute")
 async def send_message(
+    request: Request,
     body: MessageCreate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),

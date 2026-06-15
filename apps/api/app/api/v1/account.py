@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_current_user
+from app.core.rate_limit import limiter
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
@@ -24,12 +25,15 @@ ALLOWED_USER_UPDATE_FIELDS = {"first_name", "last_name", "bio", "website", "imag
 
 
 @router.get("", response_model=UserRead)
-async def get_my_account(user: User = Depends(get_current_user)) -> UserRead:
+@limiter.limit("30/minute")
+async def get_my_account(request: Request, user: User = Depends(get_current_user)) -> UserRead:
     return UserRead.model_validate(user)
 
 
 @router.patch("", response_model=UserRead)
+@limiter.limit("30/minute")
 async def update_my_account(
+    request: Request,
     body: UserUpdate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -45,7 +49,8 @@ async def update_my_account(
 
 
 @router.get("/privacy", response_model=UserPrivacyRead)
-async def get_my_privacy(user: User = Depends(get_current_user)) -> UserPrivacyRead:
+@limiter.limit("30/minute")
+async def get_my_privacy(request: Request, user: User = Depends(get_current_user)) -> UserPrivacyRead:
     return UserPrivacyRead(
         is_profile_public=user.is_profile_public,
         email_notification_prefs=EmailNotificationPrefs(**(user.email_notification_prefs or {})),
@@ -53,7 +58,9 @@ async def get_my_privacy(user: User = Depends(get_current_user)) -> UserPrivacyR
 
 
 @router.patch("/privacy", response_model=UserPrivacyRead)
+@limiter.limit("30/minute")
 async def update_my_privacy(
+    request: Request,
     body: UserPrivacyUpdate,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
@@ -73,7 +80,9 @@ async def update_my_privacy(
 
 
 @router.get("/purchase-history", response_model=list[PurchaseHistoryItem])
+@limiter.limit("30/minute")
 async def get_my_purchase_history(
+    request: Request,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[PurchaseHistoryItem]:
@@ -114,7 +123,8 @@ async def get_my_purchase_history(
 
 
 @router.get("/subscription", response_model=SubscriptionRead)
-async def get_my_subscription(user: User = Depends(get_current_user)) -> SubscriptionRead:
+@limiter.limit("30/minute")
+async def get_my_subscription(request: Request, user: User = Depends(get_current_user)) -> SubscriptionRead:
     return SubscriptionRead(
         plan="Free",
         status="active",

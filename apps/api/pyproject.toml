@@ -35,6 +35,7 @@ dependencies = [
     "openai>=1.0",
     "pgvector>=0.3",
     "livekit-api>=1.0",
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]

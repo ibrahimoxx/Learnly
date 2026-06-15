@@ -2,6 +2,8 @@ import sentry_sdk
 import structlog
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 import app.db.tables  # noqa: F401 — registers all models with SQLAlchemy mapper
 from app.api.v1.health import router as health_router
@@ -34,6 +36,7 @@ from app.api.v1.account import router as account_router
 from app.api.v1.messages import router as messages_router
 from app.api.v1.users import router as users_router
 from app.core.config import settings
+from app.core.rate_limit import limiter
 
 log = structlog.get_logger()
 
@@ -50,6 +53,9 @@ app = FastAPI(
     docs_url="/docs" if settings.node_env == "development" else None,
     redoc_url="/redoc" if settings.node_env == "development" else None,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
