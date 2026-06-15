@@ -22,5 +22,9 @@ from app.db.tables.coding_exercise import CodingExercise, CodeSubmission
 from app.db.tables.live_session import LiveSession
 from app.db.tables.message import Message
 from app.db.tables.note import Note
+from app.db.tables.announcement import CourseAnnouncement
+from app.db.tables.assignment_submission import AssignmentSubmission
+from app.db.tables.test_video_request import InstructorTestVideoRequest
+from app.db.tables.co_instructor import CourseCoInstructor
 
-__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "Gift", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment", "AffiliateLink", "AffiliateConversion", "CodingExercise", "CodeSubmission", "LiveSession", "Message", "Note"]
+__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "Gift", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment", "AffiliateLink", "AffiliateConversion", "CodingExercise", "CodeSubmission", "LiveSession", "Message", "Note", "CourseAnnouncement", "AssignmentSubmission", "InstructorTestVideoRequest", "CourseCoInstructor"]
