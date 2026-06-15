@@ -11,6 +11,7 @@ const TABS = [
   { href: "accessibility", label: "Accessibility" },
   { href: "pricing", label: "Pricing" },
   { href: "communications/welcome", label: "Messages" },
+  { href: "co-instructors", label: "Co-Instructors" },
   { href: "review/submit", label: "Submit for Review" },
 ];
 
