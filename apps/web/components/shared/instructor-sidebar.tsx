@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BookOpen, BarChart2, Tag, DollarSign, Link2,
+  BookOpen, BarChart2, Tag, DollarSign, Link2, TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/instructor/courses",    label: "My Courses",  icon: BookOpen },
-  { href: "/instructor/paths",      label: "Paths",       icon: BarChart2 },
-  { href: "/instructor/promotions", label: "Promotions",  icon: Tag },
-  { href: "/instructor/affiliate",  label: "Affiliate",   icon: Link2 },
-  { href: "/instructor/payouts",    label: "Payouts",     icon: DollarSign },
+  { href: "/instructor/courses",            label: "My Courses",  icon: BookOpen },
+  { href: "/instructor/performance/overview", label: "Performance", icon: TrendingUp },
+  { href: "/instructor/paths",              label: "Paths",       icon: BarChart2 },
+  { href: "/instructor/promotions",         label: "Promotions",  icon: Tag },
+  { href: "/instructor/affiliate",          label: "Affiliate",   icon: Link2 },
+  { href: "/instructor/payouts",            label: "Payouts",     icon: DollarSign },
 ];
 
 export function InstructorSidebar() {
