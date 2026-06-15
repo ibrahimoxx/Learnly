@@ -2,7 +2,7 @@ export type UserRole = "student" | "instructor" | "admin";
 export type CourseStatus = "draft" | "in_review" | "published" | "archived";
 export type CourseLevel = "beginner" | "intermediate" | "expert" | "all";
 export type EnrollmentStatus = "active" | "completed" | "refunded";
-export type LessonType = "video" | "article" | "quiz" | "coding_exercise";
+export type LessonType = "video" | "article" | "quiz" | "coding_exercise" | "assignment";
 
 export interface Course {
   id: string;
@@ -95,6 +95,27 @@ export interface Enrollment {
   completed_at?: string;
   completed_lessons?: number;
   total_lessons?: number;
+}
+
+export interface Note {
+  id: string;
+  lesson_id: string;
+  course_id: string;
+  content: string;
+  timestamp_seconds: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NoteWithContext extends Note {
+  lesson_title: string;
+  course_title: string;
+  course_slug: string;
+}
+
+export interface NoteCreate {
+  content: string;
+  timestamp_seconds?: number | null;
 }
 
 export interface LessonProgress {

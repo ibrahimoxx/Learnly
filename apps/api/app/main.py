@@ -23,6 +23,7 @@ from app.api.v1.learning_paths import router as learning_paths_router
 from app.api.v1.lessons import router as lessons_router
 from app.api.v1.live_sessions import router as live_sessions_router
 from app.api.v1.messages import router as messages_router
+from app.api.v1.notes import router as notes_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.organizations import router as organizations_router
 from app.api.v1.payouts import router as payouts_router
@@ -95,6 +96,7 @@ app.include_router(categories_router, prefix="/api/v1")
 app.include_router(account_router, prefix="/api/v1")
 app.include_router(messages_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
+app.include_router(notes_router, prefix="/api/v1")
 
 
 @app.on_event("startup")

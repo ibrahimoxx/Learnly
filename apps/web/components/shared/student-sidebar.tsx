@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Heart, Gift, Bell, Trophy, UserCog } from "lucide-react";
+import { BookOpen, Heart, Gift, Bell, Trophy, UserCog, StickyNote, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/dashboard",          label: "My Learning",    icon: BookOpen },
-  { href: "/wishlist",           label: "Wishlist",        icon: Heart },
-  { href: "/gifts",              label: "Gifts",           icon: Gift },
-  { href: "/notifications",      label: "Notifications",   icon: Bell },
-  { href: "/achievements",       label: "Achievements",    icon: Trophy },
-  { href: "/user/edit-profile",  label: "Account",         icon: UserCog },
+  { href: "/dashboard",                  label: "My Learning",    icon: BookOpen },
+  { href: "/home/my-courses/notes",      label: "Notes",          icon: StickyNote },
+  { href: "/home/my-courses/completed",  label: "Certificates",   icon: Award },
+  { href: "/wishlist",                   label: "Wishlist",        icon: Heart },
+  { href: "/gifts",                      label: "Gifts",           icon: Gift },
+  { href: "/notifications",              label: "Notifications",   icon: Bell },
+  { href: "/achievements",               label: "Achievements",    icon: Trophy },
+  { href: "/user/edit-profile",          label: "Account",         icon: UserCog },
 ];
 
 export function StudentSidebar() {

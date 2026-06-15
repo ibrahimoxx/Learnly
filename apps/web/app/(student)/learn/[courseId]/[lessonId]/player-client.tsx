@@ -5,10 +5,10 @@ import { useAuth } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock, Code } from "lucide-react";
+import { CheckCircle, Circle, PlayCircle, FileText, ChevronLeft, MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle, MessagesSquare, Lock, Code, StickyNote, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
-import type { Enrollment, Lesson, LessonProgress, Section, Question, LiveSession } from "@/types";
+import type { Enrollment, Lesson, LessonProgress, Section, Question, LiveSession, Note } from "@/types";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
 import { CodingExercisePlayer } from "@/components/features/coding/coding-exercise-player";
 import { LiveRoom } from "@/components/features/live/live-room";
@@ -26,7 +26,7 @@ interface Props {
   initialProgress: LessonProgress[];
 }
 
-type SidebarTab = "content" | "qa" | "forums";
+type SidebarTab = "content" | "qa" | "forums" | "notes";
 
 interface ProgressSSEEvent {
   lesson_id: string;
@@ -219,9 +219,29 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
               )}
             </div>
           ) : currentLesson.type === "quiz" ? (
-            <QuizPlayer lessonId={currentLesson.id} token={_serverToken} />
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex justify-end px-6 pt-4">
+                <Link
+                  href={`/learn/${enrollment.course_id}/${currentLesson.id}/quiz`}
+                  className="rounded-sm border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/70 hover:border-[var(--color-primary)] hover:text-white transition-colors"
+                >
+                  Open full screen
+                </Link>
+              </div>
+              <QuizPlayer lessonId={currentLesson.id} token={_serverToken} />
+            </div>
           ) : currentLesson.type === "coding_exercise" ? (
-            <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex justify-end px-6 pt-4">
+                <Link
+                  href={`/learn/${enrollment.course_id}/${currentLesson.id}/coding-exercise`}
+                  className="rounded-sm border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/70 hover:border-[var(--color-primary)] hover:text-white transition-colors"
+                >
+                  Open full screen
+                </Link>
+              </div>
+              <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
+            </div>
           ) : (
             <div className="flex-1 overflow-y-auto p-8">
               <h2 className="text-xl font-bold text-white">{currentLesson.title}</h2>
@@ -250,10 +270,11 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
 
         {/* Mobile bottom bar */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex border-t border-white/10 bg-[var(--color-hero-raised)] shadow-[var(--shadow-xl)]">
-          {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
-            const labels: Record<SidebarTab, string> = { content: "Content", qa: "Q&A", forums: "Forums" };
+          {(["content", "notes", "qa", "forums"] as SidebarTab[]).map((tab) => {
+            const labels: Record<SidebarTab, string> = { content: "Content", notes: "Notes", qa: "Q&A", forums: "Forums" };
             const icons: Record<SidebarTab, React.ReactNode> = {
               content: <BookOpen className="h-4 w-4" />,
+              notes: <StickyNote className="h-4 w-4" />,
               qa: <MessageCircle className="h-4 w-4" />,
               forums: <MessagesSquare className="h-4 w-4" />,
             };
@@ -277,8 +298,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             <div className="relative flex flex-col rounded-t-2xl bg-[var(--color-hero-raised)] overflow-hidden shadow-[var(--shadow-xl)]" style={{ height: "75dvh" }}>
               <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-3">
                 <div className="flex gap-4">
-                  {(["content", "qa", "forums"] as SidebarTab[]).map((tab) => {
-                    const labels: Record<SidebarTab, string> = { content: "Course Content", qa: "Q&A", forums: "Forums" };
+                  {(["content", "notes", "qa", "forums"] as SidebarTab[]).map((tab) => {
+                    const labels: Record<SidebarTab, string> = { content: "Course Content", notes: "Notes", qa: "Q&A", forums: "Forums" };
                     return (
                       <button
                         key={tab}
@@ -295,6 +316,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
               <div className="flex-1 overflow-y-auto">
                 {mobileTab === "content" ? (
                   <ContentTab sectionsWithLessons={sectionsWithLessons} currentLessonId={currentLesson.id} onNavigate={(id) => { setMobileDrawerOpen(false); navigateTo(id); }} completedIds={completedIds} />
+                ) : mobileTab === "notes" ? (
+                  <NotesTab lessonId={currentLesson.id} token={_serverToken} progressRef={progressRef} />
                 ) : mobileTab === "qa" ? (
                   <QATab lessonId={currentLesson.id} token={_serverToken} />
                 ) : (
@@ -319,6 +342,17 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             >
               <BookOpen className="h-3.5 w-3.5" />
               Course content
+            </button>
+            <button
+              onClick={() => setActiveTab("notes")}
+              className={`flex flex-1 items-center justify-center gap-1.5 py-3 text-xs font-medium transition-colors ${
+                activeTab === "notes"
+                  ? "border-b-2 border-[var(--color-primary)] text-white"
+                  : "text-white/40 hover:text-white/70"
+              }`}
+            >
+              <StickyNote className="h-3.5 w-3.5" />
+              Notes
             </button>
             <button
               onClick={() => setActiveTab("qa")}
@@ -353,6 +387,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 onNavigate={navigateTo}
                 completedIds={completedIds}
               />
+            ) : activeTab === "notes" ? (
+              <NotesTab lessonId={currentLesson.id} token={_serverToken} progressRef={progressRef} />
             ) : activeTab === "qa" ? (
               <QATab lessonId={currentLesson.id} token={_serverToken} />
             ) : (
@@ -446,6 +482,186 @@ function ContentTab({
   );
 }
 
+
+function formatTimestamp(seconds: number | null): string | null {
+  if (seconds === null) return null;
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function NotesTab({
+  lessonId,
+  token,
+  progressRef,
+}: {
+  lessonId: string;
+  token: string;
+  progressRef: React.RefObject<number>;
+}) {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newNote, setNewNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+
+  useEffect(() => {
+    setLoading(true);
+    apiFetch<Note[]>(`/api/v1/lessons/${lessonId}/notes`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(setNotes)
+      .catch(() => setNotes([]))
+      .finally(() => setLoading(false));
+  }, [lessonId, token]);
+
+  async function submitNote(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newNote.trim()) return;
+    setSubmitting(true);
+    try {
+      const note = await apiFetch<Note>(`/api/v1/lessons/${lessonId}/notes`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: newNote.trim(),
+          timestamp_seconds: Math.floor(progressRef.current),
+        }),
+      });
+      setNotes((prev) => [...prev, note]);
+      setNewNote("");
+    } catch {
+      toast.error("Failed to save note. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function saveEdit(noteId: string) {
+    if (!editText.trim()) return;
+    try {
+      const updated = await apiFetch<Note>(`/api/v1/notes/${noteId}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editText.trim() }),
+      });
+      setNotes((prev) => prev.map((n) => (n.id === noteId ? updated : n)));
+      setEditingId(null);
+    } catch {
+      toast.error("Failed to update note. Please try again.");
+    }
+  }
+
+  async function deleteNote(noteId: string) {
+    try {
+      await apiFetch(`/api/v1/notes/${noteId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setNotes((prev) => prev.filter((n) => n.id !== noteId));
+    } catch {
+      toast.error("Failed to delete note. Please try again.");
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-4 space-y-3">
+        {[1, 2].map((i) => (
+          <div key={i} className="h-14 rounded bg-white/5 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <form onSubmit={submitNote} className="shrink-0 p-3 border-b border-white/10 space-y-2">
+        <textarea
+          value={newNote}
+          onChange={(e) => setNewNote(e.target.value)}
+          placeholder="Take a note at the current timestamp…"
+          rows={3}
+          className="w-full resize-none rounded bg-white/10 px-2.5 py-1.5 text-xs text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+        />
+        <button
+          type="submit"
+          disabled={submitting || !newNote.trim()}
+          className="w-full rounded bg-[var(--color-primary)] py-1.5 text-xs font-semibold text-white disabled:opacity-40 hover:bg-[var(--color-primary-hover)] transition-colors"
+        >
+          Save note at {formatTimestamp(Math.floor(progressRef.current))}
+        </button>
+      </form>
+
+      <div className="flex-1 overflow-y-auto divide-y divide-white/5">
+        {notes.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-10 text-center px-4">
+            <StickyNote className="h-8 w-8 text-white/20" />
+            <p className="text-xs text-white/30">No notes yet for this lesson.</p>
+          </div>
+        ) : (
+          notes.map((note) => (
+            <div key={note.id} className="px-3 py-3">
+              {editingId === note.id ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    rows={3}
+                    className="w-full resize-none rounded bg-white/10 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => saveEdit(note.id)}
+                      disabled={!editText.trim()}
+                      className="rounded bg-[var(--color-primary)] px-2.5 py-1 text-[10px] font-semibold text-white disabled:opacity-40 hover:bg-[var(--color-primary-hover)] transition-colors"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="rounded bg-white/10 px-2.5 py-1 text-[10px] text-white/70 hover:bg-white/20 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-start justify-between gap-2">
+                    {note.timestamp_seconds !== null && (
+                      <span className="rounded bg-[var(--color-primary)]/20 px-1.5 py-0.5 text-[10px] font-mono text-[var(--color-primary)]">
+                        {formatTimestamp(note.timestamp_seconds)}
+                      </span>
+                    )}
+                    <div className="flex gap-1.5 ml-auto">
+                      <button
+                        onClick={() => { setEditingId(note.id); setEditText(note.content); }}
+                        className="text-white/40 hover:text-white/80 transition-colors"
+                        aria-label="Edit note"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => deleteNote(note.id)}
+                        className="text-white/40 hover:text-[var(--color-error)] transition-colors"
+                        aria-label="Delete note"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="mt-1.5 text-xs text-white/80 leading-snug whitespace-pre-wrap">{note.content}</p>
+                </>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}
 
 function QATab({ lessonId, token }: { lessonId: string; token: string }) {
   const [questions, setQuestions] = useState<Question[]>([]);
