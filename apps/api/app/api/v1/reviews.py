@@ -105,5 +105,7 @@ async def create_review(
         rating=review.rating,
         comment=review.comment,
         student_name=student_name,
+        instructor_response=review.instructor_response,
+        instructor_response_at=review.instructor_response_at,
         created_at=review.created_at,
     )
