@@ -8,8 +8,16 @@ from slowapi.errors import RateLimitExceeded
 import app.db.tables  # noqa: F401 — registers all models with SQLAlchemy mapper
 from app.api.v1.account import router as account_router
 from app.api.v1.admin import router as admin_router
+from app.api.v1.admin_announcements import router as admin_announcements_router
+from app.api.v1.admin_categories import router as admin_categories_router
+from app.api.v1.admin_feature_flags import router as admin_feature_flags_router
+from app.api.v1.admin_orgs import router as admin_orgs_router
+from app.api.v1.admin_payouts import router as admin_payouts_router
+from app.api.v1.admin_revenue import router as admin_revenue_router
+from app.api.v1.admin_support import router as admin_support_router
 from app.api.v1.affiliate import router as affiliate_router
 from app.api.v1.announcements import router as announcements_router
+from app.api.v1.announcements_public import router as announcements_public_router
 from app.api.v1.assignments import router as assignments_router
 from app.api.v1.categories import router as categories_router
 from app.api.v1.checkout import router as checkout_router
@@ -39,6 +47,7 @@ from app.api.v1.quiz import router as quiz_router
 from app.api.v1.recommendations import router as recommendations_router
 from app.api.v1.reviews import router as reviews_router
 from app.api.v1.sections import router as sections_router
+from app.api.v1.support import router as support_router
 from app.api.v1.users import router as users_router
 from app.api.v1.webhooks import router as webhooks_router
 from app.api.v1.wishlist import router as wishlist_router
@@ -109,6 +118,15 @@ app.include_router(assignments_router, prefix="/api/v1")
 app.include_router(instructor_tools_router, prefix="/api/v1")
 app.include_router(instructor_finances_router, prefix="/api/v1")
 app.include_router(co_instructors_router, prefix="/api/v1")
+app.include_router(admin_categories_router, prefix="/api/v1")
+app.include_router(admin_orgs_router, prefix="/api/v1")
+app.include_router(admin_feature_flags_router, prefix="/api/v1")
+app.include_router(admin_revenue_router, prefix="/api/v1")
+app.include_router(admin_payouts_router, prefix="/api/v1")
+app.include_router(admin_announcements_router, prefix="/api/v1")
+app.include_router(announcements_public_router, prefix="/api/v1")
+app.include_router(support_router, prefix="/api/v1")
+app.include_router(admin_support_router, prefix="/api/v1")
 
 
 @app.on_event("startup")

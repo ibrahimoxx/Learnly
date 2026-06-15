@@ -4,7 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { MessageSquare } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import type { StudentRow } from "@/types";
 
 export default function PerformanceStudentsPage() {
@@ -59,6 +61,7 @@ export default function PerformanceStudentsPage() {
             <th className="px-5 py-3">Enrolled</th>
             <th className="px-5 py-3 text-center">Progress</th>
             <th className="px-5 py-3">Last activity</th>
+            <th className="px-5 py-3 text-right">Action</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-[--color-border]">
@@ -81,6 +84,16 @@ export default function PerformanceStudentsPage() {
               </td>
               <td className="px-5 py-3 text-[--color-text-secondary]">
                 {s.last_activity_at ? new Date(s.last_activity_at).toLocaleDateString() : "—"}
+              </td>
+              <td className="px-5 py-3 text-right">
+                <Link
+                  href={`/instructor/communication/direct-messages?to=${s.student_id}&course=${s.course_id}&name=${encodeURIComponent(s.name)}`}
+                >
+                  <Button variant="outline" size="sm">
+                    <MessageSquare className="h-4 w-4" />
+                    Message
+                  </Button>
+                </Link>
               </td>
             </tr>
           ))}

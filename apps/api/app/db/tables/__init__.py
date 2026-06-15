@@ -26,5 +26,8 @@ from app.db.tables.announcement import CourseAnnouncement
 from app.db.tables.assignment_submission import AssignmentSubmission
 from app.db.tables.test_video_request import InstructorTestVideoRequest
 from app.db.tables.co_instructor import CourseCoInstructor
+from app.db.tables.feature_flag import FeatureFlag
+from app.db.tables.platform_announcement import PlatformAnnouncement
+from app.db.tables.support_ticket import SupportTicket, SupportTicketReply
 
-__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "Gift", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment", "AffiliateLink", "AffiliateConversion", "CodingExercise", "CodeSubmission", "LiveSession", "Message", "Note", "CourseAnnouncement", "AssignmentSubmission", "InstructorTestVideoRequest", "CourseCoInstructor"]
+__all__ = ["User", "Category", "Organization", "Course", "Section", "Lesson", "Enrollment", "LessonProgress", "Review", "Question", "Answer", "WishlistItem", "Coupon", "Notification", "Gift", "QuizQuestion", "QuizAttempt", "DiscussionPost", "DiscussionReply", "UserGamification", "Badge", "UserBadge", "PushSubscription", "LearningPath", "LearningPathCourse", "LearningPathEnrollment", "AffiliateLink", "AffiliateConversion", "CodingExercise", "CodeSubmission", "LiveSession", "Message", "Note", "CourseAnnouncement", "AssignmentSubmission", "InstructorTestVideoRequest", "CourseCoInstructor", "FeatureFlag", "PlatformAnnouncement", "SupportTicket", "SupportTicketReply"]

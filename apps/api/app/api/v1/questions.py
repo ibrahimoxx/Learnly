@@ -10,6 +10,7 @@ from app.core.auth import get_current_user
 from app.db.session import get_db
 from app.db.tables.enrollment import Enrollment
 from app.db.tables.lesson import Lesson
+from app.db.tables.notification import Notification
 from app.db.tables.question import Answer, Question
 from app.db.tables.user import User
 from app.schemas.question import AnswerCreate, AnswerRead, QuestionCreate, QuestionRead
@@ -67,7 +68,7 @@ async def create_question(
     if not lesson:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lesson not found")
 
-    # Must be enrolled in the course this lesson belongs to
+    from app.db.tables.course import Course
     from app.db.tables.section import Section
     section_result = await db.execute(select(Section).where(Section.id == lesson.section_id))
     section = section_result.scalar_one_or_none()
@@ -86,6 +87,19 @@ async def create_question(
     question = Question(lesson_id=lesson_id, student_id=user.id, body=body.body)
     db.add(question)
     await db.flush()
+
+    course_result = await db.execute(select(Course).where(Course.id == section.course_id))
+    course = course_result.scalar_one_or_none()
+    if course and course.instructor_id != user.id:
+        asker_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        db.add(Notification(
+            user_id=course.instructor_id,
+            type="new_question",
+            title="New Q&A question",
+            body=f"{asker_name} asked: {body.body[:180]}",
+            link=f"/instructor/communication/qa",
+        ))
+
     await db.refresh(question, ["student", "answers"])
     await db.commit()
 
@@ -112,6 +126,17 @@ async def create_answer(
     answer = Answer(question_id=question_id, user_id=user.id, body=body.body)
     db.add(answer)
     await db.flush()
+
+    if question.student_id != user.id:
+        answerer_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        db.add(Notification(
+            user_id=question.student_id,
+            type="qa_answer",
+            title="Your question got an answer",
+            body=f"{answerer_name}: {body.body[:200]}",
+            link=f"/learn",
+        ))
+
     await db.refresh(answer, ["user"])
     await db.commit()
 

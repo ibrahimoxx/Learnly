@@ -18,6 +18,7 @@ from app.services.gamification import process_course_completion, process_lesson_
 from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
+from app.db.tables.notification import Notification
 from app.db.tables.lesson import Lesson
 from app.db.tables.lesson_progress import LessonProgress
 from app.db.tables.section import Section
@@ -64,6 +65,16 @@ async def enroll(
     enrollment = Enrollment(student_id=user.id, course_id=body.course_id)
     db.add(enrollment)
     course.enrollment_count = (course.enrollment_count or 0) + 1
+
+    student_name = f"{user.first_name} {user.last_name}".strip() or user.email
+    db.add(Notification(
+        user_id=course.instructor_id,
+        type="new_enrollment",
+        title="New student enrolled",
+        body=f"{student_name} enrolled in \"{course.title}\"",
+        link=f"/instructor/courses/{course.id}/manage/basics",
+    ))
+
     await db.commit()
     await db.refresh(enrollment)
     log.info("enrollment_created", user_id=str(user.id), course_id=str(body.course_id))
@@ -289,6 +300,18 @@ async def _check_course_completion(enrollment: Enrollment, db: AsyncSession, bac
     if completed >= total_lessons and enrollment.status != "completed":
         enrollment.status = "completed"
         enrollment.completed_at = datetime.now(timezone.utc)
+
+        course_result = await db.execute(select(Course).where(Course.id == enrollment.course_id))
+        completed_course = course_result.scalar_one_or_none()
+        if completed_course:
+            db.add(Notification(
+                user_id=enrollment.student_id,
+                type="course_completed",
+                title="Course completed!",
+                body=f"You completed \"{completed_course.title}\" — your certificate is ready",
+                link=f"/home/my-courses/completed",
+            ))
+
         await db.commit()
         log.info("course_completed", enrollment_id=str(enrollment.id))
         if background_tasks:

@@ -39,7 +39,8 @@ export default function InstructorAnnouncementsPage() {
       ]);
       setCourses(coursesData);
       setAnnouncements(announcementsData);
-      if (coursesData.length > 0) setCourseId((prev) => prev || coursesData[0].id);
+      const firstCourse = coursesData[0];
+      if (firstCourse) setCourseId((prev) => prev || firstCourse.id);
     } catch {
       toast.error("Failed to load announcements.");
     } finally {

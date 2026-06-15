@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/shared/notification-bell";
+import { MessageNavLink } from "@/components/shared/message-nav-link";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { useCartStore } from "@/lib/stores/cart-store";
 
@@ -119,6 +120,7 @@ export function Navbar() {
               </span>
             )}
           </Link>
+          <MessageNavLink />
           <NotificationBell />
           {signedIn ? (
             <UserButton />
@@ -168,6 +170,7 @@ export function Navbar() {
               <>
                 <Link href="/dashboard" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("myLearning")}</Link>
                 <Link href="/wishlist" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("wishlist")}</Link>
+                <Link href="/user/edit-profile/messages" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>Messages</Link>
                 {isInstructor && (
                   <Link href="/instructor/courses" className={mobileNavLinkClass} onClick={() => setMobileOpen(false)}>{t("teach")}</Link>
                 )}

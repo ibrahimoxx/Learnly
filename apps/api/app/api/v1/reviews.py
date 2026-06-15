@@ -11,6 +11,7 @@ from app.core.auth import get_current_user
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
+from app.db.tables.notification import Notification
 from app.db.tables.review import Review
 from app.db.tables.user import User
 from app.schemas.review import ReviewCreate, ReviewRead
@@ -92,10 +93,21 @@ async def create_review(
         course.rating = Decimal(str(round(float(avg_rating or 0), 2)))
         course.review_count = count
 
+    student_name = f"{user.first_name} {user.last_name}".strip() or user.email
+
+    if course:
+        stars = "★" * body.rating + "☆" * (5 - body.rating)
+        db.add(Notification(
+            user_id=course.instructor_id,
+            type="new_review",
+            title=f"New {body.rating}★ review on your course",
+            body=f"{student_name} {stars}: {(body.comment or '')[:150]}",
+            link=f"/instructor/performance/reviews",
+        ))
+
     await db.commit()
     await db.refresh(review)
 
-    student_name = f"{user.first_name} {user.last_name}".strip() or user.email
     log.info("review_created", course_id=str(course_id), student_id=str(user.id), rating=body.rating)
 
     return ReviewRead(

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User, Lock, CreditCard, Receipt, Sparkles, MessageSquare } from "lucide-react";
+import { User, Lock, CreditCard, Receipt, Sparkles, MessageSquare, LifeBuoy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -12,6 +12,7 @@ const tabs = [
   { href: "/user/edit-profile/purchase-history", label: "Purchase history", icon: Receipt },
   { href: "/user/edit-profile/subscriptions", label: "Subscription", icon: Sparkles },
   { href: "/user/edit-profile/messages", label: "Messages", icon: MessageSquare },
+  { href: "/user/edit-profile/support", label: "Support", icon: LifeBuoy },
 ];
 
 export function AccountSubnav() {

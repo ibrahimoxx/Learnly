@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BookOpen, BarChart2, Tag, DollarSign, Link2, TrendingUp,
+  BookOpen, BarChart2, Tag, DollarSign, Link2, TrendingUp, Megaphone, Wrench, Receipt,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,9 @@ const links = [
   { href: "/instructor/paths",              label: "Paths",       icon: BarChart2 },
   { href: "/instructor/promotions",         label: "Promotions",  icon: Tag },
   { href: "/instructor/affiliate",          label: "Affiliate",   icon: Link2 },
+  { href: "/instructor/communication/announcements", label: "Communication", icon: Megaphone },
+  { href: "/instructor/tools/test-video",   label: "Tools",       icon: Wrench },
+  { href: "/instructor/finances/revenue-report", label: "Revenue Report", icon: Receipt },
   { href: "/instructor/payouts",            label: "Payouts",     icon: DollarSign },
 ];
 

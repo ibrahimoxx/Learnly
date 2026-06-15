@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { AlertCircle, ArrowLeft, MessageSquare, Send } from "lucide-react";
+import { AlertCircle, ArrowLeft, GraduationCap, MessageSquare, Send } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,12 @@ import { AccountSubnav } from "@/components/shared/account-subnav";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { ConversationRead, MessageRead } from "@/types";
+
+interface ComposeTarget {
+  id: string;
+  name: string;
+  courseId: string | null;
+}
 
 function extractErrorMessage(err: unknown, fallback: string): string {
   if (!(err instanceof Error)) return fallback;
@@ -36,6 +43,13 @@ function formatTime(value: string): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] ?? "";
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
+  return (first + last).toUpperCase() || "?";
 }
 
 function InboxSkeleton() {
@@ -79,19 +93,21 @@ function EmptyState() {
   );
 }
 
-export default function MessagesPage() {
+function MessagesPageContent() {
   const { getToken } = useAuth();
+  const searchParams = useSearchParams();
   const [conversations, setConversations] = useState<ConversationRead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   const [selected, setSelected] = useState<ConversationRead | null>(null);
+  const [composeTarget, setComposeTarget] = useState<ComposeTarget | null>(null);
   const [thread, setThread] = useState<MessageRead[]>([]);
   const [threadLoading, setThreadLoading] = useState(false);
   const [replyText, setReplyText] = useState("");
   const [sending, setSending] = useState(false);
 
-  async function loadConversations() {
+  async function loadConversations(): Promise<ConversationRead[]> {
     setLoading(true);
     setError(false);
     try {
@@ -100,19 +116,17 @@ export default function MessagesPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setConversations(data);
+      return data;
     } catch {
       setError(true);
+      return [];
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    loadConversations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function openThread(conversation: ConversationRead) {
+    setComposeTarget(null);
     setSelected(conversation);
     setThreadLoading(true);
     try {
@@ -124,6 +138,9 @@ export default function MessagesPage() {
       setConversations((prev) =>
         prev.map((c) => (c.participant.id === conversation.participant.id ? { ...c, unread_count: 0 } : c))
       );
+      if (conversation.unread_count > 0) {
+        window.dispatchEvent(new Event("messages:unread-changed"));
+      }
     } catch {
       toast.error("Couldn't load this conversation");
     } finally {
@@ -131,27 +148,64 @@ export default function MessagesPage() {
     }
   }
 
+  useEffect(() => {
+    async function init() {
+      const data = await loadConversations();
+      const to = searchParams.get("to");
+      if (!to) return;
+      const existing = data.find((c) => c.participant.id === to);
+      if (existing) {
+        openThread(existing);
+      } else {
+        setComposeTarget({
+          id: to,
+          name: searchParams.get("name") || "New conversation",
+          courseId: searchParams.get("course"),
+        });
+      }
+    }
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function sendReply() {
-    if (!selected || !replyText.trim()) return;
+    if (!replyText.trim() || (!selected && !composeTarget)) return;
     setSending(true);
     try {
       const token = await getToken();
+      const recipientId = selected ? selected.participant.id : composeTarget!.id;
       const message = await apiFetch<MessageRead>("/api/v1/messages", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ recipient_id: selected.participant.id, body: replyText.trim() }),
+        body: JSON.stringify({
+          recipient_id: recipientId,
+          body: replyText.trim(),
+          ...(composeTarget?.courseId ? { course_id: composeTarget.courseId } : {}),
+        }),
       });
-      setThread((prev) => [...prev, message]);
-      setConversations((prev) =>
-        prev.map((c) => (c.participant.id === selected.participant.id ? { ...c, last_message: message } : c))
-      );
       setReplyText("");
+      if (selected) {
+        setThread((prev) => [...prev, message]);
+        setConversations((prev) =>
+          prev.map((c) => (c.participant.id === selected.participant.id ? { ...c, last_message: message } : c))
+        );
+      } else if (composeTarget) {
+        const data = await loadConversations();
+        const conversation = data.find((c) => c.participant.id === composeTarget.id);
+        setComposeTarget(null);
+        if (conversation) {
+          setSelected(conversation);
+          setThread([message]);
+        }
+      }
     } catch (err) {
       toast.error(extractErrorMessage(err, "Couldn't send your message. Try again."));
     } finally {
       setSending(false);
     }
   }
+
+  const activePane = selected || composeTarget;
 
   return (
     <div className="premium-shell min-h-screen px-4 py-10 sm:px-6">
@@ -170,11 +224,11 @@ export default function MessagesPage() {
           <InboxSkeleton />
         ) : error ? (
           <ErrorState onRetry={loadConversations} />
-        ) : conversations.length === 0 ? (
+        ) : conversations.length === 0 && !composeTarget ? (
           <EmptyState />
         ) : (
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className={cn("space-y-2 md:col-span-1", selected ? "hidden md:block" : "")}>
+            <div className={cn("space-y-2 md:col-span-1", activePane ? "hidden md:block" : "")}>
               {conversations.map((conversation) => {
                 const isActive = selected?.participant.id === conversation.participant.id;
                 return (
@@ -194,28 +248,45 @@ export default function MessagesPage() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <p className="flex items-center gap-2 truncate font-semibold text-[--color-text-primary]">
+                      <div className="flex items-center gap-2 truncate font-semibold text-[--color-text-primary]">
                         {conversation.participant.first_name} {conversation.participant.last_name}
                         {conversation.unread_count > 0 ? (
                           <Badge variant="default" className="px-1.5 py-0 text-[10px]">
                             {conversation.unread_count}
                           </Badge>
                         ) : null}
-                      </p>
+                      </div>
                       <p className="truncate text-xs text-[--color-text-muted]">{conversation.last_message.body}</p>
+                      {conversation.shared_courses.length > 0 ? (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {conversation.shared_courses.map((course) => (
+                            <span
+                              key={course.id}
+                              title={course.title}
+                              className="inline-flex max-w-36 items-center gap-1 truncate rounded-full bg-(image:--gradient-brand) px-2.5 py-1 text-[10px] font-bold tracking-wide text-white shadow-(--shadow-sm) transition-all duration-300 ease-out hover:max-w-none hover:scale-105 hover:shadow-(--shadow-md)"
+                            >
+                              <GraduationCap className="h-3 w-3 shrink-0" />
+                              <span className="truncate">{course.title}</span>
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
                   </button>
                 );
               })}
+              {conversations.length === 0 ? (
+                <p className="px-1 text-xs text-[--color-text-muted]">No conversations yet — send your first message.</p>
+              ) : null}
             </div>
 
-            <div className={cn("md:col-span-2", selected ? "" : "hidden md:block")}>
-              {!selected ? (
+            <div className={cn("md:col-span-2", activePane ? "" : "hidden md:block")}>
+              {!activePane ? (
                 <div className="premium-card flex h-full min-h-[300px] flex-col items-center justify-center gap-2 rounded-[--radius-lg] p-6 text-center">
                   <MessageSquare className="h-10 w-10 text-[--color-text-muted]" />
                   <p className="font-extrabold text-[--color-text-secondary]">Select a conversation</p>
                 </div>
-              ) : (
+              ) : selected ? (
                 <div className="premium-card flex h-full flex-col rounded-[--radius-lg] p-4">
                   <div className="flex items-center gap-3 border-b border-[--color-border] pb-3">
                     <button onClick={() => setSelected(null)} className="md:hidden" aria-label="Back to conversations">
@@ -275,11 +346,51 @@ export default function MessagesPage() {
                     </Button>
                   </div>
                 </div>
+              ) : (
+                <div className="premium-card flex h-full flex-col rounded-[--radius-lg] p-4">
+                  <div className="flex items-center gap-3 border-b border-[--color-border] pb-3">
+                    <button onClick={() => setComposeTarget(null)} className="md:hidden" aria-label="Back to conversations">
+                      <ArrowLeft className="h-5 w-5 text-[--color-text-secondary]" />
+                    </button>
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback>{getInitials(composeTarget!.name)}</AvatarFallback>
+                    </Avatar>
+                    <p className="font-extrabold text-[--color-text-primary]">{composeTarget!.name}</p>
+                  </div>
+
+                  <div className="flex-1 space-y-3 overflow-y-auto py-4">
+                    <p className="text-sm text-[--color-text-secondary]">
+                      Send your first message to start the conversation.
+                    </p>
+                  </div>
+
+                  <div className="flex items-end gap-2 border-t border-[--color-border] pt-3">
+                    <Textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write a message..."
+                      rows={2}
+                      className="flex-1"
+                    />
+                    <Button onClick={sendReply} disabled={sending || !replyText.trim()}>
+                      <Send className="h-4 w-4" />
+                      Send
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={null}>
+      <MessagesPageContent />
+    </Suspense>
   );
 }

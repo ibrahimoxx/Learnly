@@ -3,11 +3,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import {
-  Clock, Users, Award, Globe, CheckCircle, PlayCircle, FileText, BarChart,
+  Clock, Users, Award, Globe, CheckCircle, PlayCircle, FileText, BarChart, MessageSquare,
 } from "lucide-react";
 import { StarRating } from "@/components/features/courses/star-rating";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PreviewCurriculum } from "@/components/features/courses/preview-curriculum";
 import { EnrollButton } from "./enroll-button";
@@ -290,29 +291,43 @@ export default async function CourseDetailPage({ params }: Props) {
                   <h2 className="text-xl font-bold tracking-tight text-[--color-text-primary]">
                     {t("instructorHeading")}
                   </h2>
-                  <Link
-                    href={`/user/${course.instructor.id}`}
-                    className="hover-lift premium-card mt-4 flex items-center gap-4 rounded-[--radius-lg] p-6"
-                  >
-                    <Avatar className="h-16 w-16 shrink-0">
-                      {course.instructor.image_url && (
-                        <AvatarImage
-                          src={course.instructor.image_url}
-                          alt={`${course.instructor.first_name} ${course.instructor.last_name}`}
-                        />
-                      )}
-                      <AvatarFallback className="text-lg font-bold">
-                        {course.instructor.first_name.charAt(0)}
-                        {course.instructor.last_name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-bold text-[--color-text-primary]">
-                        {course.instructor.first_name} {course.instructor.last_name}
-                      </p>
-                      <p className="mt-0.5 text-sm font-semibold text-[--color-primary]">{t("viewProfile")}</p>
-                    </div>
-                  </Link>
+                  <div className="hover-lift premium-card mt-4 flex flex-wrap items-center gap-4 rounded-[--radius-lg] p-6">
+                    <Link
+                      href={`/user/${course.instructor.id}`}
+                      className="flex min-w-0 flex-1 items-center gap-4"
+                    >
+                      <Avatar className="h-16 w-16 shrink-0">
+                        {course.instructor.image_url && (
+                          <AvatarImage
+                            src={course.instructor.image_url}
+                            alt={`${course.instructor.first_name} ${course.instructor.last_name}`}
+                          />
+                        )}
+                        <AvatarFallback className="text-lg font-bold">
+                          {course.instructor.first_name.charAt(0)}
+                          {course.instructor.last_name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-base font-bold text-[--color-text-primary]">
+                          {course.instructor.first_name} {course.instructor.last_name}
+                        </p>
+                        <p className="mt-0.5 text-sm font-semibold text-[--color-primary]">{t("viewProfile")}</p>
+                      </div>
+                    </Link>
+                    {isEnrolled && (
+                      <Link
+                        href={`/user/edit-profile/messages?to=${course.instructor.id}&course=${course.id}&name=${encodeURIComponent(
+                          `${course.instructor.first_name} ${course.instructor.last_name}`
+                        )}`}
+                      >
+                        <Button variant="outline" size="sm">
+                          <MessageSquare className="h-4 w-4" />
+                          {t("messageInstructor")}
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 </section>
               </>
             )}

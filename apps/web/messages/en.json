@@ -54,6 +54,7 @@
     "courses": "Courses",
     "instructorHeading": "Instructor",
     "viewProfile": "View full profile",
+    "messageInstructor": "Message instructor",
     "browseTopic": "Browse {name} courses"
   },
   "topic": {

@@ -32,7 +32,16 @@ class MessageRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class SharedCourseBrief(BaseModel):
+    id: uuid.UUID
+    title: str
+    slug: str
+
+    model_config = {"from_attributes": True}
+
+
 class ConversationRead(BaseModel):
     participant: MessageUserBrief
     last_message: MessageRead
     unread_count: int
+    shared_courses: list[SharedCourseBrief] = []

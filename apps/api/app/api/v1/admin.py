@@ -11,6 +11,7 @@ from app.db.session import get_db
 from app.db.tables.affiliate import AffiliateConversion, AffiliateLink
 from app.db.tables.course import Course
 from app.db.tables.enrollment import Enrollment
+from app.db.tables.notification import Notification
 from app.db.tables.user import User
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -103,6 +104,19 @@ async def update_course_status(
     course.status = body.status
     await db.commit()
     await db.refresh(course)
+
+    if body.status in ("published", "archived"):
+        title = "Your course was approved" if body.status == "published" else "Your course was rejected"
+        body_text = f'"{course.title}" has been {"published" if body.status == "published" else "rejected by the review team"}'
+        db.add(Notification(
+            user_id=course.instructor_id,
+            type="course_review",
+            title=title,
+            body=body_text,
+            link=f"/instructor/courses/{course.id}/manage/basics",
+        ))
+        await db.commit()
+
     return course
 
 

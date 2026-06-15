@@ -6,6 +6,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
 import { InstallPrompt } from "@/components/shared/install-prompt";
+import { PlatformBanner } from "@/components/shared/platform-banner";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -56,6 +57,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </head>
         <body>
           <NextIntlClientProvider messages={messages}>
+            <PlatformBanner />
             <Providers>{children}</Providers>
             <Toaster richColors position="bottom-right" />
             <InstallPrompt />

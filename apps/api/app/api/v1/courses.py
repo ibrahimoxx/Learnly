@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 from app.core.auth import get_current_user, require_instructor
 from app.db.session import get_db
 from app.db.tables.course import Course
+from app.db.tables.notification import Notification
 from app.db.tables.user import User
 from app.schemas.course import (
     CourseCreate,
@@ -168,6 +169,18 @@ async def update_course(
 
     if body.status == "published":
         background_tasks.add_task(_run_embed_bg, str(course.id))
+
+    if body.status == "in_review":
+        admins = await db.execute(select(User.id).where(User.role == "admin"))
+        for admin_id in admins.scalars().all():
+            db.add(Notification(
+                user_id=admin_id,
+                type="course_review",
+                title="Course submitted for review",
+                body=f'"{course.title}" is pending review',
+                link="/admin/courses",
+            ))
+        await db.commit()
 
     return CourseRead.model_validate(course)
 

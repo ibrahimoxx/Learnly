@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +22,12 @@ from app.schemas.instructor_tools import (
 
 router = APIRouter(prefix="/instructor/tools", tags=["instructor-tools"])
 
+ALLOWED_VIDEO_EXTENSIONS = {"mp4", "mov", "webm", "avi", "mkv", "m4v"}
+
+
+def _test_video_prefix(instructor_id: uuid.UUID) -> str:
+    return f"videos/test-submissions/{instructor_id}/"
+
 
 @router.post("/test-video/upload-url", response_model=TestVideoUploadResponse)
 @limiter.limit("10/minute")
@@ -30,8 +36,10 @@ async def get_test_video_upload_url(
     body: TestVideoUploadRequest,
     instructor: User = Depends(require_instructor),
 ) -> TestVideoUploadResponse:
-    extension = body.filename.rsplit(".", 1)[-1] if "." in body.filename else "mp4"
-    key = f"videos/test-submissions/{instructor.id}/{uuid.uuid4()}.{extension}"
+    extension = body.filename.rsplit(".", 1)[-1].lower() if "." in body.filename else "mp4"
+    if extension not in ALLOWED_VIDEO_EXTENSIONS:
+        extension = "mp4"
+    key = f"{_test_video_prefix(instructor.id)}{uuid.uuid4()}.{extension}"
     upload_url = await get_upload_url(key)
     return TestVideoUploadResponse(upload_url=upload_url, video_key=key)
 
@@ -71,6 +79,9 @@ async def create_test_video_request(
     instructor: User = Depends(require_instructor),
     db: AsyncSession = Depends(get_db),
 ) -> TestVideoRequestRead:
+    if not body.video_key.startswith(_test_video_prefix(instructor.id)):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid video key")
+
     test_request = InstructorTestVideoRequest(
         instructor_id=instructor.id,
         video_url=body.video_key,

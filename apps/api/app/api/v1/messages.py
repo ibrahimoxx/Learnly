@@ -12,7 +12,7 @@ from app.db.tables.enrollment import Enrollment
 from app.db.tables.message import Message
 from app.db.tables.notification import Notification
 from app.db.tables.user import User
-from app.schemas.message import ConversationRead, MessageCreate, MessageRead, MessageUserBrief
+from app.schemas.message import ConversationRead, MessageCreate, MessageRead, MessageUserBrief, SharedCourseBrief
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -79,6 +79,15 @@ async def list_conversations(
     users_result = await db.execute(select(User).where(User.id.in_(participant_ids)))
     users_by_id = {u.id: u for u in users_result.scalars().all()}
 
+    shared_courses_by_student: dict[uuid.UUID, list[SharedCourseBrief]] = {}
+    courses_result = await db.execute(
+        select(Enrollment.student_id, Course)
+        .join(Course, Course.id == Enrollment.course_id)
+        .where(Course.instructor_id == user.id, Enrollment.student_id.in_(participant_ids))
+    )
+    for student_id, course in courses_result.all():
+        shared_courses_by_student.setdefault(student_id, []).append(SharedCourseBrief.model_validate(course))
+
     conversations: list[ConversationRead] = []
     for other_id, last_message in last_by_participant.items():
         participant = users_by_id.get(other_id)
@@ -89,6 +98,7 @@ async def list_conversations(
                 participant=MessageUserBrief.model_validate(participant),
                 last_message=MessageRead.model_validate(last_message),
                 unread_count=unread_by_participant.get(other_id, 0),
+                shared_courses=shared_courses_by_student.get(other_id, []),
             )
         )
     conversations.sort(key=lambda c: c.last_message.created_at, reverse=True)

@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AccountSubnav } from "@/components/shared/account-subnav";
 import { apiFetch } from "@/lib/api";
-import type { EmailNotificationPrefs, UserPrivacy } from "@/types";
+import type { EmailNotificationPrefs, UserAccount, UserPrivacy } from "@/types";
 
 const NOTIFICATION_LABELS: Record<keyof EmailNotificationPrefs, { label: string; description: string }> = {
   enrollment: { label: "Enrollment confirmations", description: "When you enroll in a course." },
@@ -66,6 +66,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 export default function PrivacySettingsPage() {
   const { getToken } = useAuth();
   const [privacy, setPrivacy] = useState<UserPrivacy | null>(null);
+  const [isInstructor, setIsInstructor] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -76,10 +77,16 @@ export default function PrivacySettingsPage() {
     setError(false);
     try {
       const token = await getToken();
-      const data = await apiFetch<UserPrivacy>("/api/v1/users/me/privacy", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPrivacy(data);
+      const [privacyData, account] = await Promise.all([
+        apiFetch<UserPrivacy>("/api/v1/users/me/privacy", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        apiFetch<UserAccount>("/api/v1/users/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+      setPrivacy(privacyData);
+      setIsInstructor(account.role === "instructor");
       setDirty(false);
     } catch {
       setError(true);
@@ -149,24 +156,26 @@ export default function PrivacySettingsPage() {
           <ErrorState onRetry={load} />
         ) : (
           <div className="mt-8 space-y-6">
-            <div className="premium-card rounded-[--radius-lg] p-6">
-              <h2 className="font-extrabold text-[--color-text-primary]">Profile visibility</h2>
-              <div className="mt-4 flex items-center justify-between gap-4 rounded-[--radius-md] border border-[--color-border] p-4">
-                <div>
-                  <Label htmlFor="profile-public" className="font-semibold text-[--color-text-primary]">
-                    Public instructor profile
-                  </Label>
-                  <p className="mt-1 text-sm text-[--color-text-secondary]">
-                    Let other students and visitors view your public profile page.
-                  </p>
+            {isInstructor && (
+              <div className="premium-card rounded-[--radius-lg] p-6">
+                <h2 className="font-extrabold text-[--color-text-primary]">Profile visibility</h2>
+                <div className="mt-4 flex items-center justify-between gap-4 rounded-[--radius-md] border border-[--color-border] p-4">
+                  <div>
+                    <Label htmlFor="profile-public" className="font-semibold text-[--color-text-primary]">
+                      Public instructor profile
+                    </Label>
+                    <p className="mt-1 text-sm text-[--color-text-secondary]">
+                      Let other students and visitors view your public profile page.
+                    </p>
+                  </div>
+                  <Switch
+                    id="profile-public"
+                    checked={privacy.is_profile_public}
+                    onCheckedChange={toggleProfilePublic}
+                  />
                 </div>
-                <Switch
-                  id="profile-public"
-                  checked={privacy.is_profile_public}
-                  onCheckedChange={toggleProfilePublic}
-                />
               </div>
-            </div>
+            )}
 
             <div className="premium-card rounded-[--radius-lg] p-6">
               <h2 className="font-extrabold text-[--color-text-primary]">Email notifications</h2>

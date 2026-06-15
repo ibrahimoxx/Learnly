@@ -1,0 +1,160 @@
+﻿
+> @learnly/web@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.15
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for server...
+ ✓ (pwa) Compiling for client (static)...
+ ○ (pwa) Service worker: D:\Learnly\apps\web\public\sw.js
+ ○ (pwa)   URL: /sw.js
+ ○ (pwa)   Scope: /
+ ✓ (pwa) Using InjectManifest with D:\Learnly\apps\web\worker\index.ts
+node.exe :  ⚠ Compiled with warnings in 47s
+Au caractère Ligne:1 : 1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\asus\AppData\Roaming\n ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ( ⚠ Compiled with warnings in 47s:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/node/instrumentation.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/node/instrumentation.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/node/index.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/index.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/index.js
+../../node_modules/.pnpm/@sentry+opentelemetry@8.55._7976cc36f6f8201ca3f4ca21a335c006/node_modules/@sentry/opentelemetr
+y/build/cjs/index.js
+../../node_modules/.pnpm/@sentry+nextjs@8.55.2_@open_53ca5464693bed151bf6293e27fdc7f8/node_modules/@sentry/nextjs/build
+/cjs/server/index.js
+../../node_modules/.pnpm/@sentry+nextjs@8.55.2_@open_53ca5464693bed151bf6293e27fdc7f8/node_modules/@sentry/nextjs/build
+/cjs/index.server.js
+
+../../node_modules/.pnpm/require-in-the-middle@7.5.2/node_modules/require-in-the-middle/index.js
+Critical dependency: require function is used in a way in which dependencies cannot be statically extracted
+
+Import trace for requested module:
+../../node_modules/.pnpm/require-in-the-middle@7.5.2/node_modules/require-in-the-middle/index.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/node/instrumentation.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/node/index.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/platform/index.js
+../../node_modules/.pnpm/@opentelemetry+instrumentat_91c8d81e8ff5cdaf602b4d4bf87f5e08/node_modules/@opentelemetry/instr
+umentation/build/esm/index.js
+../../node_modules/.pnpm/@sentry+opentelemetry@8.55._7976cc36f6f8201ca3f4ca21a335c006/node_modules/@sentry/opentelemetr
+y/build/cjs/index.js
+../../node_modules/.pnpm/@sentry+nextjs@8.55.2_@open_53ca5464693bed151bf6293e27fdc7f8/node_modules/@sentry/nextjs/build
+/cjs/server/index.js
+../../node_modules/.pnpm/@sentry+nextjs@8.55.2_@open_53ca5464693bed151bf6293e27fdc7f8/node_modules/@sentry/nextjs/build
+/cjs/index.server.js
+
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/48) ...
+   Generating static pages (12/48) 
+   Generating static pages (24/48) 
+   Generating static pages (36/48) 
+ ✓ Generating static pages (48/48)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                                    Size  First Load JS
+┌ ƒ /                                                       2.82 kB         134 kB
+├ ƒ /_not-found                                               159 B         105 kB
+├ ƒ /~offline                                                 383 B         108 kB
+├ ƒ /achievements                                           2.67 kB         117 kB
+├ ƒ /admin                                                  2.05 kB         143 kB
+├ ƒ /admin/affiliates                                       4.63 kB         155 kB
+├ ƒ /admin/coupons                                          1.47 kB         143 kB
+├ ƒ /admin/courses                                             2 kB         153 kB
+├ ƒ /admin/users                                             1.7 kB         152 kB
+├ ƒ /api/sse/[enrollmentId]                                   159 B         105 kB
+├ ƒ /cart                                                   5.07 kB         127 kB
+├ ƒ /checkout/cancel                                        2.12 kB         117 kB
+├ ƒ /checkout/success                                       2.12 kB         117 kB
+├ ƒ /courses                                                1.07 kB         125 kB
+├ ƒ /courses/[slug]                                         21.6 kB         246 kB
+├ ƒ /dashboard                                              10.2 kB         159 kB
+├ ƒ /gifts                                                  3.17 kB         148 kB
+├ ƒ /home/my-courses/completed                              3.15 kB         148 kB
+├ ƒ /home/my-courses/notes                                   3.3 kB         150 kB
+├ ƒ /instructor/affiliate                                   5.29 kB         156 kB
+├ ƒ /instructor/communication/announcements                 4.63 kB         159 kB
+├ ƒ /instructor/communication/assignments                   4.92 kB         159 kB
+├ ƒ /instructor/communication/direct-messages               7.59 kB         162 kB
+├ ƒ /instructor/courses                                     5.22 kB         150 kB
+├ ƒ /instructor/courses/[id]/discussions                     3.4 kB         157 kB
+├ ƒ /instructor/courses/[id]/edit                           10.9 kB         165 kB
+├ ƒ /instructor/courses/[id]/live                           5.98 kB         160 kB
+├ ƒ /instructor/courses/[id]/manage/accessibility           3.85 kB         163 kB
+├ ƒ /instructor/courses/[id]/manage/captions                4.42 kB         158 kB
+├ ƒ /instructor/courses/[id]/manage/co-instructors          5.32 kB         159 kB
+├ ƒ /instructor/courses/[id]/manage/communications/welcome  3.33 kB         157 kB
+├ ƒ /instructor/courses/[id]/manage/goals                   4.28 kB         158 kB
+├ ƒ /instructor/courses/[id]/manage/pricing                 3.68 kB         158 kB
+├ ƒ /instructor/courses/[id]/manage/review/submit           4.38 kB         158 kB
+├ ƒ /instructor/finances/revenue-report                     2.72 kB         157 kB
+├ ƒ /instructor/paths                                       4.97 kB         159 kB
+├ ƒ /instructor/paths/[id]/edit                             5.49 kB         159 kB
+├ ƒ /instructor/payouts                                     4.27 kB         155 kB
+├ ƒ /instructor/performance/engagement                      1.43 kB         149 kB
+├ ƒ /instructor/performance/overview                        2.68 kB         150 kB
+├ ƒ /instructor/performance/reviews                         4.21 kB         158 kB
+├ ƒ /instructor/performance/students                        3.83 kB         158 kB
+├ ƒ /instructor/performance/traffic                         2.03 kB         149 kB
+├ ƒ /instructor/promotions                                  4.87 kB         155 kB
+├ ƒ /instructor/tools/marketplace-insights                     2 kB         146 kB
+├ ƒ /instructor/tools/test-video                            4.73 kB         155 kB
+├ ƒ /learn/[courseId]                                         159 B         105 kB
+├ ƒ /learn/[courseId]/[lessonId]                            9.44 kB         226 kB
+├ ƒ /learn/[courseId]/[lessonId]/assignment                 2.58 kB         140 kB
+├ ƒ /learn/[courseId]/[lessonId]/coding-exercise              716 B         142 kB
+├ ƒ /learn/[courseId]/[lessonId]/quiz                         638 B         205 kB
+├ ○ /manifest.webmanifest                                     159 B         105 kB
+├ ƒ /notifications                                          4.68 kB         149 kB
+├ ƒ /offline                                                  382 B         108 kB
+├ ƒ /orgs/[slug]                                            2.82 kB         134 kB
+├ ƒ /orgs/[slug]/admin                                        159 B         105 kB
+├ ƒ /orgs/[slug]/courses                                    1.07 kB         125 kB
+├ ƒ /paths                                                    173 B         108 kB
+├ ƒ /paths/[slug]                                           1.88 kB         156 kB
+├ ƒ /payment/checkout                                       5.93 kB         167 kB
+├ ƒ /payment/checkout/gift                                  5.05 kB         188 kB
+├ ƒ /pricing                                                4.84 kB         124 kB
+├ ƒ /sign-in/[[...sign-in]]                                   405 B         145 kB
+├ ƒ /sign-up/[[...sign-up]]                                   405 B         145 kB
+├ ƒ /topic/[slug]                                           2.82 kB         134 kB
+├ ƒ /user/[id]                                              4.58 kB         136 kB
+├ ƒ /user/edit-profile                                      6.54 kB         185 kB
+├ ƒ /user/edit-profile/messages                             8.61 kB         163 kB
+├ ƒ /user/edit-profile/payment-methods                      3.56 kB         118 kB
+├ ƒ /user/edit-profile/privacy                              8.88 kB         163 kB
+├ ƒ /user/edit-profile/purchase-history                     5.33 kB         150 kB
+├ ƒ /user/edit-profile/subscriptions                        4.96 kB         150 kB
+└ ƒ /wishlist                                               2.53 kB         147 kB
++ First Load JS shared by all                                105 kB
+  ├ chunks/06e05f45-911c4942e3610651.js                     54.2 kB
+  ├ chunks/5578-55d3d2bbbdc4e2b8.js                         48.2 kB
+  └ other shared chunks (total)                             2.11 kB
+
+
+ƒ Middleware                                                86.6 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

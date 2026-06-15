@@ -483,10 +483,17 @@ export interface MessageRead {
   created_at: string;
 }
 
+export interface SharedCourseBrief {
+  id: string;
+  title: string;
+  slug: string;
+}
+
 export interface ConversationRead {
   participant: MessageUserBrief;
   last_message: MessageRead;
   unread_count: number;
+  shared_courses: SharedCourseBrief[];
 }
 
 export interface CourseRevenueRow {

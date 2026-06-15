@@ -71,9 +71,10 @@ async def get_overview(
     total_students = students_result.scalar_one()
 
     since = datetime.now(timezone.utc) - timedelta(days=365)
+    month_bucket = func.date_trunc("month", Enrollment.created_at)
     monthly_result = await db.execute(
         select(
-            func.to_char(func.date_trunc("month", Enrollment.created_at), "YYYY-MM"),
+            month_bucket,
             func.coalesce(func.sum(Enrollment.amount_paid_cents), 0),
         )
         .where(
@@ -81,10 +82,12 @@ async def get_overview(
             Enrollment.status != "refunded",
             Enrollment.created_at >= since,
         )
-        .group_by(func.date_trunc("month", Enrollment.created_at))
-        .order_by(func.date_trunc("month", Enrollment.created_at))
+        .group_by(month_bucket)
+        .order_by(month_bucket)
     )
-    monthly_revenue = [MonthlyRevenuePoint(month=row[0], revenue_cents=row[1]) for row in monthly_result.all()]
+    monthly_revenue = [
+        MonthlyRevenuePoint(month=row[0].strftime("%Y-%m"), revenue_cents=row[1]) for row in monthly_result.all()
+    ]
 
     total_revenue_cents = sum(rev for rev, _ in revenue_by_course.values())
     rated_courses = [c for c in courses if c.review_count > 0]
