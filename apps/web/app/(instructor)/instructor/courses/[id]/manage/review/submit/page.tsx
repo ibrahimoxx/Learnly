@@ -143,8 +143,8 @@ export default function CourseReviewSubmitPage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <Link href={`/instructor/courses/${id}/manage/communications/welcome`}>
-          <Button variant="outline" size="sm">Back: Messages</Button>
+        <Link href={`/instructor/courses/${id}/manage/co-instructors`}>
+          <Button variant="outline" size="sm">Back: Co-Instructors</Button>
         </Link>
         <div className="flex gap-2">
           <Link href={`/instructor/courses/${id}/edit`}>
