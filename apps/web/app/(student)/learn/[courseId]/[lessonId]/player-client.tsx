@@ -11,6 +11,7 @@ import { apiFetch } from "@/lib/api";
 import type { Enrollment, Lesson, LessonProgress, Section, Question, LiveSession, Note } from "@/types";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
 import { CodingExercisePlayer } from "@/components/features/coding/coding-exercise-player";
+import { AssignmentSubmissionPlayer } from "@/components/features/assignments/assignment-submission-player";
 import { LiveRoom } from "@/components/features/live/live-room";
 import DiscussionSection from "@/components/features/courses/discussion-section";
 
@@ -242,6 +243,18 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
               </div>
               <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
             </div>
+          ) : currentLesson.type === "assignment" ? (
+            <div className="flex-1 overflow-y-auto">
+              <div className="flex justify-end px-6 pt-4">
+                <Link
+                  href={`/learn/${enrollment.course_id}/${currentLesson.id}/assignment`}
+                  className="rounded-sm border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/70 hover:border-[var(--color-primary)] hover:text-white transition-colors"
+                >
+                  Open full screen
+                </Link>
+              </div>
+              <AssignmentSubmissionPlayer lessonId={currentLesson.id} token={_serverToken} />
+            </div>
           ) : (
             <div className="flex-1 overflow-y-auto p-8">
               <h2 className="text-xl font-bold text-white">{currentLesson.title}</h2>
@@ -459,6 +472,8 @@ function ContentTab({
                         <HelpCircle className="h-4 w-4 text-white/30" />
                       ) : lesson.type === "coding_exercise" ? (
                         <Code className="h-4 w-4 text-white/30" />
+                      ) : lesson.type === "assignment" ? (
+                        <ClipboardList className="h-4 w-4 text-white/30" />
                       ) : (
                         <FileText className="h-4 w-4 text-white/30" />
                       )}
