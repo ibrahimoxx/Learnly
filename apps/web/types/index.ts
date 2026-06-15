@@ -221,6 +221,9 @@ export interface Review {
   rating: number;
   comment?: string;
   student_name: string;
+  course_title?: string | null;
+  instructor_response?: string | null;
+  instructor_response_at?: string | null;
   created_at: string;
 }
 
@@ -484,4 +487,58 @@ export interface ConversationRead {
   participant: MessageUserBrief;
   last_message: MessageRead;
   unread_count: number;
+}
+
+export interface CourseRevenueRow {
+  course_id: string;
+  title: string;
+  enrollment_count: number;
+  revenue_cents: number;
+  currency: string;
+  rating: number;
+  review_count: number;
+}
+
+export interface MonthlyRevenuePoint {
+  month: string;
+  revenue_cents: number;
+}
+
+export interface PerformanceOverview {
+  total_revenue_cents: number;
+  currency: string;
+  total_students: number;
+  total_courses: number;
+  average_rating: number;
+  monthly_revenue: MonthlyRevenuePoint[];
+  courses: CourseRevenueRow[];
+}
+
+export interface StudentRow {
+  student_id: string;
+  name: string;
+  email: string;
+  course_id: string;
+  course_title: string;
+  enrolled_at: string;
+  progress_percent: number;
+  last_activity_at: string | null;
+}
+
+export interface EngagementRow {
+  course_id: string;
+  title: string;
+  total_students: number;
+  completed_students: number;
+  completion_rate: number;
+  total_watch_minutes: number;
+  average_progress_percent: number;
+}
+
+export interface TrafficRow {
+  course_id: string;
+  title: string;
+  wishlist_count: number;
+  enrollment_count: number;
+  conversion_rate: number;
 }

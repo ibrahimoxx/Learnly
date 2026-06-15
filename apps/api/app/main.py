@@ -19,6 +19,7 @@ from app.api.v1.enrollments import router as enrollments_router
 from app.api.v1.gamification import router as gamification_router
 from app.api.v1.gifts import router as gifts_router
 from app.api.v1.health import router as health_router
+from app.api.v1.instructor_performance import router as instructor_performance_router
 from app.api.v1.learning_paths import router as learning_paths_router
 from app.api.v1.lessons import router as lessons_router
 from app.api.v1.live_sessions import router as live_sessions_router
@@ -97,6 +98,7 @@ app.include_router(account_router, prefix="/api/v1")
 app.include_router(messages_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
 app.include_router(notes_router, prefix="/api/v1")
+app.include_router(instructor_performance_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
