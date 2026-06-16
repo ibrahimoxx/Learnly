@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import { PlayCircle, Award, BookOpen, Download, Flame, Zap, Medal, GraduationCap, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { apiFetch } from "@/lib/api";
@@ -203,6 +202,10 @@ function EnrollmentGrid({ enrollments }: { enrollments: Enrollment[] }) {
 function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
   const { getToken } = useAuth();
   const isCompleted = enrollment.status === "completed";
+  const progress =
+    (enrollment.total_lessons ?? 0) > 0
+      ? Math.round(((enrollment.completed_lessons ?? 0) / (enrollment.total_lessons ?? 1)) * 100)
+      : 0;
 
   async function downloadCertificate() {
     const token = await getToken();
@@ -221,67 +224,103 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
   }
 
   return (
-    <div className="hover-lift premium-card rounded-[--radius-lg]">
-      {/* Placeholder thumbnail */}
-      <div className="thumbnail-fallback relative flex aspect-video items-center justify-center">
-        {isCompleted ? (
-          <Award className="h-12 w-12 text-[--color-star]" />
-        ) : (
-          <PlayCircle className="h-12 w-12 text-white/80" />
-        )}
-        {isCompleted && (
-          <div className="absolute top-2 right-2">
-            <Badge variant="success">Completed</Badge>
-          </div>
-        )}
-      </div>
-
-      <div className="relative p-4">
-        {enrollment.course_title && (
-          <p className="text-sm font-semibold text-[--color-text-primary] mb-1 line-clamp-2">{enrollment.course_title}</p>
-        )}
-        <p className="text-xs text-[--color-text-muted] mb-1">
-          Enrolled {new Date(enrollment.created_at).toLocaleDateString()}
-        </p>
-
-        {!isCompleted && (
-          <div className="mt-2">
-            <div className="flex justify-between text-xs text-[--color-text-muted] mb-1">
-              <span>Progress</span>
-              <span>
-                {enrollment.completed_lessons ?? 0}/{enrollment.total_lessons ?? 0} lessons
+    <div className="group hover-lift premium-card overflow-hidden rounded-[--radius-lg]">
+      {/* Thumbnail */}
+      <Link href={`/courses/${enrollment.course_slug}`} className="block">
+        <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-[--brand-700] via-[--brand-600] to-[--color-primary]">
+          {enrollment.course_image_url ? (
+            <Image
+              src={enrollment.course_image_url}
+              alt={enrollment.course_title ?? "Course"}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center">
+              <span className="rounded-[--radius-md] border border-white/20 bg-white/10 px-4 py-2 text-4xl font-black tracking-tight text-white backdrop-blur">
+                {(enrollment.course_title ?? "??").slice(0, 2).toUpperCase()}
               </span>
             </div>
-            <Progress
-              value={
-                (enrollment.total_lessons ?? 0) > 0
-                  ? Math.round(((enrollment.completed_lessons ?? 0) / (enrollment.total_lessons ?? 1)) * 100)
-                  : 0
-              }
-            />
+          )}
+
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+          {/* Status badge */}
+          {isCompleted ? (
+            <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-[--color-success] px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-lg">
+              <Award className="h-2.5 w-2.5" />
+              Completed
+            </div>
+          ) : progress > 0 ? (
+            <div className="absolute right-2 top-2 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
+              {progress}% done
+            </div>
+          ) : null}
+
+          {/* Play button overlay on hover */}
+          {!isCompleted && (
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-xl backdrop-blur">
+                <PlayCircle className="h-7 w-7 text-[--color-primary]" />
+              </div>
+            </div>
+          )}
+        </div>
+      </Link>
+
+      {/* Card body */}
+      <div className="p-4">
+        <Link href={`/courses/${enrollment.course_slug}`} className="block group/title">
+          <h3 className="line-clamp-2 text-sm font-bold leading-snug text-[--color-text-primary] transition-colors group-hover/title:text-[--color-primary]">
+            {enrollment.course_title ?? "Course"}
+          </h3>
+        </Link>
+
+        <p className="mt-1 text-[11px] text-[--color-text-muted]">
+          Since {new Date(enrollment.created_at).toLocaleDateString()}
+        </p>
+
+        {!isCompleted && (enrollment.total_lessons ?? 0) > 0 && (
+          <div className="mt-3">
+            <div className="mb-1.5 flex items-center justify-between text-[11px] text-[--color-text-muted]">
+              <span>{enrollment.completed_lessons ?? 0} / {enrollment.total_lessons ?? 0} lessons</span>
+              <span className="font-bold text-[--color-primary]">{progress}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-[--color-border]">
+              <div
+                className="h-full rounded-full bg-[image:var(--gradient-brand)] transition-all duration-700"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
           </div>
         )}
 
         {isCompleted && enrollment.completed_at && (
-          <p className="mt-2 text-xs text-[--color-success]">
+          <p className="mt-2 flex items-center gap-1 text-[11px] font-semibold text-[--color-success]">
+            <Award className="h-3 w-3" />
             Completed {new Date(enrollment.completed_at).toLocaleDateString()}
           </p>
         )}
 
-        <Link
-          href={`/courses/${enrollment.course_slug}`}
-          className="mt-3 block w-full rounded-[--radius-sm] border border-[--color-primary] py-2 text-center text-xs font-semibold text-[--color-primary] hover:bg-[--color-primary] hover:text-white transition-colors"
-        >
-          View course
-        </Link>
-        {isCompleted && (
-          <button
-            onClick={downloadCertificate}
-            className="mt-2 flex w-full items-center justify-center gap-1 rounded-[--radius-sm] border border-[--color-border] py-2 text-xs font-semibold text-[--color-text-secondary] hover:border-[--color-star] hover:text-[--color-star] transition-colors"
+        <div className="mt-3 flex items-center gap-2">
+          <Link
+            href={`/courses/${enrollment.course_slug}`}
+            className="flex flex-1 items-center justify-center gap-1 rounded-[--radius-sm] bg-[image:var(--gradient-brand)] px-3 py-2 text-xs font-extrabold text-white shadow-[var(--shadow-brand)] transition-all hover:-translate-y-0.5"
           >
-            <Download className="h-3 w-3" /> Download Certificate
-          </button>
-        )}
+            {isCompleted ? "Review course" : progress > 0 ? "Continue" : "Start learning"}
+            <ChevronRight className="h-3 w-3" />
+          </Link>
+          {isCompleted && (
+            <button
+              onClick={downloadCertificate}
+              title="Download certificate"
+              className="flex h-8 w-8 items-center justify-center rounded-[--radius-sm] border border-[--color-border] text-[--color-text-muted] transition-all hover:border-[--color-star] hover:text-[--color-star]"
+            >
+              <Download className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
