@@ -28,11 +28,16 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
 
   return (
     <div
-      className={`group hover-lift premium-card rounded-[--radius-lg] transition-all duration-300 ${
+      className="group hover-lift premium-card rounded-[--radius-lg] transition-all duration-300"
+      style={
         wishlisted
-          ? "ring-2 ring-red-500/70 shadow-[0_0_0_4px_rgba(239,68,68,0.12),0_8px_32px_rgba(239,68,68,0.18)]"
-          : ""
-      }`}
+          ? {
+              outline: "2px solid rgba(239,68,68,0.8)",
+              outlineOffset: "0px",
+              boxShadow: "0 0 0 4px rgba(239,68,68,0.12), 0 8px 32px rgba(239,68,68,0.22)",
+            }
+          : undefined
+      }
     >
       <Link href={`/courses/${course.slug}`} className="block">
         {/* Thumbnail */}
@@ -46,7 +51,7 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="rounded-[--radius-lg] border border-white/18 bg-white/10 px-5 py-3 font-heading text-5xl font-black tracking-tight text-white shadow-[var(--shadow-lg)] backdrop-blur">
+              <span className="rounded-[--radius-lg] border border-white/18 bg-white/10 px-5 py-3 font-heading text-5xl font-black tracking-tight text-white shadow-(--shadow-lg) backdrop-blur">
                 {course.title.slice(0, 2).toUpperCase()}
               </span>
             </div>
