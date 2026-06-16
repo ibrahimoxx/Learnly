@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Activity, BookOpen, Settings } from "lucide-react";
+import { LayoutDashboard, BarChart2, BookOpen, Wrench } from "lucide-react";
 
 interface Props {
   children: React.ReactNode;
@@ -8,9 +8,9 @@ interface Props {
 
 const NAV = [
   { href: "", label: "Overview", icon: LayoutDashboard },
-  { href: "/activity", label: "Activity", icon: Activity },
+  { href: "/activity", label: "Activity", icon: BarChart2 },
   { href: "/paths", label: "Learning Paths", icon: BookOpen },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/settings", label: "Settings", icon: Wrench },
 ];
 
 export default async function OrgAdminLayout({ children, params }: Props) {

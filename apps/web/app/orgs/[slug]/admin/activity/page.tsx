@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { Activity, Users, Clock, Trophy } from "lucide-react";
+import { BarChart2, Users, Clock, Award } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 
@@ -123,7 +123,7 @@ export default function OrgActivityPage() {
           </div>
         ) : !data || data.members.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Activity className="mb-3 h-10 w-10 text-[--color-text-muted]" />
+            <BarChart2 className="mb-3 h-10 w-10 text-[--color-text-muted]" />
             <p className="text-sm font-medium text-[--color-text-secondary]">No activity yet</p>
             <p className="mt-1 text-xs text-[--color-text-muted]">
               Activity will appear once members enroll in org courses.
