@@ -15,6 +15,7 @@ from app.api.v1.admin_orgs import router as admin_orgs_router
 from app.api.v1.admin_payouts import router as admin_payouts_router
 from app.api.v1.admin_revenue import router as admin_revenue_router
 from app.api.v1.admin_support import router as admin_support_router
+from app.api.v1.org_admin import router as org_admin_router
 from app.api.v1.affiliate import router as affiliate_router
 from app.api.v1.announcements import router as announcements_router
 from app.api.v1.announcements_public import router as announcements_public_router
@@ -127,6 +128,7 @@ app.include_router(admin_announcements_router, prefix="/api/v1")
 app.include_router(announcements_public_router, prefix="/api/v1")
 app.include_router(support_router, prefix="/api/v1")
 app.include_router(admin_support_router, prefix="/api/v1")
+app.include_router(org_admin_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
