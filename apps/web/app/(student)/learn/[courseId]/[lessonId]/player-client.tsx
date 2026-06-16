@@ -9,7 +9,7 @@ import {
   CheckCircle2, Circle, PlayCircle, FileText, ChevronLeft, ChevronRight,
   MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle,
   MessagesSquare, Lock, Code, StickyNote, Pencil, Trash2, ClipboardList,
-  ArrowLeft, SkipForward, Radio,
+  ArrowLeft, SkipForward, Radio, PanelLeftClose, PanelLeftOpen, Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
@@ -40,6 +40,36 @@ interface ProgressSSEEvent {
   watched_seconds: number;
   last_position_seconds: number;
   completed_at: string | null;
+}
+
+/* Shared palette */
+const C = {
+  ink: "#08080d",
+  panel: "rgba(18,16,28,0.72)",
+  panelSolid: "#13111d",
+  line: "rgba(255,255,255,0.07)",
+  brand: "#8b5cf6",
+  brandSoft: "rgba(139,92,246,0.16)",
+  brandGlow: "rgba(139,92,246,0.45)",
+  txt: "#e7e5ef",
+  txt2: "rgba(231,229,239,0.62)",
+  txt3: "rgba(231,229,239,0.34)",
+};
+
+const APP_BG =
+  "radial-gradient(900px circle at 12% -5%, rgba(139,92,246,0.16), transparent 55%)," +
+  "radial-gradient(700px circle at 95% 105%, rgba(56,189,248,0.08), transparent 50%)," +
+  C.ink;
+
+function fmtDuration(sec?: number | null): string | null {
+  if (!sec || sec <= 0) return null;
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  if (m >= 60) {
+    const h = Math.floor(m / 60);
+    return `${h}h ${m % 60}m`;
+  }
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, token: _serverToken, initialProgress }: Props) {
@@ -155,91 +185,109 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
     { id: "forums", label: "Forums", icon: <MessagesSquare className="h-3.5 w-3.5" /> },
   ];
 
-  return (
-    <div className="flex h-screen flex-col overflow-hidden" style={{ background: "#0a0a0f", color: "#e2e8f0" }}>
+  const lessonTypeLabel =
+    currentLesson.type === "coding_exercise" ? "Coding Exercise"
+    : currentLesson.type === "quiz" ? "Quiz"
+    : currentLesson.type === "assignment" ? "Assignment"
+    : currentLesson.type === "article" ? "Article"
+    : "Video";
 
-      {/* ── Top bar ── */}
+  return (
+    <div className="flex h-screen flex-col overflow-hidden" style={{ background: APP_BG, color: C.txt }}>
+
+      {/* ════ Top bar ════ */}
       <header
-        className="flex h-13 shrink-0 items-center gap-3 px-4 shadow-lg"
-        style={{ background: "#111118", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        className="relative flex h-14 shrink-0 items-center gap-3 px-4"
+        style={{ background: "rgba(12,11,18,0.8)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.line}` }}
       >
         <Link
           href="/dashboard"
-          className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors"
-          style={{ color: "rgba(255,255,255,0.45)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.45)")}
+          className="group flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
+          style={{ color: C.txt2, background: "rgba(255,255,255,0.04)" }}
         >
-          <ArrowLeft className="h-3.5 w-3.5" />
+          <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           My Learning
         </Link>
 
-        <span style={{ color: "rgba(255,255,255,0.15)" }}>/</span>
-
-        <span className="flex-1 truncate text-xs font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>
-          {currentLesson.title}
-        </span>
-
-        {/* Progress pill */}
-        <div className="hidden items-center gap-2.5 lg:flex">
-          <div className="h-1.5 w-28 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.1)" }}>
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${progressPct}%`, background: "var(--color-primary)" }}
-            />
-          </div>
-          <span className="text-[11px] font-semibold" style={{ color: "rgba(255,255,255,0.4)" }}>
-            {completedCount}/{totalLessons}
-          </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-bold tracking-tight" style={{ color: C.txt }}>
+            {currentLesson.title}
+          </p>
+          <p className="truncate text-[11px]" style={{ color: C.txt3 }}>
+            {enrollment.course_title ?? "Course"} · {lessonTypeLabel}
+          </p>
         </div>
 
         {liveSession && (
           <button
             onClick={() => setShowLiveRoom(true)}
-            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white transition-all"
-            style={{ background: "#dc2626", boxShadow: "0 0 12px rgba(220,38,38,0.4)" }}
+            className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold text-white transition-all hover:scale-105"
+            style={{ background: "linear-gradient(135deg,#ef4444,#dc2626)", boxShadow: "0 0 16px rgba(239,68,68,0.5)" }}
           >
             <Radio className="h-3 w-3 animate-pulse" />
-            LIVE
+            LIVE NOW
           </button>
         )}
       </header>
 
-      {/* ── Body ── */}
+      {/* ════ Body ════ */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* ── LEFT sidebar ── */}
+        {/* ════ LEFT sidebar ════ */}
         <aside
-          className="hidden shrink-0 flex-col overflow-hidden lg:flex transition-all duration-300"
+          className="hidden shrink-0 flex-col overflow-hidden lg:flex transition-[width] duration-300 ease-out"
           style={{
-            width: sidebarCollapsed ? "0px" : "300px",
-            background: "#111118",
-            borderRight: "1px solid rgba(255,255,255,0.06)",
+            width: sidebarCollapsed ? "0px" : "340px",
+            background: C.panel,
+            backdropFilter: "blur(24px)",
+            borderRight: `1px solid ${C.line}`,
           }}
         >
-          {/* Tab bar */}
-          <div
-            className="flex shrink-0 text-[11px]"
-            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-          >
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className="flex flex-1 flex-col items-center gap-1 py-2.5 font-medium transition-colors"
-                style={{
-                  color: activeTab === tab.id ? "white" : "rgba(255,255,255,0.35)",
-                  borderBottom: activeTab === tab.id ? "2px solid var(--color-primary)" : "2px solid transparent",
-                }}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+          {/* Progress hero */}
+          <div className="shrink-0 px-5 pt-5 pb-4" style={{ borderBottom: `1px solid ${C.line}` }}>
+            <div className="flex items-center gap-4">
+              <ProgressRing pct={progressPct} />
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.txt3 }}>
+                  Your progress
+                </p>
+                <p className="mt-0.5 text-lg font-black tracking-tight" style={{ color: C.txt }}>
+                  {completedCount}
+                  <span className="text-sm font-semibold" style={{ color: C.txt3 }}> / {totalLessons} lessons</span>
+                </p>
+                <p className="text-[11px] font-semibold" style={{ color: C.brand }}>
+                  {progressPct === 100 ? "Course complete 🎉" : `${progressPct}% done — keep going`}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Segmented tab control */}
+          <div className="shrink-0 px-3 pt-3">
+            <div className="flex gap-1 rounded-2xl p-1" style={{ background: "rgba(255,255,255,0.04)" }}>
+              {TABS.map((tab) => {
+                const on = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className="flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold transition-all"
+                    style={{
+                      color: on ? "#fff" : C.txt3,
+                      background: on ? "linear-gradient(135deg,rgba(139,92,246,0.9),rgba(124,58,237,0.7))" : "transparent",
+                      boxShadow: on ? "0 4px 12px rgba(139,92,246,0.35)" : "none",
+                    }}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
             {activeTab === "content" ? (
               <ContentTab
                 sectionsWithLessons={sectionsWithLessons}
@@ -257,55 +305,73 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           </div>
         </aside>
 
-        {/* ── Main content area ── */}
+        {/* ════ Main area ════ */}
         <div className="flex flex-1 flex-col overflow-hidden">
 
-          {/* Sidebar toggle + lesson type badge */}
-          <div
-            className="hidden shrink-0 items-center gap-3 px-4 py-2 lg:flex"
-            style={{ background: "#0d0d14", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-          >
+          {/* Toolbar */}
+          <div className="hidden shrink-0 items-center gap-3 px-5 py-2.5 lg:flex">
             <button
               onClick={() => setSidebarCollapsed((v) => !v)}
-              className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium transition-colors"
-              style={{ color: "rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.04)" }}
+              className="flex h-8 w-8 items-center justify-center rounded-xl transition-all hover:scale-105"
+              style={{ background: "rgba(255,255,255,0.05)", color: C.txt2 }}
+              aria-label="Toggle sidebar"
             >
-              {sidebarCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
-              {sidebarCollapsed ? "Show" : "Hide"} sidebar
+              {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
             </button>
 
             <span
-              className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
-              style={{
-                background: "rgba(124,58,237,0.15)",
-                color: "rgba(167,139,250,0.9)",
-                border: "1px solid rgba(124,58,237,0.25)",
-              }}
+              className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+              style={{ background: C.brandSoft, color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}
             >
-              {currentLesson.type === "coding_exercise" ? "Coding" : currentLesson.type}
+              {lessonTypeLabel}
             </span>
 
-            {prevLesson && (
-              <button
-                onClick={() => navigateTo(prevLesson.id)}
-                className="ml-auto flex items-center gap-1 text-[11px] font-medium transition-colors"
-                style={{ color: "rgba(255,255,255,0.3)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.7)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-                Previous
-              </button>
+            {fmtDuration(currentLesson.duration_seconds) && (
+              <span className="flex items-center gap-1 text-[11px] font-medium" style={{ color: C.txt3 }}>
+                <Clock className="h-3 w-3" />
+                {fmtDuration(currentLesson.duration_seconds)}
+              </span>
             )}
+
+            <div className="ml-auto flex items-center gap-2">
+              {prevLesson && (
+                <button
+                  onClick={() => navigateTo(prevLesson.id)}
+                  className="flex items-center gap-1 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.03]"
+                  style={{ background: "rgba(255,255,255,0.05)", color: C.txt2 }}
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Prev
+                </button>
+              )}
+              {nextLesson && (
+                <button
+                  onClick={() => navigateTo(nextLesson.id)}
+                  className="flex items-center gap-1 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.03]"
+                  style={{ background: "rgba(255,255,255,0.05)", color: C.txt2 }}
+                >
+                  Next
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* ── Video / lesson content ── */}
-          <div className="flex-1 overflow-hidden flex flex-col">
+          {/* ════ Content surface ════ */}
+          <div className="flex-1 overflow-hidden px-3 pb-3 lg:px-5 lg:pb-4">
             {currentLesson.type === "video" ? (
-              <div className="flex-1 bg-black flex items-center justify-center">
-                {currentLesson.video_url ? (
-                  <div className="relative w-full h-full">
-                    {currentLesson.video_url.includes("youtube.com/embed") ? (
+              <div className="relative h-full w-full">
+                {/* ambient glow */}
+                <div
+                  className="pointer-events-none absolute -inset-2 rounded-3xl opacity-60 blur-2xl"
+                  style={{ background: "radial-gradient(circle at 50% 30%, rgba(139,92,246,0.25), transparent 70%)" }}
+                />
+                <div
+                  className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl"
+                  style={{ background: "#000", border: `1px solid ${C.line}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)" }}
+                >
+                  {currentLesson.video_url ? (
+                    currentLesson.video_url.includes("youtube.com/embed") || currentLesson.video_url.includes("youtu") ? (
                       <iframe
                         key={currentLesson.id}
                         src={currentLesson.video_url}
@@ -319,129 +385,106 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                         src={currentLesson.video_url}
                         controls
                         className="h-full w-full"
-                        onTimeUpdate={(e) => {
-                          const v = e.currentTarget;
-                          handleTimeUpdate(v.currentTime, v.duration);
-                        }}
+                        onTimeUpdate={(e) => { const v = e.currentTarget; handleTimeUpdate(v.currentTime, v.duration); }}
                       />
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-4 text-center">
-                    <div
-                      className="flex h-20 w-20 items-center justify-center rounded-full"
-                      style={{ background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.3)" }}
-                    >
-                      <PlayCircle className="h-10 w-10" style={{ color: "rgba(167,139,250,0.7)" }} />
-                    </div>
-                    <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>
-                      Video not yet available
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : currentLesson.type === "quiz" ? (
-              <div className="flex-1 overflow-y-auto" style={{ background: "#0d0d14" }}>
-                <div className="flex items-center justify-between px-6 pt-5 pb-2">
-                  <h2 className="text-base font-bold" style={{ color: "#e2e8f0" }}>{currentLesson.title}</h2>
-                  <Link
-                    href={`/learn/${enrollment.course_id}/${currentLesson.id}/quiz`}
-                    className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
-                    style={{ background: "rgba(124,58,237,0.15)", color: "rgba(167,139,250,0.9)", border: "1px solid rgba(124,58,237,0.25)" }}
-                  >
-                    Full screen
-                  </Link>
-                </div>
-                <QuizPlayer lessonId={currentLesson.id} token={_serverToken} />
-              </div>
-            ) : currentLesson.type === "coding_exercise" ? (
-              <div className="flex-1 overflow-y-auto" style={{ background: "#0d0d14" }}>
-                <div className="flex items-center justify-between px-6 pt-5 pb-2">
-                  <h2 className="text-base font-bold" style={{ color: "#e2e8f0" }}>{currentLesson.title}</h2>
-                  <Link
-                    href={`/learn/${enrollment.course_id}/${currentLesson.id}/coding-exercise`}
-                    className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
-                    style={{ background: "rgba(124,58,237,0.15)", color: "rgba(167,139,250,0.9)", border: "1px solid rgba(124,58,237,0.25)" }}
-                  >
-                    Full screen
-                  </Link>
-                </div>
-                <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
-              </div>
-            ) : currentLesson.type === "assignment" ? (
-              <div className="flex-1 overflow-y-auto" style={{ background: "#0d0d14" }}>
-                <div className="flex items-center justify-between px-6 pt-5 pb-2">
-                  <h2 className="text-base font-bold" style={{ color: "#e2e8f0" }}>{currentLesson.title}</h2>
-                  <Link
-                    href={`/learn/${enrollment.course_id}/${currentLesson.id}/assignment`}
-                    className="rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
-                    style={{ background: "rgba(124,58,237,0.15)", color: "rgba(167,139,250,0.9)", border: "1px solid rgba(124,58,237,0.25)" }}
-                  >
-                    Full screen
-                  </Link>
-                </div>
-                <AssignmentSubmissionPlayer lessonId={currentLesson.id} token={_serverToken} />
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto px-8 py-8" style={{ background: "#0d0d14" }}>
-                <div className="mx-auto max-w-2xl">
-                  <span
-                    className="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
-                    style={{ background: "rgba(124,58,237,0.15)", color: "rgba(167,139,250,0.8)", border: "1px solid rgba(124,58,237,0.2)" }}
-                  >
-                    Article
-                  </span>
-                  <h2 className="mt-4 text-2xl font-black tracking-tight" style={{ color: "#f1f5f9" }}>
-                    {currentLesson.title}
-                  </h2>
-                  <div className="mt-1 h-px" style={{ background: "rgba(255,255,255,0.07)" }} />
-                  {currentLesson.content ? (
-                    <div className="mt-6 text-sm leading-7 whitespace-pre-wrap" style={{ color: "rgba(226,232,240,0.75)" }}>
-                      {currentLesson.content}
-                    </div>
+                    )
                   ) : (
-                    <p className="mt-6 text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>Content coming soon.</p>
+                    <div className="flex flex-col items-center gap-4 text-center">
+                      <div
+                        className="flex h-20 w-20 items-center justify-center rounded-2xl"
+                        style={{ background: C.brandSoft, border: "1px solid rgba(139,92,246,0.3)", boxShadow: `0 0 30px ${C.brandGlow}` }}
+                      >
+                        <PlayCircle className="h-9 w-9" style={{ color: "#c4b5fd" }} />
+                      </div>
+                      <p className="text-sm font-semibold" style={{ color: C.txt3 }}>Video not yet available</p>
+                    </div>
                   )}
                 </div>
+              </div>
+            ) : (
+              <div
+                className="h-full w-full overflow-y-auto rounded-2xl"
+                style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${C.line}` }}
+              >
+                {currentLesson.type === "quiz" ? (
+                  <LessonSurface title={currentLesson.title} href={`/learn/${enrollment.course_id}/${currentLesson.id}/quiz`}>
+                    <QuizPlayer lessonId={currentLesson.id} token={_serverToken} />
+                  </LessonSurface>
+                ) : currentLesson.type === "coding_exercise" ? (
+                  <LessonSurface title={currentLesson.title} href={`/learn/${enrollment.course_id}/${currentLesson.id}/coding-exercise`}>
+                    <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
+                  </LessonSurface>
+                ) : currentLesson.type === "assignment" ? (
+                  <LessonSurface title={currentLesson.title} href={`/learn/${enrollment.course_id}/${currentLesson.id}/assignment`}>
+                    <AssignmentSubmissionPlayer lessonId={currentLesson.id} token={_serverToken} />
+                  </LessonSurface>
+                ) : (
+                  <article className="mx-auto max-w-2xl px-6 py-8 lg:px-10 lg:py-10">
+                    <span
+                      className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+                      style={{ background: C.brandSoft, color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.25)" }}
+                    >
+                      Article
+                    </span>
+                    <h1 className="mt-4 text-2xl font-black tracking-tight lg:text-3xl" style={{ color: "#f8fafc" }}>
+                      {currentLesson.title}
+                    </h1>
+                    <div className="mt-5 h-px" style={{ background: C.line }} />
+                    {currentLesson.content ? (
+                      <div className="mt-6 text-[15px] leading-8 whitespace-pre-wrap" style={{ color: C.txt2 }}>
+                        {currentLesson.content}
+                      </div>
+                    ) : (
+                      <p className="mt-6 text-sm" style={{ color: C.txt3 }}>Content coming soon.</p>
+                    )}
+                  </article>
+                )}
               </div>
             )}
           </div>
 
-          {/* ── Next lesson bar ── */}
+          {/* ════ Next lesson bar ════ */}
           {nextLesson && (
-            <div
-              className="shrink-0 flex items-center gap-4 px-5 py-3"
-              style={{ background: "#111118", borderTop: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <SkipForward className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-medium uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.3)" }}>Up next</p>
-                <p className="truncate text-xs font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>{nextLesson.title}</p>
-              </div>
-              <button
-                onClick={() => navigateTo(nextLesson.id)}
-                className="flex shrink-0 items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold text-white transition-all hover:-translate-y-0.5"
-                style={{ background: "var(--color-primary)", boxShadow: "0 4px 14px rgba(124,58,237,0.4)" }}
+            <div className="hidden shrink-0 items-center gap-4 px-5 pb-4 lg:flex">
+              <div
+                className="flex w-full items-center gap-4 rounded-2xl px-4 py-3"
+                style={{ background: C.panel, border: `1px solid ${C.line}`, backdropFilter: "blur(20px)" }}
               >
-                Continue
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                  style={{ background: C.brandSoft, color: "#c4b5fd" }}
+                >
+                  <SkipForward className="h-4 w-4" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: C.txt3 }}>Up next</p>
+                  <p className="truncate text-sm font-semibold" style={{ color: C.txt }}>{nextLesson.title}</p>
+                </div>
+                <button
+                  onClick={() => navigateTo(nextLesson.id)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold text-white transition-all hover:-translate-y-0.5"
+                  style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", boxShadow: `0 8px 22px ${C.brandGlow}` }}
+                >
+                  Continue
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* ── Mobile bottom nav ── */}
+      {/* ════ Mobile bottom nav ════ */}
       <div
         className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex"
-        style={{ background: "#111118", borderTop: "1px solid rgba(255,255,255,0.08)" }}
+        style={{ background: "rgba(12,11,18,0.92)", backdropFilter: "blur(20px)", borderTop: `1px solid ${C.line}` }}
       >
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => { setMobileTab(tab.id); setMobileDrawerOpen(true); }}
-            className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium transition-colors"
-            style={{ color: "rgba(255,255,255,0.4)" }}
+            className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-semibold"
+            style={{ color: C.txt3 }}
           >
             {tab.icon}
             {tab.label}
@@ -449,42 +492,33 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         ))}
       </div>
 
-      {/* ── Mobile drawer ── */}
+      {/* ════ Mobile drawer ════ */}
       {mobileDrawerOpen && (
         <div className="lg:hidden fixed inset-0 z-40 flex flex-col justify-end">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setMobileDrawerOpen(false)} />
           <div
-            className="relative flex flex-col overflow-hidden rounded-t-2xl"
-            style={{ height: "75dvh", background: "#111118", border: "1px solid rgba(255,255,255,0.08)" }}
+            className="relative flex flex-col overflow-hidden rounded-t-3xl"
+            style={{ height: "78dvh", background: C.panelSolid, border: `1px solid ${C.line}` }}
           >
-            <div
-              className="flex shrink-0 items-center justify-between px-4 py-3"
-              style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <div className="flex gap-4">
-                {TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setMobileTab(tab.id)}
-                    className="text-xs font-medium transition-colors pb-0.5"
-                    style={{
-                      color: mobileTab === tab.id ? "white" : "rgba(255,255,255,0.35)",
-                      borderBottom: mobileTab === tab.id ? "2px solid var(--color-primary)" : "2px solid transparent",
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+            <div className="flex shrink-0 items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
+              <div className="flex gap-1 rounded-2xl p-1" style={{ background: "rgba(255,255,255,0.04)" }}>
+                {TABS.map((tab) => {
+                  const on = mobileTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setMobileTab(tab.id)}
+                      className="rounded-xl px-3 py-1.5 text-xs font-bold transition-all"
+                      style={{ color: on ? "#fff" : C.txt3, background: on ? "linear-gradient(135deg,#8b5cf6,#7c3aed)" : "transparent" }}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
               </div>
-              <button
-                onClick={() => setMobileDrawerOpen(false)}
-                className="text-lg leading-none"
-                style={{ color: "rgba(255,255,255,0.4)" }}
-              >
-                ✕
-              </button>
+              <button onClick={() => setMobileDrawerOpen(false)} className="text-lg leading-none" style={{ color: C.txt3 }}>✕</button>
             </div>
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto px-3 py-3">
               {mobileTab === "content" ? (
                 <ContentTab
                   sectionsWithLessons={sectionsWithLessons}
@@ -511,7 +545,57 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   );
 }
 
-/* ─────────────────── ContentTab ─────────────────── */
+/* ═══════════ Progress Ring ═══════════ */
+
+function ProgressRing({ pct }: { pct: number }) {
+  const r = 22;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (pct / 100) * circ;
+  return (
+    <div className="relative shrink-0">
+      <svg width="56" height="56" className="-rotate-90">
+        <circle cx="28" cy="28" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+        <circle
+          cx="28" cy="28" r={r} fill="none"
+          stroke="url(#ringGrad)" strokeWidth="4" strokeLinecap="round"
+          strokeDasharray={circ} strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.7s ease" }}
+        />
+        <defs>
+          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#7c3aed" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: "#e7e5ef" }}>
+        {pct}%
+      </span>
+    </div>
+  );
+}
+
+/* ═══════════ Lesson surface wrapper (quiz/coding/assignment) ═══════════ */
+
+function LessonSurface({ title, href, children }: { title: string; href: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between px-6 pt-6 pb-2">
+        <h2 className="text-lg font-black tracking-tight" style={{ color: "#f8fafc" }}>{title}</h2>
+        <Link
+          href={href}
+          className="rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all hover:scale-[1.03]"
+          style={{ background: C.brandSoft, color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}
+        >
+          Full screen
+        </Link>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+/* ═══════════ ContentTab ═══════════ */
 
 function ContentTab({
   sectionsWithLessons,
@@ -527,128 +611,121 @@ function ContentTab({
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   function toggleSection(id: string) {
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+    setCollapsed((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   }
 
   const typeIcon: Record<string, React.ReactNode> = {
-    video: <PlayCircle className="h-3.5 w-3.5" />,
-    article: <FileText className="h-3.5 w-3.5" />,
-    quiz: <HelpCircle className="h-3.5 w-3.5" />,
-    coding_exercise: <Code className="h-3.5 w-3.5" />,
-    assignment: <ClipboardList className="h-3.5 w-3.5" />,
+    video: <PlayCircle className="h-4 w-4" />,
+    article: <FileText className="h-4 w-4" />,
+    quiz: <HelpCircle className="h-4 w-4" />,
+    coding_exercise: <Code className="h-4 w-4" />,
+    assignment: <ClipboardList className="h-4 w-4" />,
   };
 
   return (
-    <div className="pb-4">
-      {sectionsWithLessons.map((section) => {
+    <div className="space-y-3">
+      {sectionsWithLessons.map((section, sIdx) => {
         const isOpen = !collapsed.has(section.id);
-        const sectionCompleted = section.lessons.filter((l) => completedIds.has(l.id)).length;
+        const done = section.lessons.filter((l) => completedIds.has(l.id)).length;
+        const total = section.lessons.length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
         return (
-          <div key={section.id}>
+          <div
+            key={section.id}
+            className="overflow-hidden rounded-2xl"
+            style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${C.line}` }}
+          >
             {/* Section header */}
             <button
               onClick={() => toggleSection(section.id)}
-              className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors"
-              style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.06)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.03)")}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors"
+              style={{ background: "rgba(255,255,255,0.02)" }}
             >
+              <span
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black"
+                style={{ background: C.brandSoft, color: "#c4b5fd" }}
+              >
+                {sIdx + 1}
+              </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold leading-snug" style={{ color: "#e2e8f0" }}>
-                  {section.title}
-                </p>
-                <p className="mt-0.5 text-[10px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-                  {sectionCompleted}/{section.lessons.length} completed
-                </p>
+                <p className="text-[12px] font-bold leading-snug" style={{ color: C.txt }}>{section.title}</p>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg,#a78bfa,#7c3aed)", transition: "width 0.6s" }} />
+                  </div>
+                  <span className="text-[10px] font-semibold tabular-nums" style={{ color: C.txt3 }}>{done}/{total}</span>
+                </div>
               </div>
               {isOpen
-                ? <ChevronUp className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} />
-                : <ChevronDown className="h-3.5 w-3.5 shrink-0" style={{ color: "rgba(255,255,255,0.3)" }} />
-              }
+                ? <ChevronUp className="h-4 w-4 shrink-0" style={{ color: C.txt3 }} />
+                : <ChevronDown className="h-4 w-4 shrink-0" style={{ color: C.txt3 }} />}
             </button>
 
             {/* Lessons */}
             {isOpen && (
-              <ul>
+              <ul className="space-y-0.5 p-1.5">
                 {section.lessons.map((lesson) => {
                   const isCurrent = lesson.id === currentLessonId;
                   const isDone = completedIds.has(lesson.id);
                   const isLocked = !!(lesson.unlock_at && new Date() < new Date(lesson.unlock_at));
+                  const dur = fmtDuration(lesson.duration_seconds);
 
                   return (
                     <li key={lesson.id}>
                       <button
                         onClick={() => !isLocked && onNavigate(lesson.id)}
                         disabled={isLocked}
-                        className="flex w-full items-start gap-3 px-4 py-2.5 text-left text-xs transition-all"
+                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all"
                         style={{
-                          background: isCurrent
-                            ? "rgba(124,58,237,0.18)"
-                            : "transparent",
-                          borderLeft: isCurrent
-                            ? "2px solid var(--color-primary)"
-                            : "2px solid transparent",
-                          opacity: isLocked ? 0.4 : 1,
+                          background: isCurrent ? "linear-gradient(135deg,rgba(139,92,246,0.28),rgba(124,58,237,0.1))" : "transparent",
+                          boxShadow: isCurrent ? "inset 0 0 0 1px rgba(139,92,246,0.4)" : "none",
+                          opacity: isLocked ? 0.45 : 1,
                           cursor: isLocked ? "not-allowed" : "pointer",
                         }}
-                        onMouseEnter={(e) => {
-                          if (!isCurrent && !isLocked) e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!isCurrent) e.currentTarget.style.background = "transparent";
-                        }}
+                        onMouseEnter={(e) => { if (!isCurrent && !isLocked) e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+                        onMouseLeave={(e) => { if (!isCurrent) e.currentTarget.style.background = "transparent"; }}
                       >
-                        {/* Icon */}
+                        {/* Icon chip */}
                         <span
-                          className="mt-0.5 shrink-0"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
                           style={{
-                            color: isLocked
-                              ? "rgba(255,255,255,0.2)"
-                              : isDone
-                                ? "#22c55e"
-                                : isCurrent
-                                  ? "rgb(167,139,250)"
-                                  : "rgba(255,255,255,0.3)",
+                            background: isDone ? "rgba(34,197,94,0.15)" : isCurrent ? "rgba(139,92,246,0.25)" : "rgba(255,255,255,0.05)",
+                            color: isLocked ? C.txt3 : isDone ? "#4ade80" : isCurrent ? "#c4b5fd" : C.txt3,
                           }}
                         >
-                          {isLocked ? (
-                            <Lock className="h-3.5 w-3.5" />
-                          ) : isDone ? (
-                            <CheckCircle2 className="h-3.5 w-3.5" />
-                          ) : isCurrent ? (
-                            <PlayCircle className="h-3.5 w-3.5" />
-                          ) : (
-                            (typeIcon[lesson.type] ?? <Circle className="h-3.5 w-3.5" />)
-                          )}
+                          {isLocked ? <Lock className="h-3.5 w-3.5" />
+                            : isDone ? <CheckCircle2 className="h-4 w-4" />
+                            : isCurrent ? <PlayCircle className="h-4 w-4" />
+                            : (typeIcon[lesson.type] ?? <Circle className="h-4 w-4" />)}
                         </span>
 
                         {/* Text */}
-                        <span className="flex flex-col gap-0.5">
+                        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                           <span
-                            className="leading-snug text-[11px]"
+                            className="truncate text-[12px] leading-snug"
                             style={{
-                              color: isCurrent
-                                ? "#f8fafc"
-                                : isDone
-                                  ? "rgba(255,255,255,0.5)"
-                                  : "rgba(255,255,255,0.65)",
-                              fontWeight: isCurrent ? 600 : 400,
-                              textDecoration: isDone && !isCurrent ? "line-through" : "none",
+                              color: isCurrent ? "#f8fafc" : isDone ? C.txt2 : C.txt2,
+                              fontWeight: isCurrent ? 700 : 500,
                             }}
                           >
                             {lesson.title}
                           </span>
-                          {isLocked && lesson.unlock_at && (
-                            <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>
-                              Unlocks {new Date(lesson.unlock_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                            </span>
-                          )}
+                          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: C.txt3 }}>
+                            {isLocked && lesson.unlock_at
+                              ? `Unlocks ${new Date(lesson.unlock_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+                              : dur
+                                ? <><Clock className="h-2.5 w-2.5" />{dur}</>
+                                : lesson.type === "quiz" ? "Quiz"
+                                : lesson.type === "coding_exercise" ? "Exercise"
+                                : lesson.type === "assignment" ? "Assignment"
+                                : lesson.type === "article" ? "Reading" : ""}
+                          </span>
                         </span>
+
+                        {isCurrent && (
+                          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "#a78bfa", boxShadow: "0 0 8px #a78bfa" }} />
+                        )}
                       </button>
                     </li>
                   );
@@ -662,7 +739,7 @@ function ContentTab({
   );
 }
 
-/* ─────────────────── NotesTab ─────────────────── */
+/* ═══════════ NotesTab ═══════════ */
 
 function formatTimestamp(seconds: number | null): string | null {
   if (seconds === null) return null;
@@ -682,8 +759,7 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
   useEffect(() => {
     setLoading(true);
     apiFetch<Note[]>(`/api/v1/lessons/${lessonId}/notes`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(setNotes).catch(() => setNotes([]))
-      .finally(() => setLoading(false));
+      .then(setNotes).catch(() => setNotes([])).finally(() => setLoading(false));
   }, [lessonId, token]);
 
   async function submitNote(e: React.FormEvent) {
@@ -723,88 +799,78 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
   }
 
   if (loading) return (
-    <div className="p-4 space-y-3">
-      {[1, 2].map((i) => <div key={i} className="h-14 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />)}
+    <div className="space-y-3">
+      {[1, 2].map((i) => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />)}
     </div>
   );
 
   return (
-    <div className="flex flex-col h-full">
-      <form
-        onSubmit={submitNote}
-        className="shrink-0 p-3 space-y-2"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-      >
+    <div className="flex flex-col gap-3">
+      <form onSubmit={submitNote} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
         <textarea
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
-          placeholder="Note at current timestamp…"
+          placeholder="Take a note at the current timestamp…"
           rows={3}
-          className="w-full resize-none rounded-lg px-3 py-2 text-xs placeholder:opacity-30 focus:outline-none focus:ring-1"
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            color: "#e2e8f0",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
+          className="w-full resize-none rounded-xl px-3 py-2 text-xs placeholder:opacity-30 focus:outline-none"
+          style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
         />
         <button
           type="submit"
           disabled={submitting || !newNote.trim()}
-          className="w-full rounded-lg py-1.5 text-xs font-semibold text-white disabled:opacity-40 transition-all"
-          style={{ background: "var(--color-primary)" }}
+          className="mt-2 w-full rounded-xl py-2 text-xs font-bold text-white disabled:opacity-40 transition-all"
+          style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}
         >
           Save at {formatTimestamp(Math.floor(progressRef.current))}
         </button>
       </form>
 
-      <div className="flex-1 overflow-y-auto divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-        {notes.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-10 text-center px-4">
-            <StickyNote className="h-7 w-7" style={{ color: "rgba(255,255,255,0.15)" }} />
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>No notes for this lesson yet.</p>
-          </div>
-        ) : (
-          notes.map((note) => (
-            <div key={note.id} className="px-3 py-3">
-              {editingId === note.id ? (
-                <div className="space-y-2">
-                  <textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    rows={3}
-                    className="w-full resize-none rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-1"
-                    style={{ background: "rgba(255,255,255,0.06)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.1)" }}
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={() => saveEdit(note.id)} disabled={!editText.trim()} className="rounded-md px-2.5 py-1 text-[10px] font-semibold text-white disabled:opacity-40" style={{ background: "var(--color-primary)" }}>Save</button>
-                    <button onClick={() => setEditingId(null)} className="rounded-md px-2.5 py-1 text-[10px]" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>Cancel</button>
+      {notes.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-10 text-center">
+          <StickyNote className="h-8 w-8" style={{ color: "rgba(255,255,255,0.15)" }} />
+          <p className="text-xs" style={{ color: C.txt3 }}>No notes for this lesson yet.</p>
+        </div>
+      ) : (
+        notes.map((note) => (
+          <div key={note.id} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
+            {editingId === note.id ? (
+              <div className="space-y-2">
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  rows={3}
+                  className="w-full resize-none rounded-xl px-3 py-2 text-xs focus:outline-none"
+                  style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
+                />
+                <div className="flex gap-2">
+                  <button onClick={() => saveEdit(note.id)} disabled={!editText.trim()} className="rounded-lg px-3 py-1 text-[10px] font-bold text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}>Save</button>
+                  <button onClick={() => setEditingId(null)} className="rounded-lg px-3 py-1 text-[10px]" style={{ background: "rgba(255,255,255,0.08)", color: C.txt2 }}>Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  {note.timestamp_seconds !== null && (
+                    <span className="rounded-md px-2 py-0.5 text-[10px] font-mono font-bold" style={{ background: C.brandSoft, color: "#c4b5fd" }}>
+                      {formatTimestamp(note.timestamp_seconds)}
+                    </span>
+                  )}
+                  <div className="ml-auto flex gap-2">
+                    <button onClick={() => { setEditingId(note.id); setEditText(note.content); }} style={{ color: C.txt3 }} className="transition-colors hover:opacity-80"><Pencil className="h-3 w-3" /></button>
+                    <button onClick={() => deleteNote(note.id)} style={{ color: C.txt3 }} className="transition-colors hover:text-red-400"><Trash2 className="h-3 w-3" /></button>
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className="flex items-center gap-2">
-                    {note.timestamp_seconds !== null && (
-                      <span className="rounded px-1.5 py-0.5 text-[10px] font-mono" style={{ background: "rgba(124,58,237,0.2)", color: "rgba(167,139,250,0.9)" }}>
-                        {formatTimestamp(note.timestamp_seconds)}
-                      </span>
-                    )}
-                    <div className="flex gap-1.5 ml-auto">
-                      <button onClick={() => { setEditingId(note.id); setEditText(note.content); }} style={{ color: "rgba(255,255,255,0.3)" }} className="transition-colors hover:opacity-80"><Pencil className="h-3 w-3" /></button>
-                      <button onClick={() => deleteNote(note.id)} style={{ color: "rgba(255,255,255,0.3)" }} className="transition-colors hover:text-red-400"><Trash2 className="h-3 w-3" /></button>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-xs leading-snug whitespace-pre-wrap" style={{ color: "rgba(226,232,240,0.75)" }}>{note.content}</p>
-                </>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+                <p className="mt-2 text-xs leading-relaxed whitespace-pre-wrap" style={{ color: C.txt2 }}>{note.content}</p>
+              </>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }
 
-/* ─────────────────── QATab ─────────────────── */
+/* ═══════════ QATab ═══════════ */
 
 function QATab({ lessonId, token }: { lessonId: string; token: string }) {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -819,8 +885,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
   useEffect(() => {
     setLoading(true);
     apiFetch<Question[]>(`/api/v1/lessons/${lessonId}/questions`)
-      .then(setQuestions).catch(() => setQuestions([]))
-      .finally(() => setLoading(false));
+      .then(setQuestions).catch(() => setQuestions([])).finally(() => setLoading(false));
   }, [lessonId]);
 
   function toggleExpand(id: string) {
@@ -859,115 +924,95 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
   }
 
   if (loading) return (
-    <div className="p-4 space-y-3">
-      {[1, 2].map((i) => <div key={i} className="h-14 rounded animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />)}
+    <div className="space-y-3">
+      {[1, 2].map((i) => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />)}
     </div>
   );
 
   return (
-    <div className="flex flex-col h-full">
-      <form onSubmit={submitQuestion} className="shrink-0 p-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+    <div className="flex flex-col gap-3">
+      <form onSubmit={submitQuestion} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
         <div className="flex gap-2">
           <input
             value={newQuestion}
             onChange={(e) => setNewQuestion(e.target.value)}
             placeholder="Ask about this lesson…"
-            className="flex-1 min-w-0 rounded-lg px-3 py-2 text-xs placeholder:opacity-30 focus:outline-none focus:ring-1"
-            style={{ background: "rgba(255,255,255,0.06)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.08)" }}
+            className="flex-1 min-w-0 rounded-xl px-3 py-2 text-xs placeholder:opacity-30 focus:outline-none"
+            style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
           />
           <button
             type="submit"
             disabled={submitting || !newQuestion.trim()}
-            className="shrink-0 rounded-lg p-2 text-white disabled:opacity-40 transition-all"
-            style={{ background: "var(--color-primary)" }}
+            className="shrink-0 rounded-xl p-2 text-white disabled:opacity-40 transition-all"
+            style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}
           >
             <Send className="h-3.5 w-3.5" />
           </button>
         </div>
-        {submitError && <p className="mt-1 text-[10px]" style={{ color: "#f87171" }}>{submitError}</p>}
+        {submitError && <p className="mt-1.5 text-[10px]" style={{ color: "#f87171" }}>{submitError}</p>}
       </form>
 
-      <div className="flex-1 overflow-y-auto divide-y" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-        {questions.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-10 text-center px-4">
-            <MessageCircle className="h-7 w-7" style={{ color: "rgba(255,255,255,0.15)" }} />
-            <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>No questions yet. Ask the first one!</p>
-          </div>
-        ) : (
-          questions.map((q) => {
-            const expanded = expandedIds.has(q.id);
-            return (
-              <div key={q.id} className="px-3 py-3">
-                <div className="flex items-start gap-2">
-                  <div
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-                    style={{ background: "rgba(124,58,237,0.25)", color: "rgba(167,139,250,0.9)" }}
-                  >
-                    {q.student_name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.35)" }}>{q.student_name}</p>
-                    <p className="mt-0.5 text-xs leading-snug" style={{ color: "rgba(226,232,240,0.8)" }}>{q.body}</p>
-                    <div className="mt-1.5 flex items-center gap-3">
-                      <button
-                        onClick={() => toggleExpand(q.id)}
-                        className="flex items-center gap-0.5 text-[10px] transition-colors"
-                        style={{ color: "rgba(255,255,255,0.35)" }}
-                      >
-                        {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                        {q.answers.length} answer{q.answers.length !== 1 ? "s" : ""}
-                      </button>
-                      <button
-                        onClick={() => setReplyingTo(replyingTo === q.id ? null : q.id)}
-                        className="text-[10px] transition-colors"
-                        style={{ color: "rgba(255,255,255,0.35)" }}
-                      >
-                        Reply
-                      </button>
-                    </div>
+      {questions.length === 0 ? (
+        <div className="flex flex-col items-center gap-2 py-10 text-center">
+          <MessageCircle className="h-8 w-8" style={{ color: "rgba(255,255,255,0.15)" }} />
+          <p className="text-xs" style={{ color: C.txt3 }}>No questions yet. Ask the first one!</p>
+        </div>
+      ) : (
+        questions.map((q) => {
+          const expanded = expandedIds.has(q.id);
+          return (
+            <div key={q.id} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
+              <div className="flex items-start gap-2.5">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: C.brandSoft, color: "#c4b5fd" }}>
+                  {q.student_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-semibold" style={{ color: C.txt3 }}>{q.student_name}</p>
+                  <p className="mt-0.5 text-xs leading-snug" style={{ color: C.txt2 }}>{q.body}</p>
+                  <div className="mt-2 flex items-center gap-3">
+                    <button onClick={() => toggleExpand(q.id)} className="flex items-center gap-0.5 text-[10px] font-semibold" style={{ color: C.txt3 }}>
+                      {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                      {q.answers.length} answer{q.answers.length !== 1 ? "s" : ""}
+                    </button>
+                    <button onClick={() => setReplyingTo(replyingTo === q.id ? null : q.id)} className="text-[10px] font-semibold" style={{ color: C.txt3 }}>Reply</button>
                   </div>
                 </div>
-
-                {expanded && q.answers.length > 0 && (
-                  <div className="mt-2 ml-8 space-y-2">
-                    {q.answers.map((a) => (
-                      <div key={a.id} className="flex items-start gap-2">
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.5)" }}>
-                          {a.user_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.25)" }}>{a.user_name}</p>
-                          <p className="mt-0.5 text-xs leading-snug" style={{ color: "rgba(226,232,240,0.65)" }}>{a.body}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {replyingTo === q.id && (
-                  <div className="mt-2 ml-8 flex gap-2">
-                    <input
-                      value={replyTexts[q.id] ?? ""}
-                      onChange={(e) => setReplyTexts((prev) => ({ ...prev, [q.id]: e.target.value }))}
-                      placeholder="Write a reply…"
-                      className="flex-1 min-w-0 rounded-lg px-2.5 py-1.5 text-xs placeholder:opacity-30 focus:outline-none"
-                      style={{ background: "rgba(255,255,255,0.06)", color: "#e2e8f0", border: "1px solid rgba(255,255,255,0.08)" }}
-                    />
-                    <button
-                      onClick={() => submitAnswer(q.id)}
-                      disabled={!replyTexts[q.id]?.trim()}
-                      className="shrink-0 rounded-lg p-1.5 text-white disabled:opacity-40"
-                      style={{ background: "var(--color-primary)" }}
-                    >
-                      <Send className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
               </div>
-            );
-          })
-        )}
-      </div>
+
+              {expanded && q.answers.length > 0 && (
+                <div className="mt-2.5 ml-9 space-y-2">
+                  {q.answers.map((a) => (
+                    <div key={a.id} className="flex items-start gap-2">
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: C.txt2 }}>
+                        {a.user_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px]" style={{ color: C.txt3 }}>{a.user_name}</p>
+                        <p className="mt-0.5 text-xs leading-snug" style={{ color: C.txt2 }}>{a.body}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {replyingTo === q.id && (
+                <div className="mt-2.5 ml-9 flex gap-2">
+                  <input
+                    value={replyTexts[q.id] ?? ""}
+                    onChange={(e) => setReplyTexts((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                    placeholder="Write a reply…"
+                    className="flex-1 min-w-0 rounded-lg px-2.5 py-1.5 text-xs placeholder:opacity-30 focus:outline-none"
+                    style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
+                  />
+                  <button onClick={() => submitAnswer(q.id)} disabled={!replyTexts[q.id]?.trim()} className="shrink-0 rounded-lg p-1.5 text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}>
+                    <Send className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }
