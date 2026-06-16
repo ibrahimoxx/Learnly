@@ -45,21 +45,39 @@ interface ProgressSSEEvent {
 /* Shared palette */
 const C = {
   ink: "#08080d",
-  panel: "rgba(18,16,28,0.72)",
+  panel: "#0f0d1c",
   panelSolid: "#13111d",
-  line: "rgba(255,255,255,0.07)",
+  line: "rgba(255,255,255,0.09)",
   brand: "#8b5cf6",
-  brandSoft: "rgba(139,92,246,0.16)",
+  brandSoft: "rgba(139,92,246,0.18)",
   brandGlow: "rgba(139,92,246,0.45)",
-  txt: "#e7e5ef",
-  txt2: "rgba(231,229,239,0.62)",
-  txt3: "rgba(231,229,239,0.34)",
+  txt: "#f0eeff",
+  txt2: "#b4b0d0",
+  txt3: "#706c8a",
 };
 
 const APP_BG =
   "radial-gradient(900px circle at 12% -5%, rgba(139,92,246,0.16), transparent 55%)," +
   "radial-gradient(700px circle at 95% 105%, rgba(56,189,248,0.08), transparent 50%)," +
   C.ink;
+
+function toEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") {
+      if (u.pathname.startsWith("/embed/")) return url;
+      const v = u.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+    }
+    if (u.hostname === "youtu.be") {
+      const v = u.pathname.slice(1);
+      if (v) return `https://www.youtube.com/embed/${v}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 function fmtDuration(sec?: number | null): string | null {
   if (!sec || sec <= 0) return null;
@@ -239,7 +257,6 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           style={{
             width: sidebarCollapsed ? "0px" : "340px",
             background: C.panel,
-            backdropFilter: "blur(24px)",
             borderRight: `1px solid ${C.line}`,
           }}
         >
@@ -248,14 +265,14 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             <div className="flex items-center gap-4">
               <ProgressRing pct={progressPct} />
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.txt3 }}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "#9d9ab5" }}>
                   Your progress
                 </p>
-                <p className="mt-0.5 text-lg font-black tracking-tight" style={{ color: C.txt }}>
+                <p className="mt-0.5 text-lg font-black tracking-tight" style={{ color: "#ffffff" }}>
                   {completedCount}
-                  <span className="text-sm font-semibold" style={{ color: C.txt3 }}> / {totalLessons} lessons</span>
+                  <span className="text-sm font-semibold" style={{ color: "#9d9ab5" }}> / {totalLessons} lessons</span>
                 </p>
-                <p className="text-[11px] font-semibold" style={{ color: C.brand }}>
+                <p className="text-[11px] font-semibold" style={{ color: "#a78bfa" }}>
                   {progressPct === 100 ? "Course complete 🎉" : `${progressPct}% done — keep going`}
                 </p>
               </div>
@@ -264,7 +281,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
 
           {/* Segmented tab control */}
           <div className="shrink-0 px-3 pt-3">
-            <div className="flex gap-1 rounded-2xl p-1" style={{ background: "rgba(255,255,255,0.04)" }}>
+            <div className="flex gap-1 rounded-2xl p-1" style={{ background: "rgba(255,255,255,0.06)" }}>
               {TABS.map((tab) => {
                 const on = activeTab === tab.id;
                 return (
@@ -273,7 +290,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                     onClick={() => setActiveTab(tab.id)}
                     className="flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold transition-all"
                     style={{
-                      color: on ? "#fff" : C.txt3,
+                      color: on ? "#fff" : "#a09cbf",
                       background: on ? "linear-gradient(135deg,rgba(139,92,246,0.9),rgba(124,58,237,0.7))" : "transparent",
                       boxShadow: on ? "0 4px 12px rgba(139,92,246,0.35)" : "none",
                     }}
@@ -370,14 +387,16 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                   className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl"
                   style={{ background: "#000", border: `1px solid ${C.line}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)" }}
                 >
-                  {currentLesson.video_url ? (
-                    currentLesson.video_url.includes("youtube.com/embed") || currentLesson.video_url.includes("youtu") ? (
+                  {currentLesson.video_url ? (() => {
+                    const embedUrl = toEmbedUrl(currentLesson.video_url);
+                    return embedUrl ? (
                       <iframe
                         key={currentLesson.id}
-                        src={currentLesson.video_url}
+                        src={embedUrl}
                         className="h-full w-full"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
                       />
                     ) : (
                       <video
@@ -387,8 +406,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                         className="h-full w-full"
                         onTimeUpdate={(e) => { const v = e.currentTarget; handleTimeUpdate(v.currentTime, v.duration); }}
                       />
-                    )
-                  ) : (
+                    );
+                  })() : (
                     <div className="flex flex-col items-center gap-4 text-center">
                       <div
                         className="flex h-20 w-20 items-center justify-center rounded-2xl"
@@ -634,13 +653,13 @@ function ContentTab({
           <div
             key={section.id}
             className="overflow-hidden rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.025)", border: `1px solid ${C.line}` }}
+            style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.line}` }}
           >
             {/* Section header */}
             <button
               onClick={() => toggleSection(section.id)}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors"
-              style={{ background: "rgba(255,255,255,0.02)" }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:brightness-110"
+              style={{ background: "rgba(255,255,255,0.03)" }}
             >
               <span
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black"
@@ -649,17 +668,17 @@ function ContentTab({
                 {sIdx + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-bold leading-snug" style={{ color: C.txt }}>{section.title}</p>
+                <p className="text-[13px] font-bold leading-snug" style={{ color: "#ffffff" }}>{section.title}</p>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+                  <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.1)" }}>
                     <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg,#a78bfa,#7c3aed)", transition: "width 0.6s" }} />
                   </div>
-                  <span className="text-[10px] font-semibold tabular-nums" style={{ color: C.txt3 }}>{done}/{total}</span>
+                  <span className="text-[10px] font-semibold tabular-nums" style={{ color: "#9d9ab5" }}>{done}/{total}</span>
                 </div>
               </div>
               {isOpen
-                ? <ChevronUp className="h-4 w-4 shrink-0" style={{ color: C.txt3 }} />
-                : <ChevronDown className="h-4 w-4 shrink-0" style={{ color: C.txt3 }} />}
+                ? <ChevronUp className="h-4 w-4 shrink-0" style={{ color: "#8c88a8" }} />
+                : <ChevronDown className="h-4 w-4 shrink-0" style={{ color: "#8c88a8" }} />}
             </button>
 
             {/* Lessons */}
@@ -705,13 +724,13 @@ function ContentTab({
                           <span
                             className="truncate text-[12px] leading-snug"
                             style={{
-                              color: isCurrent ? "#f8fafc" : isDone ? C.txt2 : C.txt2,
+                              color: isCurrent ? "#ffffff" : isDone ? "#c5c2de" : "#d8d5f0",
                               fontWeight: isCurrent ? 700 : 500,
                             }}
                           >
                             {lesson.title}
                           </span>
-                          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: C.txt3 }}>
+                          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "#7a7796" }}>
                             {isLocked && lesson.unlock_at
                               ? `Unlocks ${new Date(lesson.unlock_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
                               : dur
