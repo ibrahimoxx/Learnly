@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Activity, BookMarked, Settings } from "lucide-react";
+import { LayoutDashboard, Activity, BookOpen, Settings } from "lucide-react";
 
 interface Props {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface Props {
 const NAV = [
   { href: "", label: "Overview", icon: LayoutDashboard },
   { href: "/activity", label: "Activity", icon: Activity },
-  { href: "/paths", label: "Learning Paths", icon: BookMarked },
+  { href: "/paths", label: "Learning Paths", icon: BookOpen },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

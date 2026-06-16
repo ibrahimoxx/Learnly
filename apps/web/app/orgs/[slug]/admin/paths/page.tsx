@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { BookMarked, Plus, X } from "lucide-react";
+import { BookOpen, Plus, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -175,7 +175,7 @@ export default function OrgPathsPage() {
         </div>
       ) : paths.length === 0 ? (
         <div className="premium-card rounded-[--radius-lg] py-16 text-center">
-          <BookMarked className="mx-auto mb-3 h-10 w-10 text-[--color-text-muted]" />
+          <BookOpen className="mx-auto mb-3 h-10 w-10 text-[--color-text-muted]" />
           <p className="font-medium text-[--color-text-secondary]">No learning paths yet</p>
           <p className="mt-1 text-sm text-[--color-text-muted]">
             Create a path to guide your team through a curated course sequence.
@@ -194,7 +194,7 @@ export default function OrgPathsPage() {
             >
               <div className="mb-3 flex items-start justify-between gap-2">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[--radius-md] bg-[--color-primary-subtle]">
-                  <BookMarked className="h-4 w-4 text-[--color-primary]" />
+                  <BookOpen className="h-4 w-4 text-[--color-primary]" />
                 </div>
                 <Badge
                   variant={p.status === "published" ? "success" : "secondary"}
