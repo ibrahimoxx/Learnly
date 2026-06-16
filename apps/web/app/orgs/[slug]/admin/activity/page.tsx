@@ -76,7 +76,7 @@ export default function OrgActivityPage() {
       value: data ? data.total_minutes_watched.toLocaleString() : "—",
     },
     {
-      icon: Trophy,
+      icon: Award,
       label: "Course Completions",
       value: data?.total_completions ?? "—",
     },

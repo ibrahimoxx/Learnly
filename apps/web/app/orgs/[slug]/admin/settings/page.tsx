@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
-import { Building2, ExternalLink, ImageIcon, Users, Save } from "lucide-react";
+import { Building2, ExternalLink, Image, Users, CheckCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +124,7 @@ export default function OrgSettingsPage() {
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-[--color-text-secondary]">
                   <span className="flex items-center gap-1.5">
-                    <ImageIcon className="h-3.5 w-3.5" />
+                    <Image className="h-3.5 w-3.5" />
                     Logo URL
                   </span>
                 </label>
@@ -162,7 +162,7 @@ export default function OrgSettingsPage() {
 
             <div className="mt-5 flex items-center gap-3">
               <Button type="submit" disabled={saving} className="gap-2">
-                <Save className="h-4 w-4" />
+                <CheckCircle className="h-4 w-4" />
                 {saving ? "Saving…" : "Save Changes"}
               </Button>
               {saved && (
