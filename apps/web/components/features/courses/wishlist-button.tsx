@@ -45,16 +45,17 @@ export function WishlistButton({ courseId, iconOnly = false, onToggle }: Wishlis
           headers: { Authorization: `Bearer ${token}` },
         });
         setSaved(false);
+        onToggle?.(false);
       } else {
         await apiFetch(`/api/v1/wishlist/${courseId}`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
         });
         setSaved(true);
+        onToggle?.(true);
       }
     } catch {
-      // ignore 409 (already saved)
-      if (!saved) setSaved(true);
+      if (!saved) { setSaved(true); onToggle?.(true); }
     } finally {
       setLoading(false);
     }
