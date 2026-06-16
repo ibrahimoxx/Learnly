@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback, useState } from "react";
+
 import { useAuth } from "@clerk/nextjs";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
@@ -9,11 +10,12 @@ import {
   CheckCircle2, Circle, PlayCircle, FileText, ChevronLeft, ChevronRight,
   MessageCircle, BookOpen, ChevronDown, ChevronUp, Send, HelpCircle,
   MessagesSquare, Lock, Code, StickyNote, Pencil, Trash2, ClipboardList,
-  ArrowLeft, SkipForward, Radio, PanelLeftClose, PanelLeftOpen, Clock,
+  ArrowLeft, SkipForward, Radio, PanelLeftClose, PanelLeftOpen, Clock, Trophy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment, Lesson, LessonProgress, Section, Question, LiveSession, Note } from "@/types";
+import ReactMarkdown from "react-markdown";
 import { QuizPlayer } from "@/components/features/quiz/quiz-player";
 import { CodingExercisePlayer } from "@/components/features/coding/coding-exercise-player";
 import { AssignmentSubmissionPlayer } from "@/components/features/assignments/assignment-submission-player";
@@ -44,34 +46,34 @@ interface ProgressSSEEvent {
 
 /* Shared palette */
 const C = {
-  ink: "#08080d",
-  panel: "#1a1730",
-  panelSolid: "#201c38",
-  line: "rgba(255,255,255,0.10)",
-  brand: "#8b5cf6",
-  brandSoft: "rgba(139,92,246,0.20)",
-  brandGlow: "rgba(139,92,246,0.45)",
-  txt: "#ffffff",
-  txt2: "#c8c4e8",
-  txt3: "#8c88a8",
+  ink: "#f3f4f6",
+  panel: "#ffffff",
+  panelSolid: "#ffffff",
+  line: "#d1d7dc",
+  brand: "#0056d2",
+  brandSoft: "#eaf1fb",
+  brandGlow: "rgba(0,86,210,0.15)",
+  txt: "#1c1d1f",
+  txt2: "#3d4244",
+  txt3: "#6a6f73",
 };
 
-const APP_BG =
-  "radial-gradient(900px circle at 12% -5%, rgba(139,92,246,0.16), transparent 55%)," +
-  "radial-gradient(700px circle at 95% 105%, rgba(56,189,248,0.08), transparent 50%)," +
-  C.ink;
+const APP_BG = "#f3f4f6";
 
 function toEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
     if (u.hostname === "www.youtube.com" || u.hostname === "youtube.com") {
-      if (u.pathname.startsWith("/embed/")) return url;
+      if (u.pathname.startsWith("/embed/")) {
+        u.searchParams.set("enablejsapi", "1");
+        return u.toString();
+      }
       const v = u.searchParams.get("v");
-      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (v) return `https://www.youtube.com/embed/${v}?enablejsapi=1`;
     }
     if (u.hostname === "youtu.be") {
       const v = u.pathname.slice(1);
-      if (v) return `https://www.youtube.com/embed/${v}`;
+      if (v) return `https://www.youtube.com/embed/${v}?enablejsapi=1`;
     }
     return null;
   } catch {
@@ -106,6 +108,8 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
   const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
   const [showLiveRoom, setShowLiveRoom] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const prevProgressRef = useRef<number>(-1);
 
   useEffect(() => {
     async function pollLiveSessions() {
@@ -187,6 +191,14 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
     return () => { if (saveIntervalRef.current) clearInterval(saveIntervalRef.current); };
   }, [saveProgress]);
 
+  useEffect(() => {
+    if (progressPct === 100 && totalLessons > 0 && prevProgressRef.current < 100 && prevProgressRef.current >= 0) {
+      setTimeout(() => setShowCelebration(true), 800);
+    }
+    prevProgressRef.current = progressPct;
+  }, [progressPct, totalLessons]);
+
+
   function handleTimeUpdate(currentTime: number, duration: number) {
     progressRef.current = currentTime;
     if (duration > 0 && currentTime / duration >= 0.9) saveProgress(Math.floor(currentTime), Math.floor(currentTime), true);
@@ -216,12 +228,12 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       {/* ════ Top bar ════ */}
       <header
         className="relative flex h-14 shrink-0 items-center gap-3 px-4"
-        style={{ background: "rgba(12,11,18,0.8)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.line}` }}
+        style={{ background: "#ffffff", borderBottom: `1px solid ${C.line}` }}
       >
         <Link
           href="/dashboard"
           className="group flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all"
-          style={{ color: C.txt2, background: "rgba(255,255,255,0.04)" }}
+          style={{ color: C.brand, background: "rgba(0,86,210,0.06)" }}
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
           My Learning
@@ -260,39 +272,42 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             borderRight: `1px solid ${C.line}`,
           }}
         >
-          {/* Progress hero */}
-          <div className="shrink-0 px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.10)", background: "#1e1a34" }}>
-            <div className="flex items-center gap-4">
-              <ProgressRing pct={progressPct} />
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: "#9d9ab5" }}>
-                  Your progress
-                </p>
-                <p className="mt-0.5 text-lg font-black tracking-tight" style={{ color: "#ffffff" }}>
-                  {completedCount}
-                  <span className="text-sm font-semibold" style={{ color: "#9d9ab5" }}> / {totalLessons} lessons</span>
-                </p>
-                <p className="text-[11px] font-semibold" style={{ color: "#a78bfa" }}>
-                  {progressPct === 100 ? "Course complete 🎉" : `${progressPct}% done — keep going`}
-                </p>
-              </div>
+          {/* Progress hero — Coursera style: simple text, thin progress bar */}
+          <div className="shrink-0 px-4 pt-4 pb-3" style={{ borderBottom: `1px solid ${C.line}` }}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[13px] font-bold" style={{ color: C.txt }}>
+                {enrollment.course_title ?? "Course"}
+              </p>
+              <span className="text-[11px]" style={{ color: C.txt3 }}>
+                {completedCount}/{totalLessons}
+              </span>
             </div>
+            {/* Thin linear progress bar */}
+            <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: "#e0e0e0" }}>
+              <div
+                className="h-full rounded-full transition-all duration-700"
+                style={{ width: `${progressPct}%`, background: "#0056d2" }}
+              />
+            </div>
+            <p className="mt-1.5 text-[11px]" style={{ color: C.brand }}>
+              {progressPct === 100 ? "Course complete 🎉" : `${progressPct}% complete`}
+            </p>
           </div>
 
           {/* Segmented tab control */}
-          <div className="shrink-0 px-3 pt-3">
-            <div className="flex gap-1 rounded-2xl p-1" style={{ background: "#2a2550" }}>
+          <div className="shrink-0" style={{ borderBottom: `1px solid ${C.line}` }}>
+            <div className="flex"  style={{ background: "#ffffff" }}>
               {TABS.map((tab) => {
                 const on = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className="flex flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-bold transition-all"
+                    className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[10px] font-bold transition-all"
                     style={{
-                      color: on ? "#fff" : "#a09cbf",
-                      background: on ? "linear-gradient(135deg,rgba(139,92,246,0.9),rgba(124,58,237,0.7))" : "transparent",
-                      boxShadow: on ? "0 4px 12px rgba(139,92,246,0.35)" : "none",
+                      color: on ? C.brand : C.txt3,
+                      background: "transparent",
+                      borderBottom: on ? `2px solid ${C.brand}` : "2px solid transparent",
                     }}
                   >
                     {tab.icon}
@@ -304,7 +319,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           </div>
 
           {/* Tab content */}
-          <div className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
+          <div className="flex-1 overflow-y-auto">
             {activeTab === "content" ? (
               <ContentTab
                 sectionsWithLessons={sectionsWithLessons}
@@ -326,11 +341,11 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
         <div className="flex flex-1 flex-col overflow-hidden">
 
           {/* Toolbar */}
-          <div className="hidden shrink-0 items-center gap-3 px-5 py-2.5 lg:flex">
+          <div className="hidden shrink-0 items-center gap-3 px-5 py-2.5 lg:flex" style={{ background: "#ffffff", borderBottom: `1px solid ${C.line}` }}>
             <button
               onClick={() => setSidebarCollapsed((v) => !v)}
               className="flex h-8 w-8 items-center justify-center rounded-xl transition-all hover:scale-105"
-              style={{ background: "rgba(255,255,255,0.05)", color: C.txt2 }}
+              style={{ background: "#f3f4f6", color: C.txt2 }}
               aria-label="Toggle sidebar"
             >
               {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
@@ -338,7 +353,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
 
             <span
               className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
-              style={{ background: C.brandSoft, color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}
+              style={{ background: C.brandSoft, color: C.brand, border: "1px solid #bdd4f8" }}
             >
               {lessonTypeLabel}
             </span>
@@ -351,11 +366,32 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             )}
 
             <div className="ml-auto flex items-center gap-2">
+              {currentLesson.type === "video" && (
+                completedIds.has(currentLesson.id) ? (
+                  <span
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-bold"
+                    style={{ background: "rgba(22,163,74,0.10)", color: "#16a34a" }}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Completed
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => saveProgress(0, 0, true)}
+                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-bold transition-all hover:scale-[1.03]"
+                    style={{ background: C.brandSoft, color: C.brand, border: "1px solid #bdd4f8" }}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Mark as Complete
+                  </button>
+                )
+              )}
+
               {prevLesson && (
                 <button
                   onClick={() => navigateTo(prevLesson.id)}
                   className="flex items-center gap-1 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.03]"
-                  style={{ background: "rgba(255,255,255,0.05)", color: C.txt2 }}
+                  style={{ background: "#ffffff", color: C.txt, border: `1px solid ${C.line}` }}
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
                   Prev
@@ -365,7 +401,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 <button
                   onClick={() => navigateTo(nextLesson.id)}
                   className="flex items-center gap-1 rounded-xl px-3 py-1.5 text-[11px] font-semibold transition-all hover:scale-[1.03]"
-                  style={{ background: "rgba(255,255,255,0.05)", color: C.txt2 }}
+                  style={{ background: "#ffffff", color: C.txt, border: `1px solid ${C.line}` }}
                 >
                   Next
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -381,16 +417,17 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 {/* ambient glow */}
                 <div
                   className="pointer-events-none absolute -inset-2 rounded-3xl opacity-60 blur-2xl"
-                  style={{ background: "radial-gradient(circle at 50% 30%, rgba(139,92,246,0.25), transparent 70%)" }}
+                  style={{ background: "transparent", opacity: 0 }}
                 />
                 <div
                   className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl"
-                  style={{ background: "#000", border: `1px solid ${C.line}`, boxShadow: "0 24px 60px rgba(0,0,0,0.6)" }}
+                  style={{ background: "#000000", border: `1px solid ${C.line}`, boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
                 >
                   {currentLesson.video_url ? (() => {
                     const embedUrl = toEmbedUrl(currentLesson.video_url);
                     return embedUrl ? (
                       <iframe
+                        id="yt-embed"
                         key={currentLesson.id}
                         src={embedUrl}
                         className="h-full w-full"
@@ -411,9 +448,9 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                     <div className="flex flex-col items-center gap-4 text-center">
                       <div
                         className="flex h-20 w-20 items-center justify-center rounded-2xl"
-                        style={{ background: C.brandSoft, border: "1px solid rgba(139,92,246,0.3)", boxShadow: `0 0 30px ${C.brandGlow}` }}
+                        style={{ background: "#f3f4f6", border: `1px solid ${C.line}`, boxShadow: "none" }}
                       >
-                        <PlayCircle className="h-9 w-9" style={{ color: "#c4b5fd" }} />
+                        <PlayCircle className="h-9 w-9" style={{ color: C.txt3 }} />
                       </div>
                       <p className="text-sm font-semibold" style={{ color: C.txt3 }}>Video not yet available</p>
                     </div>
@@ -423,40 +460,28 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             ) : (
               <div
                 className="h-full w-full overflow-y-auto rounded-2xl"
-                style={{ background: "rgba(255,255,255,0.02)", border: `1px solid ${C.line}` }}
+                style={{ background: "#ffffff", border: `1px solid ${C.line}` }}
               >
                 {currentLesson.type === "quiz" ? (
                   <LessonSurface title={currentLesson.title} href={`/learn/${enrollment.course_id}/${currentLesson.id}/quiz`}>
-                    <QuizPlayer lessonId={currentLesson.id} token={_serverToken} />
+                    <QuizPlayer lessonId={currentLesson.id} token={_serverToken} onComplete={() => saveProgress(0, 0, true)} />
                   </LessonSurface>
                 ) : currentLesson.type === "coding_exercise" ? (
                   <LessonSurface title={currentLesson.title} href={`/learn/${enrollment.course_id}/${currentLesson.id}/coding-exercise`}>
-                    <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} />
+                    <CodingExercisePlayer lessonId={currentLesson.id} token={_serverToken} onComplete={() => saveProgress(0, 0, true)} />
                   </LessonSurface>
                 ) : currentLesson.type === "assignment" ? (
                   <LessonSurface title={currentLesson.title} href={`/learn/${enrollment.course_id}/${currentLesson.id}/assignment`}>
                     <AssignmentSubmissionPlayer lessonId={currentLesson.id} token={_serverToken} />
                   </LessonSurface>
                 ) : (
-                  <article className="mx-auto max-w-2xl px-6 py-8 lg:px-10 lg:py-10">
-                    <span
-                      className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
-                      style={{ background: C.brandSoft, color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.25)" }}
-                    >
-                      Article
-                    </span>
-                    <h1 className="mt-4 text-2xl font-black tracking-tight lg:text-3xl" style={{ color: "#f8fafc" }}>
-                      {currentLesson.title}
-                    </h1>
-                    <div className="mt-5 h-px" style={{ background: C.line }} />
-                    {currentLesson.content ? (
-                      <div className="mt-6 text-[15px] leading-8 whitespace-pre-wrap" style={{ color: C.txt2 }}>
-                        {currentLesson.content}
-                      </div>
-                    ) : (
-                      <p className="mt-6 text-sm" style={{ color: C.txt3 }}>Content coming soon.</p>
-                    )}
-                  </article>
+                  <ArticleView
+                    lesson={currentLesson}
+                    isCompleted={completedIds.has(currentLesson.id)}
+                    nextLesson={nextLesson}
+                    onComplete={() => saveProgress(0, 0, true)}
+                    onNavigate={navigateTo}
+                  />
                 )}
               </div>
             )}
@@ -467,11 +492,11 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             <div className="hidden shrink-0 items-center gap-4 px-5 pb-4 lg:flex">
               <div
                 className="flex w-full items-center gap-4 rounded-2xl px-4 py-3"
-                style={{ background: C.panel, border: `1px solid ${C.line}`, backdropFilter: "blur(20px)" }}
+                style={{ background: "#ffffff", border: `1px solid ${C.line}`, boxShadow: "0 -2px 8px rgba(0,0,0,0.06)" }}
               >
                 <div
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: C.brandSoft, color: "#c4b5fd" }}
+                  style={{ background: C.brandSoft, color: C.brand }}
                 >
                   <SkipForward className="h-4 w-4" />
                 </div>
@@ -482,7 +507,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 <button
                   onClick={() => navigateTo(nextLesson.id)}
                   className="flex shrink-0 items-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold text-white transition-all hover:-translate-y-0.5"
-                  style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)", boxShadow: `0 8px 22px ${C.brandGlow}` }}
+                  style={{ background: "#0056d2", boxShadow: "none" }}
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" />
@@ -496,7 +521,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       {/* ════ Mobile bottom nav ════ */}
       <div
         className="lg:hidden fixed bottom-0 left-0 right-0 z-30 flex"
-        style={{ background: "rgba(12,11,18,0.92)", backdropFilter: "blur(20px)", borderTop: `1px solid ${C.line}` }}
+        style={{ background: "#ffffff", borderTop: `1px solid ${C.line}` }}
       >
         {TABS.map((tab) => (
           <button
@@ -520,7 +545,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
             style={{ height: "78dvh", background: C.panelSolid, border: `1px solid ${C.line}` }}
           >
             <div className="flex shrink-0 items-center justify-between px-4 py-3" style={{ borderBottom: `1px solid ${C.line}` }}>
-              <div className="flex gap-1 rounded-2xl p-1" style={{ background: "rgba(255,255,255,0.04)" }}>
+              <div className="flex gap-1 rounded-2xl p-1" style={{ background: "#f3f4f6" }}>
                 {TABS.map((tab) => {
                   const on = mobileTab === tab.id;
                   return (
@@ -528,7 +553,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                       key={tab.id}
                       onClick={() => setMobileTab(tab.id)}
                       className="rounded-xl px-3 py-1.5 text-xs font-bold transition-all"
-                      style={{ color: on ? "#fff" : C.txt3, background: on ? "linear-gradient(135deg,#8b5cf6,#7c3aed)" : "transparent" }}
+                      style={{ color: on ? C.txt : C.txt3, background: on ? "#ffffff" : "transparent", boxShadow: on ? "0 1px 4px rgba(0,0,0,0.12)" : "none" }}
                     >
                       {tab.label}
                     </button>
@@ -560,6 +585,178 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
       {showLiveRoom && liveSession && (
         <LiveRoom sessionId={liveSession.id} getToken={getAuthToken} onClose={() => setShowLiveRoom(false)} />
       )}
+
+      {showCelebration && (
+        <CourseCompletionModal
+          courseTitle={enrollment.course_title ?? "Course"}
+          enrollmentId={enrollment.id}
+          getAuthToken={getAuthToken}
+          onClose={() => setShowCelebration(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ═══════════ Course Completion Modal ═══════════ */
+
+const CONFETTI_COLORS = ["#0056d2","#a435f0","#16a34a","#f59e0b","#ef4444","#06b6d4","#ec4899"];
+
+function CourseCompletionModal({
+  courseTitle,
+  onClose,
+}: {
+  courseTitle: string;
+  enrollmentId: string;
+  getAuthToken: () => Promise<string>;
+  onClose: () => void;
+}) {
+  const router = useRouter();
+
+  function handleCertificate() {
+    onClose();
+    router.push("/home/my-courses/completed");
+  }
+
+  const confettiPieces = Array.from({ length: 48 }, (_, i) => ({
+    id: i,
+    color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+    left: `${Math.random() * 100}%`,
+    delay: `${Math.random() * 1.2}s`,
+    duration: `${1.8 + Math.random() * 1.4}s`,
+    size: `${6 + Math.random() * 8}px`,
+    rotate: `${Math.random() * 360}deg`,
+  }));
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)" }}
+    >
+      {/* Confetti */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {confettiPieces.map((p) => (
+          <div
+            key={p.id}
+            className="absolute top-0"
+            style={{
+              left: p.left,
+              width: p.size,
+              height: p.size,
+              background: p.color,
+              borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+              transform: `rotate(${p.rotate})`,
+              animation: `confettiFall ${p.duration} ${p.delay} ease-in forwards`,
+              opacity: 0,
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes confettiFall {
+          0%  { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+          100%{ transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        @keyframes popIn {
+          0%  { transform: scale(0.7); opacity: 0; }
+          70% { transform: scale(1.04); }
+          100%{ transform: scale(1);   opacity: 1; }
+        }
+        @keyframes trophyBounce {
+          0%,100%{ transform: translateY(0) scale(1); }
+          40%    { transform: translateY(-12px) scale(1.08); }
+        }
+        @keyframes shimmer {
+          0%  { background-position: -200% center; }
+          100%{ background-position:  200% center; }
+        }
+      `}</style>
+
+      {/* Card */}
+      <div
+        className="relative mx-4 flex w-full max-w-md flex-col items-center gap-6 rounded-3xl px-8 py-10 text-center shadow-2xl"
+        style={{ background: "#ffffff", animation: "popIn 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards" }}
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full text-lg transition-opacity hover:opacity-60"
+          style={{ color: "#9ca3af", background: "#f3f4f6" }}
+          aria-label="Close"
+        >
+          ✕
+        </button>
+
+        {/* Trophy */}
+        <div
+          className="flex h-24 w-24 items-center justify-center rounded-full text-5xl"
+          style={{
+            background: "linear-gradient(135deg,#fef3c7,#fde68a)",
+            border: "4px solid #f59e0b",
+            animation: "trophyBounce 1.8s ease-in-out infinite",
+            boxShadow: "0 8px 32px rgba(245,158,11,0.35)",
+          }}
+        >
+          🏆
+        </div>
+
+        {/* Heading */}
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#a435f0" }}>
+            Course Complete
+          </p>
+          <h2
+            className="mt-1 text-2xl font-black"
+            style={{
+              backgroundImage: "linear-gradient(90deg,#0056d2,#a435f0,#0056d2)",
+              backgroundSize: "200% auto",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              animation: "shimmer 3s linear infinite",
+            }}
+          >
+            Congratulations! 🎉
+          </h2>
+          <p className="mt-2 text-sm font-medium" style={{ color: "#6a6f73" }}>
+            You finished
+          </p>
+          <p className="mt-0.5 text-base font-bold" style={{ color: "#1c1d1f" }}>
+            {courseTitle}
+          </p>
+        </div>
+
+        {/* Stars */}
+        <div className="flex gap-1 text-xl">
+          {["⭐","⭐","⭐","⭐","⭐"].map((s, i) => (
+            <span
+              key={i}
+              style={{ animation: `popIn 0.3s ${0.1 * i + 0.5}s both` }}
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+
+        {/* CTA buttons */}
+        <div className="flex w-full flex-col gap-3">
+          <button
+            onClick={handleCertificate}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-black text-white transition-all hover:scale-[1.02] hover:shadow-lg"
+            style={{ background: "linear-gradient(135deg,#0056d2,#a435f0)", boxShadow: "0 4px 16px rgba(0,86,210,0.35)" }}
+          >
+            <Trophy className="h-4 w-4" />
+            Get My Certificate
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full rounded-2xl py-3 text-sm font-semibold transition-colors hover:bg-gray-50"
+            style={{ color: "#6a6f73", border: "1px solid #d1d7dc" }}
+          >
+            Keep Learning
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -573,7 +770,7 @@ function ProgressRing({ pct }: { pct: number }) {
   return (
     <div className="relative shrink-0">
       <svg width="56" height="56" className="-rotate-90">
-        <circle cx="28" cy="28" r={r} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="4" />
+        <circle cx="28" cy="28" r={r} fill="none" stroke="#e0e0e0" strokeWidth="4" />
         <circle
           cx="28" cy="28" r={r} fill="none"
           stroke="url(#ringGrad)" strokeWidth="4" strokeLinecap="round"
@@ -582,12 +779,12 @@ function ProgressRing({ pct }: { pct: number }) {
         />
         <defs>
           <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#a78bfa" />
-            <stop offset="100%" stopColor="#7c3aed" />
+            <stop offset="0%" stopColor="#0056d2" />
+            <stop offset="100%" stopColor="#0070c0" />
           </linearGradient>
         </defs>
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: "#e7e5ef" }}>
+      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-black" style={{ color: C.txt }}>
         {pct}%
       </span>
     </div>
@@ -600,11 +797,11 @@ function LessonSurface({ title, href, children }: { title: string; href: string;
   return (
     <div>
       <div className="flex items-center justify-between px-6 pt-6 pb-2">
-        <h2 className="text-lg font-black tracking-tight" style={{ color: "#f8fafc" }}>{title}</h2>
+        <h2 className="text-lg font-black tracking-tight" style={{ color: C.txt }}>{title}</h2>
         <Link
           href={href}
           className="rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all hover:scale-[1.03]"
-          style={{ background: C.brandSoft, color: "#c4b5fd", border: "1px solid rgba(139,92,246,0.3)" }}
+          style={{ background: C.brandSoft, color: C.brand, border: "1px solid #bdd4f8" }}
         >
           Full screen
         </Link>
@@ -627,124 +824,145 @@ function ContentTab({
   onNavigate: (id: string) => void;
   completedIds: Set<string>;
 }) {
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    const currentSectionId = sectionsWithLessons.find((s) =>
+      s.lessons.some((l) => l.id === currentLessonId)
+    )?.id;
+    return new Set(
+      sectionsWithLessons.filter((s) => s.id !== currentSectionId).map((s) => s.id)
+    );
+  });
 
   function toggleSection(id: string) {
     setCollapsed((prev) => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
   }
 
-  const typeIcon: Record<string, React.ReactNode> = {
-    video: <PlayCircle className="h-4 w-4" />,
-    article: <FileText className="h-4 w-4" />,
-    quiz: <HelpCircle className="h-4 w-4" />,
-    coding_exercise: <Code className="h-4 w-4" />,
-    assignment: <ClipboardList className="h-4 w-4" />,
-  };
+  /* Progressive section locking: section N unlocks only when all lessons in N-1 are done */
+  const unlockedSectionIds = new Set<string>();
+  for (let i = 0; i < sectionsWithLessons.length; i++) {
+    const section = sectionsWithLessons[i];
+    if (!section) break;
+    if (i === 0) {
+      unlockedSectionIds.add(section.id);
+    } else {
+      const prev = sectionsWithLessons[i - 1];
+      if (!prev) break;
+      const prevAllDone = prev.lessons.length > 0 && prev.lessons.every((l) => completedIds.has(l.id));
+      if (prevAllDone) {
+        unlockedSectionIds.add(section.id);
+      } else {
+        break;
+      }
+    }
+  }
 
   return (
-    <div className="space-y-3">
+    <div>
       {sectionsWithLessons.map((section, sIdx) => {
         const isOpen = !collapsed.has(section.id);
         const done = section.lessons.filter((l) => completedIds.has(l.id)).length;
         const total = section.lessons.length;
-        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        const sectionDone = total > 0 && done === total;
+        const sectionLocked = !unlockedSectionIds.has(section.id);
 
         return (
           <div
             key={section.id}
-            className="overflow-hidden rounded-2xl"
-            style={{ background: "#252040", border: "1px solid rgba(255,255,255,0.12)" }}
+            style={{ borderBottom: `1px solid ${C.line}`, opacity: sectionLocked ? 0.55 : 1 }}
           >
             {/* Section header */}
             <button
-              onClick={() => toggleSection(section.id)}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:brightness-110"
-              style={{ background: "#2c2848" }}
+              onClick={() => !sectionLocked && toggleSection(section.id)}
+              disabled={sectionLocked}
+              className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors"
+              style={{
+                background: sectionLocked ? "#f7f9fa" : sectionDone ? "#f0fdf4" : isOpen ? "#eaf1fb" : "transparent",
+                cursor: sectionLocked ? "not-allowed" : "pointer",
+              }}
+              onMouseEnter={(e) => { if (!isOpen && !sectionDone && !sectionLocked) e.currentTarget.style.background = "#f7f9fa"; }}
+              onMouseLeave={(e) => { if (!isOpen && !sectionDone && !sectionLocked) e.currentTarget.style.background = "transparent"; }}
             >
-              <span
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black"
-                style={{ background: C.brandSoft, color: "#c4b5fd" }}
-              >
-                {sIdx + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold leading-snug" style={{ color: "#ffffff" }}>{section.title}</p>
-                <div className="mt-1.5 flex items-center gap-2">
-                  <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.15)" }}>
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg,#a78bfa,#7c3aed)", transition: "width 0.6s" }} />
-                  </div>
-                  <span className="text-[10px] font-semibold tabular-nums" style={{ color: "#9d9ab5" }}>{done}/{total}</span>
-                </div>
+              <div className="flex-1 min-w-0 pt-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: sectionLocked ? C.txt3 : sectionDone ? "#16a34a" : C.brand }}>
+                  Section {sIdx + 1}
+                </p>
+                <p className="mt-0.5 text-[13px] font-bold leading-snug" style={{ color: C.txt }}>
+                  {section.title}
+                </p>
+                <p className="mt-0.5 text-[11px]" style={{ color: sectionLocked ? C.txt3 : sectionDone ? "#16a34a" : C.txt3 }}>
+                  {sectionLocked ? "Complete previous section to unlock" : sectionDone ? "✓ Section complete" : `${done}/${total} completed`}
+                </p>
               </div>
-              {isOpen
-                ? <ChevronUp className="h-4 w-4 shrink-0" style={{ color: "#8c88a8" }} />
-                : <ChevronDown className="h-4 w-4 shrink-0" style={{ color: "#8c88a8" }} />}
+              {sectionLocked
+                ? <Lock className="h-4 w-4 shrink-0 mt-1" style={{ color: C.txt3 }} />
+                : isOpen
+                  ? <ChevronUp className="h-4 w-4 shrink-0 mt-1" style={{ color: C.txt3 }} />
+                  : <ChevronDown className="h-4 w-4 shrink-0 mt-1" style={{ color: C.txt3 }} />}
             </button>
 
-            {/* Lessons */}
-            {isOpen && (
-              <ul className="space-y-0.5 p-1.5">
+            {/* Lessons — only shown when section is unlocked and open */}
+            {!sectionLocked && isOpen && (
+              <ul>
                 {section.lessons.map((lesson) => {
                   const isCurrent = lesson.id === currentLessonId;
                   const isDone = completedIds.has(lesson.id);
                   const isLocked = !!(lesson.unlock_at && new Date() < new Date(lesson.unlock_at));
                   const dur = fmtDuration(lesson.duration_seconds);
+                  const typeLabel =
+                    lesson.type === "quiz" ? "Quiz"
+                    : lesson.type === "coding_exercise" ? "Exercise"
+                    : lesson.type === "assignment" ? "Assignment"
+                    : lesson.type === "article" ? "Reading"
+                    : "Video";
 
                   return (
-                    <li key={lesson.id}>
+                    <li key={lesson.id} style={{ borderTop: `1px solid ${C.line}` }}>
                       <button
                         onClick={() => !isLocked && onNavigate(lesson.id)}
                         disabled={isLocked}
-                        className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all"
+                        className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors"
                         style={{
-                          background: isCurrent ? "linear-gradient(135deg,rgba(139,92,246,0.28),rgba(124,58,237,0.1))" : "transparent",
-                          boxShadow: isCurrent ? "inset 0 0 0 1px rgba(139,92,246,0.4)" : "none",
-                          opacity: isLocked ? 0.45 : 1,
+                          background: isCurrent ? "#eaf1fb" : "transparent",
+                          opacity: isLocked ? 0.5 : 1,
                           cursor: isLocked ? "not-allowed" : "pointer",
+                          borderLeft: isCurrent ? `3px solid ${C.brand}` : "3px solid transparent",
                         }}
-                        onMouseEnter={(e) => { if (!isCurrent && !isLocked) e.currentTarget.style.background = "rgba(255,255,255,0.05)"; }}
+                        onMouseEnter={(e) => { if (!isCurrent && !isLocked) e.currentTarget.style.background = "#f7f9fa"; }}
                         onMouseLeave={(e) => { if (!isCurrent) e.currentTarget.style.background = "transparent"; }}
                       >
-                        {/* Icon chip */}
-                        <span
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                        {/* Status circle */}
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
                           style={{
-                            background: isDone ? "rgba(34,197,94,0.15)" : isCurrent ? "rgba(139,92,246,0.25)" : "rgba(255,255,255,0.05)",
-                            color: isLocked ? C.txt3 : isDone ? "#4ade80" : isCurrent ? "#c4b5fd" : C.txt3,
+                            background: isDone ? "#16a34a" : "transparent",
+                            border: isDone ? "none" : `2px solid ${isCurrent ? C.brand : "#9ca3af"}`,
                           }}
                         >
-                          {isLocked ? <Lock className="h-3.5 w-3.5" />
-                            : isDone ? <CheckCircle2 className="h-4 w-4" />
-                            : isCurrent ? <PlayCircle className="h-4 w-4" />
-                            : (typeIcon[lesson.type] ?? <Circle className="h-4 w-4" />)}
+                          {isLocked
+                            ? <Lock className="h-2.5 w-2.5" style={{ color: C.txt3 }} />
+                            : isDone
+                              ? <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+                              : null}
                         </span>
 
                         {/* Text */}
                         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                           <span
-                            className="truncate text-[12px] leading-snug"
+                            className="text-[12px] leading-snug"
                             style={{
-                              color: isCurrent ? "#ffffff" : isDone ? "#c5c2de" : "#d8d5f0",
-                              fontWeight: isCurrent ? 700 : 500,
+                              color: isCurrent ? C.brand : isDone ? C.txt3 : C.txt,
+                              fontWeight: isCurrent ? 700 : 400,
                             }}
                           >
                             {lesson.title}
                           </span>
-                          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "#7a7796" }}>
+                          <span className="text-[11px]" style={{ color: C.txt3 }}>
                             {isLocked && lesson.unlock_at
                               ? `Unlocks ${new Date(lesson.unlock_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
                               : dur
-                                ? <><Clock className="h-2.5 w-2.5" />{dur}</>
-                                : lesson.type === "quiz" ? "Quiz"
-                                : lesson.type === "coding_exercise" ? "Exercise"
-                                : lesson.type === "assignment" ? "Assignment"
-                                : lesson.type === "article" ? "Reading" : ""}
+                                ? `${typeLabel} · ${dur}`
+                                : typeLabel}
                           </span>
                         </span>
-
-                        {isCurrent && (
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "#a78bfa", boxShadow: "0 0 8px #a78bfa" }} />
-                        )}
                       </button>
                     </li>
                   );
@@ -819,26 +1037,26 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
 
   if (loading) return (
     <div className="space-y-3">
-      {[1, 2].map((i) => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />)}
+      {[1, 2].map((i) => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "#f7f9fa" }} />)}
     </div>
   );
 
   return (
     <div className="flex flex-col gap-3">
-      <form onSubmit={submitNote} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
+      <form onSubmit={submitNote} className="rounded-2xl p-3" style={{ background: "#f7f9fa", border: `1px solid ${C.line}` }}>
         <textarea
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           placeholder="Take a note at the current timestamp…"
           rows={3}
           className="w-full resize-none rounded-xl px-3 py-2 text-xs placeholder:opacity-30 focus:outline-none"
-          style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
+          style={{ background: "#ffffff", color: C.txt, border: `1px solid ${C.line}` }}
         />
         <button
           type="submit"
           disabled={submitting || !newNote.trim()}
           className="mt-2 w-full rounded-xl py-2 text-xs font-bold text-white disabled:opacity-40 transition-all"
-          style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}
+          style={{ background: "#0056d2" }}
         >
           Save at {formatTimestamp(Math.floor(progressRef.current))}
         </button>
@@ -846,12 +1064,12 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
 
       {notes.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-10 text-center">
-          <StickyNote className="h-8 w-8" style={{ color: "rgba(255,255,255,0.15)" }} />
+          <StickyNote className="h-8 w-8" style={{ color: "#d1d7dc" }} />
           <p className="text-xs" style={{ color: C.txt3 }}>No notes for this lesson yet.</p>
         </div>
       ) : (
         notes.map((note) => (
-          <div key={note.id} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
+          <div key={note.id} className="rounded-2xl p-3" style={{ background: "#f7f9fa", border: `1px solid ${C.line}` }}>
             {editingId === note.id ? (
               <div className="space-y-2">
                 <textarea
@@ -859,18 +1077,18 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
                   onChange={(e) => setEditText(e.target.value)}
                   rows={3}
                   className="w-full resize-none rounded-xl px-3 py-2 text-xs focus:outline-none"
-                  style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
+                  style={{ background: "#ffffff", color: C.txt, border: `1px solid ${C.line}` }}
                 />
                 <div className="flex gap-2">
-                  <button onClick={() => saveEdit(note.id)} disabled={!editText.trim()} className="rounded-lg px-3 py-1 text-[10px] font-bold text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}>Save</button>
-                  <button onClick={() => setEditingId(null)} className="rounded-lg px-3 py-1 text-[10px]" style={{ background: "rgba(255,255,255,0.08)", color: C.txt2 }}>Cancel</button>
+                  <button onClick={() => saveEdit(note.id)} disabled={!editText.trim()} className="rounded-lg px-3 py-1 text-[10px] font-bold text-white disabled:opacity-40" style={{ background: "#0056d2" }}>Save</button>
+                  <button onClick={() => setEditingId(null)} className="rounded-lg px-3 py-1 text-[10px]" style={{ background: "#ffffff", color: C.txt2, border: `1px solid ${C.line}` }}>Cancel</button>
                 </div>
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-2">
                   {note.timestamp_seconds !== null && (
-                    <span className="rounded-md px-2 py-0.5 text-[10px] font-mono font-bold" style={{ background: C.brandSoft, color: "#c4b5fd" }}>
+                    <span className="rounded-md px-2 py-0.5 text-[10px] font-mono font-bold" style={{ background: C.brandSoft, color: C.brand }}>
                       {formatTimestamp(note.timestamp_seconds)}
                     </span>
                   )}
@@ -944,26 +1162,26 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
 
   if (loading) return (
     <div className="space-y-3">
-      {[1, 2].map((i) => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "rgba(255,255,255,0.05)" }} />)}
+      {[1, 2].map((i) => <div key={i} className="h-16 rounded-2xl animate-pulse" style={{ background: "#f7f9fa" }} />)}
     </div>
   );
 
   return (
     <div className="flex flex-col gap-3">
-      <form onSubmit={submitQuestion} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
+      <form onSubmit={submitQuestion} className="rounded-2xl p-3" style={{ background: "#f7f9fa", border: `1px solid ${C.line}` }}>
         <div className="flex gap-2">
           <input
             value={newQuestion}
             onChange={(e) => setNewQuestion(e.target.value)}
             placeholder="Ask about this lesson…"
             className="flex-1 min-w-0 rounded-xl px-3 py-2 text-xs placeholder:opacity-30 focus:outline-none"
-            style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
+            style={{ background: "#ffffff", color: C.txt, border: `1px solid ${C.line}` }}
           />
           <button
             type="submit"
             disabled={submitting || !newQuestion.trim()}
             className="shrink-0 rounded-xl p-2 text-white disabled:opacity-40 transition-all"
-            style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}
+            style={{ background: "#0056d2" }}
           >
             <Send className="h-3.5 w-3.5" />
           </button>
@@ -973,16 +1191,16 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
 
       {questions.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-10 text-center">
-          <MessageCircle className="h-8 w-8" style={{ color: "rgba(255,255,255,0.15)" }} />
+          <MessageCircle className="h-8 w-8" style={{ color: "#d1d7dc" }} />
           <p className="text-xs" style={{ color: C.txt3 }}>No questions yet. Ask the first one!</p>
         </div>
       ) : (
         questions.map((q) => {
           const expanded = expandedIds.has(q.id);
           return (
-            <div key={q.id} className="rounded-2xl p-3" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${C.line}` }}>
+            <div key={q.id} className="rounded-2xl p-3" style={{ background: "#f7f9fa", border: `1px solid ${C.line}` }}>
               <div className="flex items-start gap-2.5">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: C.brandSoft, color: "#c4b5fd" }}>
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold" style={{ background: C.brandSoft, color: C.brand }}>
                   {q.student_name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -1002,7 +1220,7 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
                 <div className="mt-2.5 ml-9 space-y-2">
                   {q.answers.map((a) => (
                     <div key={a.id} className="flex items-start gap-2">
-                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: C.txt2 }}>
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold" style={{ background: "#ffffff", color: C.txt2, border: "1px solid #e0e0e0" }}>
                         {a.user_name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1021,9 +1239,9 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
                     onChange={(e) => setReplyTexts((prev) => ({ ...prev, [q.id]: e.target.value }))}
                     placeholder="Write a reply…"
                     className="flex-1 min-w-0 rounded-lg px-2.5 py-1.5 text-xs placeholder:opacity-30 focus:outline-none"
-                    style={{ background: "rgba(255,255,255,0.05)", color: C.txt, border: `1px solid ${C.line}` }}
+                    style={{ background: "#ffffff", color: C.txt, border: `1px solid ${C.line}` }}
                   />
-                  <button onClick={() => submitAnswer(q.id)} disabled={!replyTexts[q.id]?.trim()} className="shrink-0 rounded-lg p-1.5 text-white disabled:opacity-40" style={{ background: "linear-gradient(135deg,#8b5cf6,#7c3aed)" }}>
+                  <button onClick={() => submitAnswer(q.id)} disabled={!replyTexts[q.id]?.trim()} className="shrink-0 rounded-lg p-1.5 text-white disabled:opacity-40" style={{ background: "#0056d2" }}>
                     <Send className="h-3 w-3" />
                   </button>
                 </div>
@@ -1033,5 +1251,126 @@ function QATab({ lessonId, token }: { lessonId: string; token: string }) {
         })
       )}
     </div>
+  );
+}
+
+/* ═══════════ ArticleView ═══════════ */
+
+function ArticleView({
+  lesson,
+  isCompleted,
+  nextLesson,
+  onComplete,
+  onNavigate,
+}: {
+  lesson: Lesson;
+  isCompleted: boolean;
+  nextLesson: Lesson | null;
+  onComplete: () => void;
+  onNavigate: (id: string) => void;
+}) {
+  const [marking, setMarking] = useState(false);
+
+  async function handleMarkComplete() {
+    setMarking(true);
+    await onComplete();
+    setMarking(false);
+  }
+
+  return (
+    <article className="mx-auto max-w-2xl px-6 py-8 lg:px-10 lg:py-10">
+      {/* Badge */}
+      <span
+        className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+        style={{ background: C.brandSoft, color: C.brand, border: "1px solid #bdd4f8" }}
+      >
+        Article
+      </span>
+
+      {/* Title */}
+      <h1 className="mt-4 text-2xl font-black tracking-tight lg:text-3xl" style={{ color: C.txt }}>
+        {lesson.title}
+      </h1>
+      <div className="mt-5 h-px" style={{ background: C.line }} />
+
+      {/* Content */}
+      {lesson.content ? (
+        <div
+          className="mt-6 prose-article"
+          style={{ color: C.txt2 }}
+        >
+          <ReactMarkdown
+            components={{
+              h1: ({ children }) => <h1 style={{ color: C.txt, fontSize: "1.5rem", fontWeight: 900, marginTop: "1.75rem", marginBottom: "0.5rem" }}>{children}</h1>,
+              h2: ({ children }) => <h2 style={{ color: C.txt, fontSize: "1.25rem", fontWeight: 800, marginTop: "1.5rem", marginBottom: "0.5rem" }}>{children}</h2>,
+              h3: ({ children }) => <h3 style={{ color: C.txt, fontSize: "1.05rem", fontWeight: 700, marginTop: "1.25rem", marginBottom: "0.4rem" }}>{children}</h3>,
+              p: ({ children }) => <p style={{ color: C.txt2, lineHeight: "1.85", marginBottom: "1rem" }}>{children}</p>,
+              li: ({ children }) => <li style={{ color: C.txt2, marginBottom: "0.3rem", lineHeight: "1.7" }}>{children}</li>,
+              ul: ({ children }) => <ul style={{ paddingLeft: "1.25rem", marginBottom: "1rem", listStyleType: "disc" }}>{children}</ul>,
+              ol: ({ children }) => <ol style={{ paddingLeft: "1.25rem", marginBottom: "1rem", listStyleType: "decimal" }}>{children}</ol>,
+              code: ({ children, className }) => {
+                const isBlock = className?.includes("language-");
+                return isBlock ? (
+                  <code style={{ display: "block", background: "#f7f9fa", color: C.txt, padding: "0.1rem 0.3rem", borderRadius: "0.25rem", fontSize: "0.85em", fontFamily: "monospace" }}>{children}</code>
+                ) : (
+                  <code style={{ background: "#f3f4f6", color: C.txt, padding: "0.1rem 0.4rem", borderRadius: "0.3rem", fontSize: "0.88em", fontFamily: "monospace" }}>{children}</code>
+                );
+              },
+              pre: ({ children }) => <pre style={{ background: "#f7f9fa", border: `1px solid ${C.line}`, borderRadius: "0.75rem", padding: "1rem", overflowX: "auto", marginBottom: "1rem", fontSize: "0.875rem", lineHeight: "1.6", fontFamily: "monospace", color: C.txt }}>{children}</pre>,
+              strong: ({ children }) => <strong style={{ color: C.txt, fontWeight: 700 }}>{children}</strong>,
+              em: ({ children }) => <em style={{ color: C.txt2, fontStyle: "italic" }}>{children}</em>,
+              blockquote: ({ children }) => <blockquote style={{ borderLeft: "3px solid #0056d2", paddingLeft: "1rem", color: C.txt3, marginBottom: "1rem", fontStyle: "italic" }}>{children}</blockquote>,
+              hr: () => <hr style={{ border: "none", borderTop: `1px solid ${C.line}`, margin: "1.5rem 0" }} />,
+            }}
+          >
+            {lesson.content}
+          </ReactMarkdown>
+        </div>
+      ) : (
+        <p className="mt-6 text-sm" style={{ color: C.txt3 }}>Content coming soon.</p>
+      )}
+
+      {/* ══ Completion block ══ */}
+      <div className="mt-10 pt-8" style={{ borderTop: `1px solid ${C.line}` }}>
+        {isCompleted ? (
+          <div className="flex flex-col items-center gap-4 text-center">
+            {/* Completed state */}
+            <div
+              className="flex h-16 w-16 items-center justify-center rounded-2xl"
+              style={{ background: "rgba(22,163,74,0.10)", border: "1px solid rgba(22,163,74,0.25)", boxShadow: "none" }}
+            >
+              <Trophy className="h-8 w-8" style={{ color: "#16a34a" }} />
+            </div>
+            <div>
+              <p className="text-base font-black" style={{ color: "#16a34a" }}>Lesson completed!</p>
+              <p className="mt-0.5 text-sm" style={{ color: C.txt3 }}>Great work. Keep the momentum going.</p>
+            </div>
+            {nextLesson && (
+              <button
+                onClick={() => onNavigate(nextLesson.id)}
+                className="flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-black text-white transition-all hover:scale-[1.03] hover:shadow-lg"
+                style={{ background: "#0056d2", boxShadow: "0 2px 8px rgba(0,86,210,0.3)" }}
+              >
+                Next lesson
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-sm" style={{ color: C.txt3 }}>Done reading? Mark this lesson as complete.</p>
+            <button
+              onClick={handleMarkComplete}
+              disabled={marking}
+              className="flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-black text-white transition-all hover:scale-[1.03] disabled:opacity-60"
+              style={{ background: "#0056d2", boxShadow: "0 2px 8px rgba(0,86,210,0.3)" }}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              {marking ? "Saving…" : "Mark as Complete"}
+            </button>
+          </div>
+        )}
+      </div>
+    </article>
   );
 }

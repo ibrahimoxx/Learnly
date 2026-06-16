@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { SignInButton, SignUpButton, UserButton, useAuth, useUser } from "@clerk/nextjs";
-import { Search, BookOpen, Menu, X, ShoppingCart } from "lucide-react";
+import { SignInButton, SignUpButton, useAuth, useUser, useClerk } from "@clerk/nextjs";
+import { Search, BookOpen, Menu, X, ShoppingCart, User, GraduationCap, ShoppingBag, Settings, Bell, Award, HelpCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,101 @@ import { useCartStore } from "@/lib/stores/cart-store";
 
 const navLinkClass = "rounded-full px-3.5 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
 const mobileNavLinkClass = "rounded-[--radius-sm] px-3 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
+
+type ClerkUser = ReturnType<typeof useUser>["user"];
+
+const USER_MENU_ITEMS = [
+  { label: "My Learning",    href: "/dashboard",                         icon: GraduationCap },
+  { label: "Profile",        href: "/user/edit-profile",                 icon: User },
+  { label: "My Purchases",   href: "/user/edit-profile/purchase-history",icon: ShoppingBag },
+  { label: "Settings",       href: "/user/edit-profile",                 icon: Settings },
+  { label: "Notifications",  href: "/notifications",                     icon: Bell },
+  { label: "Accomplishments",href: "/home/my-courses/completed",         icon: Award },
+  { label: "Help Center",    href: "/help",                              icon: HelpCircle },
+] as const;
+
+function UserMenu({ user }: { user: ClerkUser }) {
+  const { signOut } = useClerk();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    if (open) document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [open]);
+
+  const initials = user
+    ? `${user.firstName?.charAt(0) ?? ""}${user.lastName?.charAt(0) ?? ""}`.toUpperCase() || "?"
+    : "?";
+  const avatar = user?.imageUrl;
+
+  return (
+    <div ref={ref} className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      {/* Avatar trigger */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full text-sm font-black text-white transition-all hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[--color-primary]"
+        style={{ background: avatar ? "transparent" : "linear-gradient(135deg,#1c4ed8,#6d28d9)" }}
+        aria-label="User menu"
+        aria-expanded={open}
+      >
+        {avatar ? (
+          <img src={avatar} alt={initials} className="h-full w-full object-cover" />
+        ) : (
+          <span className="text-[13px]">{initials}</span>
+        )}
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          className="absolute right-0 top-full z-50 mt-1 w-52 overflow-hidden rounded-2xl border border-gray-100 bg-white py-1 shadow-xl"
+          style={{ boxShadow: "0 8px 32px rgba(0,0,0,0.14)" }}
+        >
+          {/* User info header */}
+          <div className="border-b border-gray-100 px-4 py-3">
+            <p className="text-[13px] font-bold text-gray-900 truncate">
+              {user?.fullName ?? user?.primaryEmailAddress?.emailAddress ?? "Account"}
+            </p>
+            <p className="text-[11px] text-gray-400 truncate">
+              {user?.primaryEmailAddress?.emailAddress}
+            </p>
+          </div>
+
+          {/* Menu items */}
+          <nav className="py-1">
+            {USER_MENU_ITEMS.map(({ label, href, icon: Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-900"
+              >
+                <Icon className="h-4 w-4 shrink-0 text-gray-400" />
+                {label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Divider + logout */}
+          <div className="border-t border-gray-100 py-1">
+            <button
+              onClick={() => signOut(() => router.push("/"))}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-[13px] font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              Log Out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Navbar() {
   const { isSignedIn } = useAuth();
@@ -123,7 +218,7 @@ export function Navbar() {
           <MessageNavLink />
           <NotificationBell />
           {signedIn ? (
-            <UserButton />
+            <UserMenu user={user} />
           ) : (
             <>
               <SignInButton mode="modal" forceRedirectUrl={returnTo}>
@@ -184,7 +279,7 @@ export function Navbar() {
             <LanguageSwitcher />
             <div className={cn("flex gap-2", signedIn && "justify-start")}>
               {signedIn ? (
-                <UserButton />
+                <UserMenu user={user} />
               ) : (
                 <>
                   <SignInButton mode="modal" forceRedirectUrl={returnTo}>

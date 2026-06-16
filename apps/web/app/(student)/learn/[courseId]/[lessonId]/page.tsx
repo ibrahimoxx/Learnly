@@ -47,9 +47,11 @@ async function getProgress(enrollmentId: string, token: string) {
   }
 }
 
-async function getLessons(sectionId: string) {
+async function getLessons(sectionId: string, token?: string) {
   try {
-    return await apiFetch<Lesson[]>(`/api/v1/sections/${sectionId}/lessons`);
+    return await apiFetch<Lesson[]>(`/api/v1/sections/${sectionId}/lessons`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
   } catch {
     return [];
   }
@@ -96,7 +98,7 @@ export default async function PlayerPage({ params }: Props) {
   const sectionsWithLessons = await Promise.all(
     sections.map(async (section) => ({
       ...section,
-      lessons: await getLessons(section.id),
+      lessons: await getLessons(section.id, token),
     }))
   );
 

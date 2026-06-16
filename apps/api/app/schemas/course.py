@@ -95,6 +95,7 @@ class CourseListRead(BaseModel):
     enrollment_count: int
     instructor_id: uuid.UUID
     created_at: datetime
+    category: CategoryRead | None = None
 
     model_config = {"from_attributes": True}
 

@@ -1,13 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Search, ArrowRight, Award, Users, PlayCircle, TrendingUp } from "lucide-react";
+import { Search, Award, Users, PlayCircle, TrendingUp } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
-import { CourseCard } from "@/components/features/courses/course-card";
+import { CourseViewToggle } from "@/components/features/courses/course-view-toggle";
 import { apiFetch } from "@/lib/api";
 import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
-import type { CourseListResponse } from "@/types";
+import type { CourseListResponse, Course } from "@/types";
 
 export const metadata: Metadata = {
   title: "Learnly — Learn Without Limits",
@@ -31,9 +31,9 @@ interface PlatformStats {
   total_reviews: number;
 }
 
-async function getFeaturedCourses() {
+async function getAllCourses(): Promise<Course[]> {
   try {
-    const data = await apiFetch<CourseListResponse>("/api/v1/courses?status=published&per_page=8");
+    const data = await apiFetch<CourseListResponse>("/api/v1/courses?status=published&per_page=50");
     return data.items;
   } catch {
     return [];
@@ -49,8 +49,8 @@ async function getPlatformStats(): Promise<PlatformStats> {
 }
 
 export default async function HomePage() {
-  const [featured, ownedCourseIds, t, platformStats] = await Promise.all([
-    getFeaturedCourses(),
+  const [allCourses, ownedCourseIds, t, platformStats] = await Promise.all([
+    getAllCourses(),
     getViewerEnrollmentCourseIds(),
     getTranslations("home"),
     getPlatformStats(),
@@ -152,27 +152,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured courses */}
+      {/* Courses */}
       <section className="bg-[--color-surface]/70 px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between">
-            <h2 className="text-3xl font-black tracking-tight text-[--color-text-primary]">{t("featuredCourses")}</h2>
-            <Link
-              href="/courses"
-              className="flex items-center gap-1 text-sm font-medium text-[--color-primary] hover:underline"
-            >
-              {t("viewAll")} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          {featured.length > 0 ? (
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
-              {featured.map((course) => (
-                <CourseCard key={course.id} course={course} isOwned={ownedCourseIdSet.has(course.id)} />
-              ))}
-            </div>
+          {allCourses.length > 0 ? (
+            <CourseViewToggle courses={allCourses} ownedIds={ownedCourseIdSet} />
           ) : (
-            <div className="premium-card mt-10 flex flex-col items-center justify-center rounded-[--radius-lg] py-16 text-center">
+            <div className="premium-card flex flex-col items-center justify-center rounded-[--radius-lg] py-16 text-center">
               <Image src="/brand/empty-state.svg" alt="" width={180} height={130} className="mb-2" />
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[--color-primary-subtle]">
                 <PlayCircle className="h-7 w-7 text-[--color-primary]" />

@@ -59,7 +59,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: http://localhost:9000 https://*.r2.cloudflarestorage.com https://*.cloudflare.com https://img.clerk.com https://*.clerk.com https://*.clerk.dev https://lh3.googleusercontent.com https://www.gstatic.com https://ssl.gstatic.com https://img.youtube.com https://i.ytimg.com https://randomuser.me https://placehold.co",
               "media-src 'self' blob: http://localhost:9000 https://*.r2.cloudflarestorage.com https://*.cloudflare.com https://*.cloudflarestream.com https://videodelivery.net",
               "connect-src 'self' http://localhost:8000 http://localhost:9000 https://*.clerk.accounts.dev https://api.stripe.com https://clerk.learnly.app https://clerk-telemetry.com https://*.posthog.com https://*.i.posthog.com https://challenges.cloudflare.com wss: ws:",
-              "frame-src https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com",
+              "frame-src https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com",
               "worker-src 'self' blob:",
               "object-src 'none'",
               "base-uri 'self'",

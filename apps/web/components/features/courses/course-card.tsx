@@ -63,6 +63,7 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
                 src={course.image_url}
                 alt={course.title}
                 fill
+                unoptimized
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             ) : (

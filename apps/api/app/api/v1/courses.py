@@ -53,7 +53,7 @@ async def list_courses(
     q: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ) -> PaginatedCourses:
-    query = select(Course)
+    query = select(Course).options(selectinload(Course.category))
     if status_filter:
         query = query.where(Course.status == status_filter)
     else:
