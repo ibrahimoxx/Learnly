@@ -42,6 +42,7 @@ from app.api.v1.notes import router as notes_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.organizations import router as organizations_router
 from app.api.v1.payouts import router as payouts_router
+from app.api.v1.platform_stats import router as platform_stats_router
 from app.api.v1.push import router as push_router
 from app.api.v1.questions import router as questions_router
 from app.api.v1.quiz import router as quiz_router
@@ -109,6 +110,7 @@ app.include_router(affiliate_router, prefix="/api/v1")
 app.include_router(coding_exercises_router, prefix="/api/v1")
 app.include_router(live_sessions_router, prefix="/api/v1")
 app.include_router(categories_router, prefix="/api/v1")
+app.include_router(platform_stats_router, prefix="/api/v1")
 app.include_router(account_router, prefix="/api/v1")
 app.include_router(messages_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")

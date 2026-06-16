@@ -24,6 +24,13 @@ const CATEGORIES = [
   { label: "Health & Fitness", icon: "🏋️", href: "/courses?category=health" },
 ];
 
+interface PlatformStats {
+  total_courses: number;
+  total_students: number;
+  avg_rating: number;
+  total_reviews: number;
+}
+
 async function getFeaturedCourses() {
   try {
     const data = await apiFetch<CourseListResponse>("/api/v1/courses?status=published&per_page=8");
@@ -33,19 +40,28 @@ async function getFeaturedCourses() {
   }
 }
 
+async function getPlatformStats(): Promise<PlatformStats> {
+  try {
+    return await apiFetch<PlatformStats>("/api/v1/stats");
+  } catch {
+    return { total_courses: 0, total_students: 0, avg_rating: 0, total_reviews: 0 };
+  }
+}
+
 export default async function HomePage() {
-  const [featured, ownedCourseIds, t] = await Promise.all([
+  const [featured, ownedCourseIds, t, platformStats] = await Promise.all([
     getFeaturedCourses(),
     getViewerEnrollmentCourseIds(),
     getTranslations("home"),
+    getPlatformStats(),
   ]);
   const ownedCourseIdSet = new Set(ownedCourseIds);
 
   const STATS = [
-    { icon: Users, value: "10K+", label: t("statsStudents") },
-    { icon: PlayCircle, value: "500+", label: t("statsCourses") },
-    { icon: Award, value: "95%", label: t("statsCompletion") },
-    { icon: TrendingUp, value: "4.8★", label: t("statsRating") },
+    { icon: Users, value: platformStats.total_students.toLocaleString(), label: t("statsStudents") },
+    { icon: PlayCircle, value: platformStats.total_courses.toLocaleString(), label: t("statsCourses") },
+    { icon: TrendingUp, value: platformStats.avg_rating > 0 ? `${platformStats.avg_rating}★` : "—", label: t("statsRating") },
+    { icon: Award, value: platformStats.total_reviews.toLocaleString(), label: t("statsReviews") },
   ];
 
   return (
