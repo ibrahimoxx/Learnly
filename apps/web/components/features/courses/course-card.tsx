@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Users } from "lucide-react";
@@ -20,10 +23,17 @@ const levelLabels: Record<string, string> = {
 };
 
 export function CourseCard({ course, isOwned = false }: CourseCardProps) {
+  const [wishlisted, setWishlisted] = useState(false);
   const price = isOwned ? "Owned" : course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
 
   return (
-    <div className="group hover-lift premium-card rounded-[--radius-lg]">
+    <div
+      className={`group hover-lift premium-card rounded-[--radius-lg] transition-all duration-300 ${
+        wishlisted
+          ? "ring-2 ring-red-500/70 shadow-[0_0_0_4px_rgba(239,68,68,0.12),0_8px_32px_rgba(239,68,68,0.18)]"
+          : ""
+      }`}
+    >
       <Link href={`/courses/${course.slug}`} className="block">
         {/* Thumbnail */}
         <div className="thumbnail-fallback sheen-overlay relative aspect-video w-full overflow-hidden">
@@ -77,7 +87,7 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
           >
             {price}
           </span>
-          <WishlistButton courseId={course.id} iconOnly />
+          <WishlistButton courseId={course.id} iconOnly onToggle={setWishlisted} />
           <AddToCartButton
             courseId={course.id}
             slug={course.slug}
