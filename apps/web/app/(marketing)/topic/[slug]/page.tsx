@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
@@ -7,7 +8,11 @@ import { CourseCard } from "@/components/features/courses/course-card";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
-import type { Category, CategoryWithCount, CourseListResponse } from "@/types";
+import type { Category, CategoryWithCount, Course, CourseListResponse } from "@/types";
+
+interface CategoryWithPreviews extends CategoryWithCount {
+  previews: Pick<Course, "id" | "image_url" | "title">[];
+}
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -29,10 +34,18 @@ async function getCategoryCourses(slug: string) {
   }
 }
 
-async function getRelatedCategories(currentSlug: string) {
+async function getRelatedCategories(currentSlug: string): Promise<CategoryWithPreviews[]> {
   try {
     const categories = await apiFetch<CategoryWithCount[]>(`/api/v1/categories`);
-    return categories.filter((c) => c.slug !== currentSlug).slice(0, 6);
+    const related = categories.filter((c) => c.slug !== currentSlug).slice(0, 6);
+    const previews = await Promise.all(
+      related.map((cat) =>
+        apiFetch<CourseListResponse>(`/api/v1/categories/${cat.slug}/courses?limit=3`)
+          .then((r) => r.items.map((c) => ({ id: c.id, image_url: c.image_url, title: c.title })))
+          .catch(() => [] as Pick<Course, "id" | "image_url" | "title">[])
+      )
+    );
+    return related.map((cat, i) => ({ ...cat, previews: previews[i] ?? [] }));
   } catch {
     return [];
   }
