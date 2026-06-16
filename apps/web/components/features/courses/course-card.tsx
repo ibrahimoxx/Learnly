@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "./star-rating";
 import { AddToCartButton } from "./add-to-cart-button";
+import { WishlistButton } from "./wishlist-button";
 import type { Course } from "@/types";
 
 interface CourseCardProps {
@@ -76,6 +77,7 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
           >
             {price}
           </span>
+          <WishlistButton courseId={course.id} iconOnly />
           <AddToCartButton
             courseId={course.id}
             slug={course.slug}

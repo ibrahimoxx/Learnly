@@ -7,9 +7,10 @@ import { apiFetch } from "@/lib/api";
 
 interface WishlistButtonProps {
   courseId: string;
+  iconOnly?: boolean;
 }
 
-export function WishlistButton({ courseId }: WishlistButtonProps) {
+export function WishlistButton({ courseId, iconOnly = false }: WishlistButtonProps) {
   const { isSignedIn, getToken } = useAuth();
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,23 @@ export function WishlistButton({ courseId }: WishlistButtonProps) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (iconOnly) {
+    return (
+      <button
+        onClick={toggle}
+        disabled={loading}
+        aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
+        className={`flex h-8 w-8 items-center justify-center rounded-full border transition-colors disabled:opacity-50 ${
+          saved
+            ? "border-[--color-error]/30 bg-[--color-error]/10 text-[--color-error] hover:bg-[--color-error]/15"
+            : "border-[--color-border] bg-white text-[--color-text-secondary] hover:border-[--color-error]/30 hover:text-[--color-error]"
+        }`}
+      >
+        <Heart className={`h-3.5 w-3.5 ${saved ? "fill-[--color-error]" : ""}`} />
+      </button>
+    );
   }
 
   return (
