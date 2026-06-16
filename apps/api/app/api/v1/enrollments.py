@@ -152,6 +152,7 @@ async def my_enrollments(
             course_id=e.course_id,
             course_title=courses_by_id[e.course_id].title if e.course_id in courses_by_id else "",
             course_slug=courses_by_id[e.course_id].slug if e.course_id in courses_by_id else "",
+            course_image_url=courses_by_id[e.course_id].image_url if e.course_id in courses_by_id else None,
             status=e.status,
             completed_at=e.completed_at,
             created_at=e.created_at,

@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
-import { PlayCircle, Award, BookOpen, Download, Flame, Zap, Medal, GraduationCap } from "lucide-react";
+import { PlayCircle, Award, BookOpen, Download, Flame, Zap, Medal, GraduationCap, ChevronRight } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";

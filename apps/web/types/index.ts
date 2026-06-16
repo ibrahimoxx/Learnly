@@ -97,6 +97,7 @@ export interface Enrollment {
   course_id: string;
   course_title?: string;
   course_slug?: string;
+  course_image_url?: string | null;
   status: EnrollmentStatus;
   created_at: string;
   completed_at?: string;

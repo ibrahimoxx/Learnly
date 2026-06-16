@@ -15,6 +15,7 @@ class EnrollmentRead(BaseModel):
     course_id: uuid.UUID
     course_title: str = ""
     course_slug: str = ""
+    course_image_url: str | None = None
     status: str
     completed_at: datetime | None
     created_at: datetime
