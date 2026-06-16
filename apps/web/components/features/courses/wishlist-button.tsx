@@ -8,9 +8,10 @@ import { apiFetch } from "@/lib/api";
 interface WishlistButtonProps {
   courseId: string;
   iconOnly?: boolean;
+  onToggle?: (saved: boolean) => void;
 }
 
-export function WishlistButton({ courseId, iconOnly = false }: WishlistButtonProps) {
+export function WishlistButton({ courseId, iconOnly = false, onToggle }: WishlistButtonProps) {
   const { isSignedIn, getToken } = useAuth();
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
