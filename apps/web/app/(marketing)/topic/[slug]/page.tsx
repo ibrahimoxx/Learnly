@@ -145,15 +145,57 @@ export default async function TopicPage({ params }: Props) {
         {relatedCategories.length > 0 && (
           <section className="mt-14">
             <h2 className="text-xl font-bold tracking-tight text-[--color-text-primary]">{t("relatedTopics")}</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {relatedCategories.map((cat) => (
                 <Link
                   key={cat.slug}
                   href={`/topic/${cat.slug}`}
-                  className="hover-lift inline-flex items-center gap-2 rounded-full border border-[--color-border] bg-[--color-surface-raised] px-4 py-2 text-sm font-bold text-[--color-text-secondary] shadow-[var(--shadow-xs)] transition-colors hover:border-[--color-primary] hover:text-[--color-primary]"
+                  className="group hover-lift premium-card flex flex-col overflow-hidden rounded-[--radius-lg] transition-all hover:border-[--color-primary]/40"
                 >
-                  {cat.name}
-                  <span className="text-xs text-[--color-text-muted]">({cat.course_count})</span>
+                  {/* Thumbnail strip */}
+                  <div className="relative flex h-24 overflow-hidden bg-[--color-surface]">
+                    {cat.previews.length > 0 ? (
+                      cat.previews.map((course, idx) => (
+                        <div
+                          key={course.id}
+                          className="relative flex-1 overflow-hidden"
+                          style={{ flex: idx === 0 ? 2 : 1 }}
+                        >
+                          {course.image_url ? (
+                            <Image
+                              src={course.image_url}
+                              alt={course.title}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center bg-linear-to-br from-[--brand-700] to-[--color-primary]">
+                              <span className="text-xs font-black text-white/80">
+                                {course.title.slice(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                          {idx > 0 && <div className="absolute inset-y-0 left-0 w-px bg-white/20" />}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-[--brand-700] via-[--brand-600] to-[--color-primary]">
+                        <span className="text-2xl font-black text-white/40">{cat.name.slice(0, 2).toUpperCase()}</span>
+                      </div>
+                    )}
+                    {/* Dark overlay + category name on image */}
+                    <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent" />
+                  </div>
+
+                  {/* Label */}
+                  <div className="flex items-center justify-between px-3 py-2.5">
+                    <span className="text-sm font-bold text-[--color-text-primary] transition-colors group-hover:text-[--color-primary]">
+                      {cat.name}
+                    </span>
+                    <span className="rounded-full bg-[--color-primary-subtle] px-2 py-0.5 text-[10px] font-extrabold text-[--brand-800]">
+                      {cat.course_count} {cat.course_count === 1 ? "course" : "courses"}
+                    </span>
+                  </div>
                 </Link>
               ))}
             </div>
