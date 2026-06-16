@@ -28,6 +28,11 @@ ai-output/
 ai_output/
 scripts/generated/
 
+# Seed data — raw/normalized JSON + seed scripts, never commit
+seed-data/scripts/
+seed-data/raw/
+seed-data/normalized/
+
 # OS & editor
 .DS_Store
 Thumbs.db
