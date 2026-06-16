@@ -45,15 +45,15 @@ interface ProgressSSEEvent {
 /* Shared palette */
 const C = {
   ink: "#08080d",
-  panel: "#0f0d1c",
-  panelSolid: "#13111d",
-  line: "rgba(255,255,255,0.09)",
+  panel: "#1a1730",
+  panelSolid: "#201c38",
+  line: "rgba(255,255,255,0.10)",
   brand: "#8b5cf6",
-  brandSoft: "rgba(139,92,246,0.18)",
+  brandSoft: "rgba(139,92,246,0.20)",
   brandGlow: "rgba(139,92,246,0.45)",
-  txt: "#f0eeff",
-  txt2: "#b4b0d0",
-  txt3: "#706c8a",
+  txt: "#ffffff",
+  txt2: "#c8c4e8",
+  txt3: "#8c88a8",
 };
 
 const APP_BG =
@@ -261,7 +261,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
           }}
         >
           {/* Progress hero */}
-          <div className="shrink-0 px-5 pt-5 pb-4" style={{ borderBottom: `1px solid ${C.line}` }}>
+          <div className="shrink-0 px-5 pt-5 pb-4" style={{ borderBottom: "1px solid rgba(255,255,255,0.10)", background: "#1e1a34" }}>
             <div className="flex items-center gap-4">
               <ProgressRing pct={progressPct} />
               <div className="min-w-0">
@@ -281,7 +281,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
 
           {/* Segmented tab control */}
           <div className="shrink-0 px-3 pt-3">
-            <div className="flex gap-1 rounded-2xl p-1" style={{ background: "rgba(255,255,255,0.06)" }}>
+            <div className="flex gap-1 rounded-2xl p-1" style={{ background: "#2a2550" }}>
               {TABS.map((tab) => {
                 const on = activeTab === tab.id;
                 return (
@@ -573,7 +573,7 @@ function ProgressRing({ pct }: { pct: number }) {
   return (
     <div className="relative shrink-0">
       <svg width="56" height="56" className="-rotate-90">
-        <circle cx="28" cy="28" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="4" />
+        <circle cx="28" cy="28" r={r} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="4" />
         <circle
           cx="28" cy="28" r={r} fill="none"
           stroke="url(#ringGrad)" strokeWidth="4" strokeLinecap="round"
@@ -653,13 +653,13 @@ function ContentTab({
           <div
             key={section.id}
             className="overflow-hidden rounded-2xl"
-            style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${C.line}` }}
+            style={{ background: "#252040", border: "1px solid rgba(255,255,255,0.12)" }}
           >
             {/* Section header */}
             <button
               onClick={() => toggleSection(section.id)}
               className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:brightness-110"
-              style={{ background: "rgba(255,255,255,0.03)" }}
+              style={{ background: "#2c2848" }}
             >
               <span
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-black"
@@ -670,7 +670,7 @@ function ContentTab({
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-bold leading-snug" style={{ color: "#ffffff" }}>{section.title}</p>
                 <div className="mt-1.5 flex items-center gap-2">
-                  <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.1)" }}>
+                  <div className="h-1 flex-1 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.15)" }}>
                     <div className="h-full rounded-full" style={{ width: `${pct}%`, background: "linear-gradient(90deg,#a78bfa,#7c3aed)", transition: "width 0.6s" }} />
                   </div>
                   <span className="text-[10px] font-semibold tabular-nums" style={{ color: "#9d9ab5" }}>{done}/{total}</span>
