@@ -26,7 +26,7 @@ function CategorySection({ group, ownedIds }: { group: CategoryGroup; ownedIds: 
       <h2 className="text-xl font-black tracking-tight" style={{ color: "#1c1d1f" }}>
         {group.name}
       </h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="course-grid mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {visible.map((course) => (
           <CourseCard key={course.id} course={course} isOwned={ownedIds.has(course.id)} />
         ))}

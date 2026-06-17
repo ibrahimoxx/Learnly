@@ -15,7 +15,7 @@ function CategorySection({ name, courses, ownedIds }: { name: string; courses: C
   return (
     <section>
       <h2 className="text-xl font-black tracking-tight" style={{ color: "#1c1d1f" }}>{name}</h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="course-grid mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {visible.map((c) => (
           <CourseCard key={c.id} course={c} isOwned={ownedIds.has(c.id)} />
         ))}
@@ -80,7 +80,7 @@ export function CourseViewToggle({ courses, ownedIds }: CourseViewToggleProps) {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="course-grid grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {courses.map((c) => (
             <CourseCard key={c.id} course={c} isOwned={ownedIds.has(c.id)} />
           ))}
