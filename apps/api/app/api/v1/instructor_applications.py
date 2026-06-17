@@ -10,6 +10,7 @@ from app.core.auth import get_current_user
 from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.instructor_application import InstructorApplication
+from app.db.tables.notification import Notification
 from app.db.tables.user import User
 from app.schemas.instructor_application import (
     InstructorApplicationCreate,
@@ -63,6 +64,19 @@ async def submit_application(
         **body.model_dump(),
     )
     db.add(app_obj)
+
+    # Notify all admins
+    admin_ids = (await db.execute(select(User.id).where(User.role == "admin"))).scalars().all()
+    applicant_name = f"{current_user.first_name} {current_user.last_name}".strip() or current_user.email
+    for admin_id in admin_ids:
+        db.add(Notification(
+            user_id=admin_id,
+            type="instructor_application",
+            title="New instructor application",
+            body=f"{applicant_name} applied to become an instructor",
+            link="/admin/instructor-applications",
+        ))
+
     await db.commit()
     await db.refresh(app_obj)
     return InstructorApplicationRead.model_validate(app_obj)
