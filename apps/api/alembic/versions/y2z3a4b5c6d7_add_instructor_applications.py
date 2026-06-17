@@ -16,7 +16,12 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("CREATE TYPE IF NOT EXISTS instructor_application_status AS ENUM ('pending', 'approved', 'rejected', 'withdrawn')")
+    op.execute("""
+        DO $$ BEGIN
+            CREATE TYPE instructor_application_status AS ENUM ('pending', 'approved', 'rejected', 'withdrawn');
+        EXCEPTION WHEN duplicate_object THEN NULL;
+        END $$;
+    """)
 
     op.create_table(
         "instructor_applications",
