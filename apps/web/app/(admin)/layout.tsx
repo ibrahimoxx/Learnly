@@ -15,6 +15,7 @@ import {
   Wallet,
   Megaphone,
   LifeBuoy,
+  GraduationCap,
 } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -51,6 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             { href: "/admin/payouts", label: "Payouts", icon: Wallet },
             { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
             { href: "/admin/support", label: "Support", icon: LifeBuoy },
+            { href: "/admin/instructor-applications", label: "Instructor Apps", icon: GraduationCap },
           ].map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
