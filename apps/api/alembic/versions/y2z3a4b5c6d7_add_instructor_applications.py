@@ -16,18 +16,17 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("""
-        DO $$ BEGIN
-            CREATE TYPE instructor_application_status AS ENUM ('pending', 'approved', 'rejected', 'withdrawn');
-        EXCEPTION WHEN duplicate_object THEN NULL;
-        END $$;
-    """)
+    status_enum = postgresql.ENUM(
+        "pending", "approved", "rejected", "withdrawn",
+        name="instructor_application_status",
+        create_type=False,
+    )
 
     op.create_table(
         "instructor_applications",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("status", sa.Enum("pending", "approved", "rejected", "withdrawn", name="instructor_application_status", create_type=False), nullable=False, server_default="pending"),
+        sa.Column("status", status_enum, nullable=False, server_default="pending"),
         sa.Column("expertise", sa.Text, nullable=False),
         sa.Column("experience", sa.Text, nullable=False),
         sa.Column("course_ideas", sa.Text, nullable=False),
@@ -46,4 +45,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("instructor_applications")
-    op.execute("DROP TYPE IF EXISTS instructor_application_status")
+    op.execute("DROP TYPE IF EXISTS instructor_application_status CASCADE")
