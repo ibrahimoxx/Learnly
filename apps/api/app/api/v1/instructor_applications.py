@@ -154,6 +154,15 @@ async def approve_application(
     app_obj.status = "approved"
     app_obj.reviewed_by = admin.id
     app_obj.reviewed_at = datetime.now(timezone.utc)
+
+    db.add(Notification(
+        user_id=applicant.id,
+        type="instructor_application_approved",
+        title="Your instructor application was approved!",
+        body="Congratulations! You are now an instructor on Learnly. Sign out and sign back in to access your dashboard.",
+        link="/instructor/courses",
+    ))
+
     await db.commit()
     await db.refresh(app_obj)
     return InstructorApplicationRead.model_validate(app_obj)
@@ -176,10 +185,23 @@ async def reject_application(
     if app_obj.status != "pending":
         raise HTTPException(status_code=409, detail=f"Application already {app_obj.status}")
 
+    # Fetch applicant to notify
+    applicant = (await db.execute(select(User).where(User.id == app_obj.user_id))).scalar_one_or_none()
+
     app_obj.status = "rejected"
     app_obj.rejection_reason = body.reason
     app_obj.reviewed_by = admin.id
     app_obj.reviewed_at = datetime.now(timezone.utc)
+
+    if applicant:
+        db.add(Notification(
+            user_id=applicant.id,
+            type="instructor_application_rejected",
+            title="Your instructor application was not approved",
+            body=f"Reason: {body.reason}. You may apply again after addressing the feedback.",
+            link="/teach/apply",
+        ))
+
     await db.commit()
     await db.refresh(app_obj)
     return InstructorApplicationRead.model_validate(app_obj)

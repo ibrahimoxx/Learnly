@@ -110,6 +110,18 @@ async def submit_assignment(
         )
         db.add(submission)
 
+    # Notify instructor
+    course_row = (await db.execute(select(Course).where(Course.id == course_id))).scalar_one_or_none()
+    if course_row:
+        student_name = f"{user.first_name} {user.last_name}".strip() or user.email
+        db.add(Notification(
+            user_id=course_row.instructor_id,
+            type="assignment_submitted",
+            title="New assignment submission",
+            body=f"{student_name} submitted an assignment in {course_row.title}",
+            link="/instructor/communication/assignments",
+        ))
+
     await db.commit()
     await db.refresh(submission)
     return AssignmentSubmissionRead.model_validate(submission)

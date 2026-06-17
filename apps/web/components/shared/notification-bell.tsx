@@ -6,10 +6,21 @@ import {
   Award,
   Bell,
   BookOpen,
+  CheckCircle2,
+  ClipboardCheck,
+  ClipboardList,
+  DollarSign,
   Gift,
+  GraduationCap,
+  HelpCircle,
+  LifeBuoy,
   Megaphone,
   MessageCircle,
+  MessageSquare,
   Star,
+  UserPlus,
+  Users,
+  XCircle,
   type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
@@ -25,52 +36,37 @@ interface Notification {
   created_at: string;
 }
 
+const NOTIFICATION_VISUALS: Record<string, { Icon: LucideIcon; bg: string; color: string }> = {
+  // ── Student ──────────────────────────────────────────────────────────────
+  enrollment:                        { Icon: BookOpen,       bg: "bg-[--color-success]/15",        color: "text-[--color-success]" },
+  course_completed:                  { Icon: Award,          bg: "bg-[--color-warning]/15",        color: "text-[--color-warning]" },
+  badge_earned:                      { Icon: Award,          bg: "bg-amber-100",                   color: "text-amber-500" },
+  qa_reply:                          { Icon: MessageCircle,  bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  qa_answer:                         { Icon: MessageCircle,  bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  assignment_graded:                 { Icon: ClipboardCheck, bg: "bg-[--color-success]/15",        color: "text-[--color-success]" },
+  gift_received:                     { Icon: Gift,           bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  gift_sent:                         { Icon: Gift,           bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  instructor_application_approved:   { Icon: CheckCircle2,   bg: "bg-[--color-success]/15",        color: "text-[--color-success]" },
+  instructor_application_rejected:   { Icon: XCircle,        bg: "bg-red-50",                      color: "text-red-500" },
+  support_reply:                     { Icon: LifeBuoy,       bg: "bg-[--color-success]/15",        color: "text-[--color-success]" },
+  // ── Instructor ───────────────────────────────────────────────────────────
+  new_enrollment:                    { Icon: Users,          bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  new_review:                        { Icon: Star,           bg: "bg-[--color-star]/15",           color: "text-[--color-star]" },
+  new_question:                      { Icon: HelpCircle,     bg: "bg-amber-50",                    color: "text-amber-500" },
+  assignment_submitted:              { Icon: ClipboardList,  bg: "bg-amber-50",                    color: "text-amber-500" },
+  co_instructor_invite:              { Icon: UserPlus,       bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  course_review:                     { Icon: CheckCircle2,   bg: "bg-[--color-success]/15",        color: "text-[--color-success]" },
+  payout_processed:                  { Icon: DollarSign,     bg: "bg-[--color-success]/15",        color: "text-[--color-success]" },
+  // ── Admin ────────────────────────────────────────────────────────────────
+  instructor_application:            { Icon: GraduationCap,  bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  support_ticket:                    { Icon: LifeBuoy,       bg: "bg-red-50",                      color: "text-red-500" },
+  // ── Shared ───────────────────────────────────────────────────────────────
+  direct_message:                    { Icon: MessageSquare,  bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+  announcement:                      { Icon: Megaphone,      bg: "bg-[--color-primary-subtle]",    color: "text-[--color-primary]" },
+};
+
 function getNotificationVisual(type: string): { Icon: LucideIcon; bg: string; color: string } {
-  switch (type) {
-    case "gift_received":
-    case "gift_sent":
-      return {
-        Icon: Gift,
-        bg: "bg-[--color-primary-subtle]",
-        color: "text-[--color-primary]",
-      };
-    case "badge_earned":
-      return {
-        Icon: Award,
-        bg: "bg-[--color-warning]/15",
-        color: "text-[--color-warning]",
-      };
-    case "enrollment":
-      return {
-        Icon: BookOpen,
-        bg: "bg-[--color-success]/15",
-        color: "text-[--color-success]",
-      };
-    case "review":
-      return {
-        Icon: Star,
-        bg: "bg-[--color-star]/15",
-        color: "text-[--color-star]",
-      };
-    case "qa_reply":
-      return {
-        Icon: MessageCircle,
-        bg: "bg-[--color-primary-subtle]",
-        color: "text-[--color-primary]",
-      };
-    case "announcement":
-      return {
-        Icon: Megaphone,
-        bg: "bg-[--color-primary-subtle]",
-        color: "text-[--color-primary]",
-      };
-    default:
-      return {
-        Icon: Bell,
-        bg: "bg-[--color-surface]",
-        color: "text-[--color-text-muted]",
-      };
-  }
+  return NOTIFICATION_VISUALS[type] ?? { Icon: Bell, bg: "bg-[--color-surface]", color: "text-[--color-text-muted]" };
 }
 
 export function NotificationBell() {
@@ -158,7 +154,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="animate-scale-in absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[--radius-lg] border border-white/70 bg-[--color-surface-glass] shadow-[var(--shadow-xl)] backdrop-blur-xl">
+        <div className="animate-scale-in absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-[--radius-lg] border border-white/70 bg-[--color-surface-glass] shadow-(--shadow-xl) backdrop-blur-xl">
           <div className="flex items-center justify-between border-b border-[--color-border] px-4 py-3">
             <span className="text-sm font-extrabold text-[--color-text-primary]">Notifications</span>
             {notifications.length > 0 && (
