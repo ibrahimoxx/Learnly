@@ -163,9 +163,9 @@ function ScrollCue() {
 
 export function HeroSection(props: HeroSectionProps) {
   return (
-    <section className="relative isolate min-h-[90vh] overflow-hidden bg-[--color-hero] text-white">
+    <section className="relative isolate min-h-[50vh] overflow-hidden bg-[--color-hero] text-white">
       <HeroBackground />
-      <div className="relative z-20 flex min-h-[90vh] items-center px-4 py-20 sm:px-6">
+      <div className="relative z-20 flex min-h-[50vh] items-center px-4 py-12 sm:px-6">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-12 lg:grid-cols-[1.02fr_0.98fr]">
           <HeroCopy {...props} />
           <HeroLogoOrb />

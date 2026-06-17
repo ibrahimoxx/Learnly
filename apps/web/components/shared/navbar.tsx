@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { SignInButton, SignUpButton, useAuth, useUser, useClerk } from "@clerk/nextjs";
-import { Search, BookOpen, Menu, X, ShoppingCart, User, GraduationCap, ShoppingBag, Settings, Bell, Award, HelpCircle, LogOut } from "lucide-react";
+import Image from "next/image";
+import { Search, Menu, X, ShoppingCart, User, GraduationCap, ShoppingBag, Settings, Bell, Award, HelpCircle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -133,9 +134,7 @@ export function Navbar() {
       <header className="sticky top-0 z-50 w-full border-b border-white/60 bg-[--color-surface-glass] shadow-[var(--shadow-sm)] backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <div className="flex shrink-0 items-center gap-2 font-extrabold text-[--color-text-primary]">
-            <span className="flex h-9 w-9 items-center justify-center rounded-[--radius-sm] bg-[image:var(--gradient-brand)] text-white shadow-[var(--shadow-brand)]">
-              <BookOpen className="h-5 w-5" />
-            </span>
+            <Image src="/brand/learnly-logo-generated.png" alt="Learnly" width={36} height={36} className="rounded-[--radius-sm]" unoptimized />
             <span className="font-heading text-xl">Learnly</span>
           </div>
         </div>
@@ -161,9 +160,7 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
         {/* Logo */}
         <Link href="/" className="group flex shrink-0 items-center gap-2 font-extrabold text-[--color-text-primary]">
-          <span className="flex h-9 w-9 items-center justify-center rounded-[--radius-sm] bg-[image:var(--gradient-brand)] text-white shadow-[var(--shadow-brand)] transition-transform group-hover:-rotate-3 group-hover:scale-105">
-            <BookOpen className="h-5 w-5" />
-          </span>
+          <Image src="/brand/learnly-logo-generated.png" alt="Learnly" width={36} height={36} className="rounded-[--radius-sm] transition-transform group-hover:-rotate-3 group-hover:scale-105" unoptimized />
           <span className="font-heading text-xl">Learnly</span>
         </Link>
 

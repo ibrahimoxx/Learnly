@@ -13,9 +13,12 @@ interface WishlistButtonProps {
 
 export function WishlistButton({ courseId, iconOnly = false, onToggle }: WishlistButtonProps) {
   const { isSignedIn, getToken } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pulse, setPulse] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (!isSignedIn) return;
@@ -36,7 +39,7 @@ export function WishlistButton({ courseId, iconOnly = false, onToggle }: Wishlis
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSignedIn, courseId]);
 
-  if (!isSignedIn) return null;
+  if (!mounted || !isSignedIn) return null;
 
   async function toggle() {
     if (loading) return;
