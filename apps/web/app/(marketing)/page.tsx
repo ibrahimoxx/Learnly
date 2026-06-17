@@ -1,34 +1,37 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Search, Award, Users, PlayCircle, TrendingUp } from "lucide-react";
+import { PlayCircle } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { Button } from "@/components/ui/button";
+import { AnimatedStat } from "@/components/features/home/animated-stat";
+import { HeroSection } from "@/components/features/home/hero-section";
+import { Reveal } from "@/components/features/home/reveal";
 import { CourseViewToggle } from "@/components/features/courses/course-view-toggle";
+import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
-import type { CourseListResponse, Course } from "@/types";
+import type { Course, CourseListResponse } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Learnly — Learn Without Limits",
+  title: "Learnly â€” Learn Without Limits",
 };
 
 const CATEGORIES = [
-  { label: "Web Development", icon: "💻", href: "/courses?category=web-development" },
-  { label: "Data Science", icon: "📊", href: "/courses?category=data-science" },
-  { label: "Design", icon: "🎨", href: "/courses?category=design" },
-  { label: "Business", icon: "📈", href: "/courses?category=business" },
-  { label: "Marketing", icon: "📣", href: "/courses?category=marketing" },
-  { label: "Photography", icon: "📷", href: "/courses?category=photography" },
-  { label: "Music", icon: "🎵", href: "/courses?category=music" },
-  { label: "Health & Fitness", icon: "🏋️", href: "/courses?category=health" },
+  { label: "Web Development", icon: "ðŸ’»", href: "/courses?category=web-development" },
+  { label: "Data Science", icon: "ðŸ“Š", href: "/courses?category=data-science" },
+  { label: "Design", icon: "ðŸŽ¨", href: "/courses?category=design" },
+  { label: "Business", icon: "ðŸ“ˆ", href: "/courses?category=business" },
+  { label: "Marketing", icon: "ðŸ“£", href: "/courses?category=marketing" },
+  { label: "Photography", icon: "ðŸ“·", href: "/courses?category=photography" },
+  { label: "Music", icon: "ðŸŽµ", href: "/courses?category=music" },
+  { label: "Health & Fitness", icon: "ðŸ‹ï¸", href: "/courses?category=health" },
 ];
 
 interface PlatformStats {
-  total_courses: number;
-  total_students: number;
   avg_rating: number;
+  total_courses: number;
   total_reviews: number;
+  total_students: number;
 }
 
 async function getAllCourses(): Promise<Course[]> {
@@ -56,103 +59,75 @@ export default async function HomePage() {
     getPlatformStats(),
   ]);
   const ownedCourseIdSet = new Set(ownedCourseIds);
-
-  const STATS = [
-    { icon: Users, value: platformStats.total_students.toLocaleString(), label: t("statsStudents") },
-    { icon: PlayCircle, value: platformStats.total_courses.toLocaleString(), label: t("statsCourses") },
-    { icon: TrendingUp, value: platformStats.avg_rating > 0 ? `${platformStats.avg_rating}★` : "—", label: t("statsRating") },
-    { icon: Award, value: platformStats.total_reviews.toLocaleString(), label: t("statsReviews") },
+  const stats = [
+    { iconName: "students" as const, value: platformStats.total_students, suffix: "+", label: t("statsStudents") },
+    { iconName: "courses" as const, value: platformStats.total_courses, suffix: "+", label: t("statsCourses") },
+    {
+      iconName: "rating" as const,
+      value: platformStats.avg_rating > 0 ? platformStats.avg_rating : null,
+      suffix: "★",
+      decimals: 1,
+      fallback: "—",
+      label: t("statsRating"),
+    },
+    { iconName: "reviews" as const, value: platformStats.total_reviews, suffix: "+", label: t("statsReviews") },
   ];
 
   return (
     <>
-      {/* Hero */}
-      <section className="mesh-panel relative overflow-hidden px-4 py-20 text-white sm:px-6 sm:py-24">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
-          <div className="max-w-3xl stagger-children">
-            <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-extrabold uppercase tracking-wider text-white/76 shadow-[var(--shadow-sm)] backdrop-blur">
-              Skillforge learning marketplace
-            </span>
-          <h1 className="mt-5 max-w-3xl text-5xl font-black leading-none tracking-tight sm:text-6xl lg:text-7xl">
-            {t("heroTitle")}
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-white/74">
-            {t("heroSubtitle")}
-          </p>
+      <HeroSection
+        badgeText="Learnly learning marketplace"
+        popularLabel={t("heroPopular")}
+        popularTags={CATEGORIES.slice(0, 4).map(({ href, label }) => ({ href, label }))}
+        searchButton={t("heroSearchButton")}
+        searchPlaceholder={t("heroSearchPlaceholder")}
+        subtitle={t("heroSubtitle")}
+        title={t("heroTitle")}
+      />
 
-          {/* Search */}
-          <form action="/courses" className="mt-8 flex w-full max-w-2xl overflow-hidden rounded-full border border-white/20 bg-white/12 p-1 shadow-[var(--shadow-xl)] backdrop-blur-xl">
-            <div className="flex flex-1 items-center gap-2 px-4">
-              <Search className="h-4 w-4 shrink-0 text-white/60" />
-              <input
-                name="q"
-                type="text"
-                placeholder={t("heroSearchPlaceholder")}
-                className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/50 focus:outline-none"
-              />
-            </div>
-            <button
-              type="submit"
-              className="rounded-full bg-white px-6 py-2 text-sm font-extrabold text-[--brand-800] shadow-[var(--shadow-brand)] transition-all hover:-translate-y-0.5 hover:bg-white/90"
-            >
-              {t("heroSearchButton")}
-            </button>
-          </form>
-
-          <p className="mt-4 text-xs font-semibold text-white/54">{t("heroPopular")}</p>
-          </div>
-
-          <div className="relative hidden min-h-[390px] lg:block">
-            <Image
-              src="/brand/hero-orbit.svg"
-              alt=""
-              fill
-              priority
-              className="object-contain drop-shadow-2xl"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="border-b border-white/60 bg-[--color-surface-glass] backdrop-blur-xl">
+      <section
+        id="learnly-stats"
+        className="border-b border-white/60 bg-[--color-surface-glass] backdrop-blur-xl"
+      >
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
-            {STATS.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="premium-card flex items-center gap-3 rounded-[--radius-md] p-4">
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-[--radius-md] bg-[--color-primary-subtle]">
-                  <Icon className="h-5 w-5 text-[--color-primary]" />
-                </div>
-                <div className="relative">
-                  <p className="text-lg font-bold text-[--color-text-primary]">{value}</p>
-                  <p className="text-xs text-[--color-text-muted]">{label}</p>
-                </div>
-              </div>
+            {stats.map((stat, index) => (
+              <AnimatedStat
+                key={stat.label}
+                decimals={stat.decimals}
+                delay={index * 0.1}
+                fallback={stat.fallback}
+                iconName={stat.iconName}
+                label={stat.label}
+                suffix={stat.suffix}
+                value={stat.value}
+              />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Categories */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="text-3xl font-black tracking-tight text-[--color-text-primary]">{t("browseByCategory")}</h2>
+        <h2 className="text-3xl font-black tracking-tight text-[--color-text-primary]">
+          {t("browseByCategory")}
+        </h2>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {CATEGORIES.map((cat) => (
-            <Link
-              key={cat.href}
-              href={cat.href}
-              className="group hover-lift premium-card flex flex-col items-center gap-2 rounded-[--radius-md] p-4 text-center"
-            >
-              <span className="relative text-2xl">{cat.icon}</span>
-              <span className="text-xs font-medium text-[--color-text-secondary] group-hover:text-[--color-primary] transition-colors leading-tight">
-                {cat.label}
-              </span>
-            </Link>
+          {CATEGORIES.map((cat, index) => (
+            <Reveal key={cat.href} delay={index * 0.1} variant="scale">
+              <Link
+                href={cat.href}
+                className="group hover-lift premium-card flex flex-col items-center gap-2 rounded-[--radius-md] p-4 text-center"
+              >
+                <span className="relative text-2xl">{cat.icon}</span>
+                <span className="text-xs font-medium leading-tight text-[--color-text-secondary] transition-colors group-hover:text-[--color-primary]">
+                  {cat.label}
+                </span>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </section>
 
-      {/* Courses */}
       <section className="bg-[--color-surface]/70 px-4 py-16 sm:px-6">
         <div className="mx-auto max-w-7xl">
           {allCourses.length > 0 ? (
@@ -163,14 +138,15 @@ export default async function HomePage() {
               <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[--color-primary-subtle]">
                 <PlayCircle className="h-7 w-7 text-[--color-primary]" />
               </span>
-              <h3 className="mt-4 text-base font-semibold text-[--color-text-secondary]">{t("noCoursesTitle")}</h3>
+              <h3 className="mt-4 text-base font-semibold text-[--color-text-secondary]">
+                {t("noCoursesTitle")}
+              </h3>
               <p className="mt-1 text-sm text-[--color-text-muted]">{t("noCoursesDesc")}</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* Become instructor CTA */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="mesh-panel overflow-hidden rounded-[--radius-xl] p-10 text-white shadow-[var(--shadow-xl)]">
           <div className="max-w-2xl">
