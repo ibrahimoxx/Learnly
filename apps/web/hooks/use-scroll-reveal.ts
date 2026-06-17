@@ -16,6 +16,7 @@ export function useScrollReveal<T extends HTMLDivElement = HTMLDivElement>(thres
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         if (!entry.isIntersecting) return;
         element.classList.add("revealed");
         observer.disconnect();

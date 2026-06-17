@@ -47,6 +47,7 @@ function useCountUp(value: number | null, ref: React.RefObject<HTMLDivElement | 
     let frameId = 0;
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         if (!entry.isIntersecting) return;
 
         const startedAt = performance.now();
