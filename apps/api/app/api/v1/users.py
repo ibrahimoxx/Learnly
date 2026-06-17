@@ -2,10 +2,13 @@ import math
 import uuid
 from decimal import Decimal
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.auth import get_current_user
+from app.core.config import settings
 from app.db.session import get_db
 from app.db.tables.course import Course
 from app.db.tables.user import User
@@ -13,6 +16,30 @@ from app.schemas.course import CourseListRead, PaginatedCourses
 from app.schemas.user import InstructorProfileRead
 
 router = APIRouter(prefix="/users", tags=["users"])
+
+
+@router.post("/me/become-instructor", status_code=status.HTTP_200_OK)
+async def become_instructor(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
+    if current_user.role in ("instructor", "admin"):
+        return {"role": current_user.role}
+
+    # Update Clerk public_metadata.role
+    async with httpx.AsyncClient() as client:
+        resp = await client.patch(
+            f"https://api.clerk.com/v1/users/{current_user.clerk_id}/metadata",
+            headers={"Authorization": f"Bearer {settings.clerk_secret_key}", "Content-Type": "application/json"},
+            json={"public_metadata": {"role": "instructor"}},
+        )
+        if resp.status_code not in (200, 201):
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="Failed to update Clerk role")
+
+    # Update DB
+    current_user.role = "instructor"
+    await db.commit()
+    return {"role": "instructor"}
 
 
 async def _get_instructor(user_id: uuid.UUID, db: AsyncSession) -> User:

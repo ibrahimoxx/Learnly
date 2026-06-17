@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
-import { BookOpen, DollarSign, Users, Star, ChevronRight, PlayCircle, BarChart3, Globe } from "lucide-react";
+import { useUser, useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { BookOpen, DollarSign, Users, Star, ChevronRight, PlayCircle, BarChart3, Globe, Loader2 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 const PERKS = [
   { icon: DollarSign, title: "Earn revenue",       desc: "Get paid for every enrollment. Set your own price and keep up to 70% of every sale." },
@@ -21,8 +24,32 @@ const STEPS = [
 
 export default function TeachPage() {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const role = user?.publicMetadata?.role as string | undefined;
   const isInstructor = role === "instructor" || role === "admin";
+
+  async function handleBecomeInstructor() {
+    if (!user) { router.push("/sign-up"); return; }
+    setLoading(true);
+    setError("");
+    try {
+      const token = await getToken();
+      await apiFetch("/api/v1/users/me/become-instructor", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Force Clerk to refresh the session token so new role is picked up
+      await user.reload();
+      router.push("/instructor/courses");
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -59,15 +86,17 @@ export default function TeachPage() {
                 Go to your dashboard <ChevronRight className="h-4 w-4" />
               </Link>
             ) : (
-              <Link
-                href={isLoaded && user ? "/user/edit-profile" : "/sign-up"}
-                className="flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white transition-all hover:opacity-90"
+              <button
+                onClick={handleBecomeInstructor}
+                disabled={loading}
+                className="flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white transition-all hover:opacity-90 disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}
               >
-                {isLoaded && user ? "Request instructor access" : "Get started — it's free"}
-                <ChevronRight className="h-4 w-4" />
-              </Link>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4" />}
+                {loading ? "Setting up your account…" : isLoaded && user ? "Become an instructor" : "Get started — it's free"}
+              </button>
             )}
+            {error && <p className="w-full text-center text-sm text-red-400">{error}</p>}
             <Link
               href="/courses"
               className="rounded-full border border-white/20 bg-white/8 px-8 py-3.5 text-sm font-semibold text-white/80 backdrop-blur transition-all hover:bg-white/14"
@@ -116,14 +145,26 @@ export default function TeachPage() {
         <p className="mx-auto mt-2 max-w-md text-sm" style={{ color: "#6a6f73" }}>
           Free to publish. No upfront cost. Start building your course today.
         </p>
-        <Link
-          href={isLoaded && isInstructor ? "/instructor/courses" : isLoaded && user ? "/user/edit-profile" : "/sign-up"}
-          className="mt-6 inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white transition-all hover:opacity-90"
-          style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}
-        >
-          {isLoaded && isInstructor ? "Go to your dashboard" : "Get started — it's free"}
-          <ChevronRight className="h-4 w-4" />
-        </Link>
+        {isLoaded && isInstructor ? (
+          <Link
+            href="/instructor/courses"
+            className="mt-6 inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}
+          >
+            Go to your dashboard <ChevronRight className="h-4 w-4" />
+          </Link>
+        ) : (
+          <button
+            onClick={handleBecomeInstructor}
+            disabled={loading}
+            className="mt-6 inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white transition-all hover:opacity-90 disabled:opacity-60"
+            style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {loading ? "Setting up…" : isLoaded && user ? "Become an instructor" : "Get started — it's free"}
+            {!loading && <ChevronRight className="h-4 w-4" />}
+          </button>
+        )}
       </div>
     </div>
   );
