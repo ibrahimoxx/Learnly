@@ -165,7 +165,7 @@ export default async function HomePage() {
           <div className="max-w-2xl">
             <h2 className="text-3xl font-black tracking-tight sm:text-4xl">{t("becomeInstructor")}</h2>
             <p className="mt-3 text-white/80">{t("becomeInstructorDesc")}</p>
-            <Link href="/instructor/courses" className="mt-6 inline-block">
+            <Link href="/teach" className="mt-6 inline-block">
               <Button className="bg-white text-[--brand-800] hover:bg-white/90">
                 {t("startTeachingToday")}
               </Button>

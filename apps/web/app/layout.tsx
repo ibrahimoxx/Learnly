@@ -34,13 +34,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/brand/learnly-logo-generated.png", sizes: "any", type: "image/png" },
     ],
     apple: [
-      { url: "/icons/icon-152x152.png", sizes: "152x152", type: "image/png" },
-      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/brand/learnly-logo-generated.png", sizes: "180x180", type: "image/png" },
     ],
+    shortcut: "/brand/learnly-logo-generated.png",
   },
 };
 
