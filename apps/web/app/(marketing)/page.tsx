@@ -1,7 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { PlayCircle } from "lucide-react";
+import {
+  BarChart3,
+  BriefcaseBusiness,
+  Camera,
+  Code2,
+  Dumbbell,
+  Megaphone,
+  Music2,
+  Palette,
+  PlayCircle,
+} from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { AnimatedStat } from "@/components/features/home/animated-stat";
 import { HeroSection } from "@/components/features/home/hero-section";
@@ -13,18 +23,18 @@ import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { Course, CourseListResponse } from "@/types";
 
 export const metadata: Metadata = {
-  title: "Learnly â€” Learn Without Limits",
+  title: "Learnly - Learn Without Limits",
 };
 
 const CATEGORIES = [
-  { label: "Web Development", icon: "ðŸ’»", href: "/courses?category=web-development" },
-  { label: "Data Science", icon: "ðŸ“Š", href: "/courses?category=data-science" },
-  { label: "Design", icon: "ðŸŽ¨", href: "/courses?category=design" },
-  { label: "Business", icon: "ðŸ“ˆ", href: "/courses?category=business" },
-  { label: "Marketing", icon: "ðŸ“£", href: "/courses?category=marketing" },
-  { label: "Photography", icon: "ðŸ“·", href: "/courses?category=photography" },
-  { label: "Music", icon: "ðŸŽµ", href: "/courses?category=music" },
-  { label: "Health & Fitness", icon: "ðŸ‹ï¸", href: "/courses?category=health" },
+  { label: "Web Development", icon: Code2, href: "/courses?category=web-development" },
+  { label: "Data Science", icon: BarChart3, href: "/courses?category=data-science" },
+  { label: "Design", icon: Palette, href: "/courses?category=design" },
+  { label: "Business", icon: BriefcaseBusiness, href: "/courses?category=business" },
+  { label: "Marketing", icon: Megaphone, href: "/courses?category=marketing" },
+  { label: "Photography", icon: Camera, href: "/courses?category=photography" },
+  { label: "Music", icon: Music2, href: "/courses?category=music" },
+  { label: "Health & Fitness", icon: Dumbbell, href: "/courses?category=health" },
 ];
 
 interface PlatformStats {
@@ -65,9 +75,9 @@ export default async function HomePage() {
     {
       iconName: "rating" as const,
       value: platformStats.avg_rating > 0 ? platformStats.avg_rating : null,
-      suffix: "★",
+      suffix: "\u2605",
       decimals: 1,
-      fallback: "—",
+      fallback: "\u2014",
       label: t("statsRating"),
     },
     { iconName: "reviews" as const, value: platformStats.total_reviews, suffix: "+", label: t("statsReviews") },
@@ -112,19 +122,22 @@ export default async function HomePage() {
           {t("browseByCategory")}
         </h2>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {CATEGORIES.map((cat, index) => (
-            <Reveal key={cat.href} delay={index * 0.1} variant="scale">
-              <Link
-                href={cat.href}
-                className="group hover-lift premium-card flex flex-col items-center gap-2 rounded-[--radius-md] p-4 text-center"
-              >
-                <span className="relative text-2xl">{cat.icon}</span>
-                <span className="text-xs font-medium leading-tight text-[--color-text-secondary] transition-colors group-hover:text-[--color-primary]">
-                  {cat.label}
-                </span>
-              </Link>
-            </Reveal>
-          ))}
+          {CATEGORIES.map((cat, index) => {
+            const Icon = cat.icon;
+            return (
+              <Reveal key={cat.href} delay={index * 0.1} variant="scale">
+                <Link
+                  href={cat.href}
+                  className="group hover-lift premium-card flex flex-col items-center gap-2 rounded-[--radius-md] p-4 text-center"
+                >
+                  <Icon className="h-6 w-6 text-[--color-primary]" />
+                  <span className="text-xs font-medium leading-tight text-[--color-text-secondary] transition-colors group-hover:text-[--color-primary]">
+                    {cat.label}
+                  </span>
+                </Link>
+              </Reveal>
+            );
+          })}
         </div>
       </section>
 

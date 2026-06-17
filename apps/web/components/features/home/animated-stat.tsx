@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import {
   Award,
   PlayCircle,
@@ -30,7 +30,7 @@ interface AnimatedStatProps {
   value: number | null;
 }
 
-function useCountUp(value: number | null, ref: React.RefObject<HTMLDivElement | null>) {
+function useCountUp(value: number | null, ref: RefObject<HTMLDivElement | null>) {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
@@ -76,7 +76,7 @@ function useCountUp(value: number | null, ref: React.RefObject<HTMLDivElement | 
 export function AnimatedStat({
   decimals = 0,
   delay = 0,
-  fallback = "—",
+  fallback = "\u2014",
   iconName,
   label,
   suffix = "",
