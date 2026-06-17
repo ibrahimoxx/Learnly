@@ -16,17 +16,11 @@ depends_on = None
 
 
 def upgrade() -> None:
-    status_enum = postgresql.ENUM(
-        "pending", "approved", "rejected", "withdrawn",
-        name="instructor_application_status",
-        create_type=False,
-    )
-
     op.create_table(
         "instructor_applications",
         sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
         sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("status", status_enum, nullable=False, server_default="pending"),
+        sa.Column("status", sa.Enum("pending", "approved", "rejected", "withdrawn", name="instructor_application_status"), nullable=False, server_default="pending"),
         sa.Column("expertise", sa.Text, nullable=False),
         sa.Column("experience", sa.Text, nullable=False),
         sa.Column("course_ideas", sa.Text, nullable=False),
