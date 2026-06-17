@@ -30,21 +30,30 @@ function fadeUp(delay: number, duration: number) {
 
 function HeroBackground() {
   return (
-    <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 z-0 overflow-hidden" style={{ background: "linear-gradient(135deg,#08080f 0%,#0d0d2b 45%,#1a0a38 100%)" }}>
       {HERO_VIDEO_URL ? (
-        <video
-          autoPlay
-          className="h-full w-full object-cover"
-          loop
-          muted
-          playsInline
-          src={HERO_VIDEO_URL}
-        />
+        <video autoPlay className="absolute inset-0 h-full w-full object-cover" loop muted playsInline src={HERO_VIDEO_URL} />
       ) : (
-        <div className="h-full w-full bg-[radial-gradient(circle_at_18%_18%,rgba(70,120,255,0.28),transparent_28%),radial-gradient(circle_at_82%_18%,rgba(153,102,255,0.24),transparent_22%),linear-gradient(135deg,rgba(8,10,26,1),rgba(22,25,60,1)_48%,rgba(42,14,88,1))]" />
+        <>
+          {/* Animated aurora orbs */}
+          <div className="hero-orb hero-orb-1" />
+          <div className="hero-orb hero-orb-2" />
+          <div className="hero-orb hero-orb-3" />
+          {/* Subtle grid */}
+          <div
+            className="absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.5) 1px,transparent 1px)",
+              backgroundSize: "60px 60px",
+            }}
+          />
+          {/* Noise grain */}
+          <div className="absolute inset-0 opacity-[0.035]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "200px 200px" }} />
+        </>
       )}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_22%,rgba(126,110,255,0.2),transparent_26%)]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+      {/* Dark left vignette so text is always readable */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent" />
+      <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/40" />
     </div>
   );
 }
