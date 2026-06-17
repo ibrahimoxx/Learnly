@@ -51,6 +51,7 @@ from app.api.v1.reviews import router as reviews_router
 from app.api.v1.sections import router as sections_router
 from app.api.v1.support import router as support_router
 from app.api.v1.users import router as users_router
+from app.api.v1.instructor_applications import router as instructor_applications_router
 from app.api.v1.webhooks import router as webhooks_router
 from app.api.v1.wishlist import router as wishlist_router
 from app.core.config import settings
@@ -131,6 +132,7 @@ app.include_router(announcements_public_router, prefix="/api/v1")
 app.include_router(support_router, prefix="/api/v1")
 app.include_router(admin_support_router, prefix="/api/v1")
 app.include_router(org_admin_router, prefix="/api/v1")
+app.include_router(instructor_applications_router, prefix="/api/v1")
 
 
 @app.on_event("startup")
