@@ -45,10 +45,10 @@ const CATEGORIES = [
 
 const FAQS = [
   { q: "How do I enroll in a course?", a: "Browse the course catalog, open any course detail page, and click Enroll or Buy. Free courses enroll instantly; paid courses go through the checkout." },
-  { q: "Can I watch videos offline?", a: "Offline viewing is not yet supported. All videos stream directly from our platform — an internet connection is required." },
-  { q: "How do I get my certificate?", a: "Complete 100% of the course lessons. Your certificate is generated automatically and appears in My Learning → Certificates." },
+  { q: "Can I watch videos offline?", a: "Offline viewing is not yet supported. All videos stream directly from our platform â€” an internet connection is required." },
+  { q: "How do I get my certificate?", a: "Complete 100% of the course lessons. Your certificate is generated automatically and appears in My Learning â†’ Certificates." },
   { q: "How do I contact an instructor?", a: "Open the course player, go to the Q&A tab, and post a question on any lesson. Instructors are notified by email and reply in the thread." },
-  { q: "What is the refund policy?", a: "Requests within 30 days of purchase and under 30% course completion qualify for a full refund. Go to My Purchases → Request Refund." },
+  { q: "What is the refund policy?", a: "Requests within 30 days of purchase and under 30% course completion qualify for a full refund. Go to My Purchases â†’ Request Refund." },
 ];
 
 export default function HelpPage() {
@@ -85,7 +85,7 @@ export default function HelpPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for answers…"
+            placeholder="Search for answersâ€¦"
             className="w-full rounded-full py-3 pl-11 pr-5 text-sm text-gray-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-white/50"
             style={{ background: "#ffffff" }}
           />
@@ -94,7 +94,7 @@ export default function HelpPage() {
           <p className="mt-3 text-sm text-blue-100">
             {filteredCategories.length + filteredFaqs.length === 0
               ? "No results found."
-              : `${filteredCategories.length} topic${filteredCategories.length !== 1 ? "s" : ""} · ${filteredFaqs.length} FAQ${filteredFaqs.length !== 1 ? "s" : ""}`}
+              : `${filteredCategories.length} topic${filteredCategories.length !== 1 ? "s" : ""} Â· ${filteredFaqs.length} FAQ${filteredFaqs.length !== 1 ? "s" : ""}`}
           </p>
         )}
       </div>
@@ -167,7 +167,7 @@ export default function HelpPage() {
       {/* Contact CTA */}
       <div className="border-t py-12 text-center" style={{ borderColor: "#d1d7dc", background: "#ffffff" }}>
         <p className="text-base font-bold" style={{ color: "#1c1d1f" }}>Still need help?</p>
-        <p className="mt-1 text-sm" style={{ color: "#6a6f73" }}>Our support team is available Monday–Friday, 9 am–6 pm CET.</p>
+        <p className="mt-1 text-sm" style={{ color: "#6a6f73" }}>Our support team is available Mondayâ€“Friday, 9 amâ€“6 pm CET.</p>
         <Link
           href="mailto:support@learnly.app"
           className="mt-4 inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-bold text-white"

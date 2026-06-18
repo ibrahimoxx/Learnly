@@ -1,16 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import { ChevronRight, Loader2, CheckCircle2, XCircle, Clock, ArrowLeft } from "lucide-react";
+import { ChevronRight, Loader2, CheckCircle2, XCircle, Clock, ArrowLeft, RotateCcw } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
 interface ApplicationStatus {
   status: "pending" | "approved" | "rejected" | "withdrawn";
   rejection_reason: string | null;
   created_at: string;
+  reviewed_at: string | null;
+  expertise: string;
+  experience: string;
+  course_ideas: string;
+  motivation: string;
+  website: string | null;
+  linkedin: string | null;
 }
 
 export default function TeachApplyPage() {
@@ -33,7 +40,7 @@ export default function TeachApplyPage() {
   });
 
   // Check existing application on mount
-  useState(() => {
+  useEffect(() => {
     async function checkExisting() {
       if (!isLoaded || !user) return;
       const role = user.publicMetadata?.role as string | undefined;
@@ -60,7 +67,7 @@ export default function TeachApplyPage() {
       }
     }
     checkExisting();
-  });
+  }, [isLoaded, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -103,8 +110,24 @@ export default function TeachApplyPage() {
     );
   }
 
+  function handleReapply() {
+    if (existing) {
+      setForm({
+        expertise: existing.expertise,
+        experience: existing.experience,
+        course_ideas: existing.course_ideas,
+        motivation: existing.motivation,
+        website: existing.website ?? "",
+        linkedin: existing.linkedin ?? "",
+      });
+    }
+    setExisting(null);
+    setError("");
+    setStep("form");
+  }
+
   if (step === "submitted" && existing) {
-    return <ApplicationStatusCard status={existing} />;
+    return <ApplicationStatusCard status={existing} onReapply={handleReapply} />;
   }
 
   return (
@@ -239,10 +262,74 @@ export default function TeachApplyPage() {
   );
 }
 
-function ApplicationStatusCard({ status }: { status: ApplicationStatus }) {
+function ApplicationStatusCard({
+  status,
+  onReapply,
+}: {
+  status: ApplicationStatus;
+  onReapply: () => void;
+}) {
   const isPending = status.status === "pending";
   const isApproved = status.status === "approved";
   const isRejected = status.status === "rejected";
+
+  if (isRejected) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div
+          className="px-4 py-10 text-white sm:px-6"
+          style={{ background: "linear-gradient(135deg,#0f0c29,#302b63,#24243e)" }}
+        >
+          <div className="mx-auto max-w-2xl">
+            <Link href="/teach" className="mb-6 inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white/90">
+              <ArrowLeft className="h-3.5 w-3.5" /> Back to instructor page
+            </Link>
+            <h1 className="text-3xl font-black">Your application wasn&apos;t approved</h1>
+            <p className="mt-2 text-white/70 text-sm">
+              Don&apos;t worry — you can address the feedback below and submit a new application.
+            </p>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+          <div className="flex items-start gap-4 rounded-2xl border border-red-100 bg-red-50 p-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100">
+              <XCircle className="h-6 w-6 text-red-500" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-gray-900">Application not approved</h2>
+              {status.rejection_reason ? (
+                <p className="mt-1.5 text-sm text-gray-700">
+                  <span className="font-bold">Reason: </span>
+                  {status.rejection_reason}
+                </p>
+              ) : (
+                <p className="mt-1.5 text-sm text-gray-700">No specific reason was provided.</p>
+              )}
+              <p className="mt-2 text-xs text-gray-500">
+                Reviewed on {new Date(status.reviewed_at ?? status.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={onReapply}
+              className="flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-black text-white transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(135deg,#6366f1,#a855f7)" }}
+            >
+              <RotateCcw className="h-4 w-4" />
+              Submit a new application
+            </button>
+            <Link href="/" className="text-sm text-[--color-text-muted] hover:underline">
+              Back to home
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-20">
@@ -274,22 +361,6 @@ function ApplicationStatusCard({ status }: { status: ApplicationStatus }) {
             >
               Go to dashboard <ChevronRight className="h-4 w-4" />
             </Link>
-          </>
-        )}
-        {isRejected && (
-          <>
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50">
-              <XCircle className="h-8 w-8 text-red-500" />
-            </div>
-            <h2 className="mt-5 text-xl font-black text-gray-900">Application not approved</h2>
-            {status.rejection_reason && (
-              <p className="mt-2 text-sm text-gray-500">
-                <span className="font-semibold">Reason: </span>{status.rejection_reason}
-              </p>
-            )}
-            <p className="mt-3 text-sm text-gray-400">
-              You may apply again after addressing the feedback above.
-            </p>
           </>
         )}
         <Link href="/" className="mt-6 inline-block text-sm text-[--color-text-muted] hover:underline">

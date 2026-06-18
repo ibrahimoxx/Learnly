@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Download, X } from "lucide-react";
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-}
+import { useInstallStore, type BeforeInstallPromptEvent } from "@/lib/stores/install-store";
 
 const DISMISSED_KEY = "pwa-install-dismissed";
 
 export function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
+  const deferredPrompt = useInstallStore((state) => state.deferredPrompt);
+  const setDeferredPrompt = useInstallStore((state) => state.setDeferredPrompt);
+  const setInstalled = useInstallStore((state) => state.setInstalled);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -31,9 +30,19 @@ export function InstallPrompt() {
       setVisible(true);
     }
 
+    function installedHandler() {
+      setInstalled(true);
+      setDeferredPrompt(null);
+      setVisible(false);
+    }
+
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+    window.addEventListener("appinstalled", installedHandler);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, [setDeferredPrompt, setInstalled]);
 
   async function install() {
     if (!deferredPrompt) return;
@@ -59,8 +68,14 @@ export function InstallPrompt() {
       className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-2xl border border-[--color-border] bg-white px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,.14)] sm:bottom-6"
     >
       <div className="flex items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/icons/icon-72x72.png" alt="" className="h-10 w-10 rounded-xl" aria-hidden="true" />
+        <Image
+          src="/brand/learnly-logo-generated.png"
+          alt="Learnly"
+          width={40}
+          height={40}
+          className="h-10 w-10 rounded-xl"
+          unoptimized
+        />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-[--color-text-primary] leading-tight">
             Install Learnly

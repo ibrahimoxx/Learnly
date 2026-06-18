@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { SignInButton, SignUpButton, useAuth, useUser, useClerk } from "@clerk/nextjs";
 import Image from "next/image";
-import { Search, Menu, X, ShoppingCart, User, GraduationCap, ShoppingBag, Settings, Bell, Award, HelpCircle, LogOut } from "lucide-react";
+import { Search, Menu, X, ShoppingCart, User, GraduationCap, ShoppingBag, Settings, Bell, Award, HelpCircle, LogOut, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,8 @@ import { NotificationBell } from "@/components/shared/notification-bell";
 import { MessageNavLink } from "@/components/shared/message-nav-link";
 import { LanguageSwitcher } from "@/components/shared/language-switcher";
 import { useCartStore } from "@/lib/stores/cart-store";
+import { useInstallStore } from "@/lib/stores/install-store";
+import { toast } from "sonner";
 
 const navLinkClass = "rounded-full px-3.5 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
 const mobileNavLinkClass = "rounded-[--radius-sm] px-3 py-2 text-sm font-extrabold text-[--color-text-secondary] hover:bg-[--color-primary-subtle] hover:text-[--brand-800] transition-colors";
@@ -127,7 +129,11 @@ export function Navbar() {
   useEffect(() => { setMounted(true); }, []);
   const signedIn = mounted && isSignedIn;
   const { items } = useCartStore();
+  const deferredPrompt = useInstallStore((state) => state.deferredPrompt);
+  const isInstalled = useInstallStore((state) => state.isInstalled);
+  const setDeferredPrompt = useInstallStore((state) => state.setDeferredPrompt);
   const cartCount = mounted ? items.length : 0;
+  const showInstallButton = !isInstalled;
 
   if (!mounted) {
     return (
@@ -152,6 +158,18 @@ export function Navbar() {
       router.push(`/courses?q=${encodeURIComponent(query.trim())}`);
     } else {
       router.push("/courses");
+    }
+  }
+
+  async function handleInstall() {
+    if (!deferredPrompt) {
+      toast.info("Open your browser menu and choose \"Install app\" to add Learnly.");
+      return;
+    }
+    await deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setDeferredPrompt(null);
     }
   }
 
@@ -200,6 +218,16 @@ export function Navbar() {
         {/* Auth + language — desktop */}
         <div className="ml-auto hidden items-center gap-2 lg:flex">
           <LanguageSwitcher />
+          {showInstallButton && (
+            <button
+              onClick={handleInstall}
+              aria-label="Install app"
+              title="Install app"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
+            >
+              <Download className="h-5 w-5" />
+            </button>
+          )}
           <Link
             href="/cart"
             aria-label="Cart"
@@ -275,6 +303,16 @@ export function Navbar() {
           <div className="mt-3 flex items-center justify-between">
             <LanguageSwitcher />
             <div className={cn("flex gap-2", signedIn && "justify-start")}>
+              {showInstallButton && (
+                <button
+                  onClick={handleInstall}
+                  aria-label="Install app"
+                  title="Install app"
+                  className="relative flex h-9 w-9 items-center justify-center rounded-full text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
+                >
+                  <Download className="h-5 w-5" />
+                </button>
+              )}
               {signedIn ? (
                 <UserMenu user={user} />
               ) : (

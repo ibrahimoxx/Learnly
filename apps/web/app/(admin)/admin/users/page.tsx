@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 
@@ -27,6 +28,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [switchingRole, setSwitchingRole] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -61,6 +63,24 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function switchRole(userId: string, newRole: "student" | "instructor") {
+    setSwitchingRole(userId);
+    const token = await getToken();
+    try {
+      const updated = await apiFetch<AdminUser>(`/api/v1/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ role: newRole }),
+      });
+      setUsers((prev) => prev.map((u) => (u.id === userId ? updated : u)));
+      toast.success(`Switched to ${newRole}`);
+    } catch {
+      toast.error("Failed to switch role");
+    } finally {
+      setSwitchingRole(null);
+    }
+  }
+
   return (
     <div className="p-6">
       <h1 className="mb-5 text-4xl font-black tracking-tight text-[--color-text-primary]">User Management</h1>
@@ -89,9 +109,43 @@ export default function AdminUsersPage() {
                   </td>
                   <td className="px-4 py-3 text-[--color-text-muted] max-w-[200px] truncate">{u.email}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold ${ROLE_COLORS[u.role] ?? "bg-[--color-surface] text-[--color-text-secondary]"}`}>
-                      {u.role}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold ${ROLE_COLORS[u.role] ?? "bg-[--color-surface] text-[--color-text-secondary]"}`}>
+                        {u.role}
+                      </span>
+                      {u.role === "student" && (
+                        <button
+                          onClick={() => switchRole(u.id, "instructor")}
+                          disabled={switchingRole === u.id}
+                          className="group inline-flex items-center gap-1 rounded-full border border-[--color-accent-sky]/30 px-2.5 py-1 text-[11px] font-semibold text-[--color-accent-sky] transition-all duration-200 hover:scale-105 hover:border-[--color-accent-sky] hover:bg-[--color-accent-sky] hover:text-white hover:shadow-md disabled:opacity-50 disabled:hover:scale-100"
+                        >
+                          {switchingRole === u.id ? (
+                            "…"
+                          ) : (
+                            <>
+                              <ArrowUpRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                              Make instructor
+                            </>
+                          )}
+                        </button>
+                      )}
+                      {u.role === "instructor" && (
+                        <button
+                          onClick={() => switchRole(u.id, "student")}
+                          disabled={switchingRole === u.id}
+                          className="group inline-flex items-center gap-1 rounded-full border border-[--color-border] px-2.5 py-1 text-[11px] font-semibold text-[--color-text-secondary] transition-all duration-200 hover:scale-105 hover:border-[--color-text-primary] hover:bg-[--color-text-primary] hover:text-white hover:shadow-md disabled:opacity-50 disabled:hover:scale-100"
+                        >
+                          {switchingRole === u.id ? (
+                            "…"
+                          ) : (
+                            <>
+                              <ArrowDownLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5 group-hover:translate-y-0.5" />
+                              Make student
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-bold ${u.is_active ? "text-[--color-success]" : "text-[--color-error]"}`}>

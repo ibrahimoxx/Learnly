@@ -8,6 +8,7 @@ export const publicRoutes = [
   "/orgs(.*)",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/account-suspended",
   "/api/webhooks(.*)",
   "/offline",
   "/sw.js",
@@ -50,6 +51,14 @@ export default clerkMiddleware(async (auth, request) => {
     const response = NextResponse.rewrite(url);
     response.headers.set("x-org-slug", subdomain);
     return response;
+  }
+
+  const { sessionClaims } = await auth();
+  const publicMetadata = sessionClaims?.public_metadata as { suspended?: boolean } | undefined;
+  const isSuspended = publicMetadata?.suspended === true;
+
+  if (isSuspended && request.nextUrl.pathname !== "/account-suspended") {
+    return NextResponse.redirect(new URL("/account-suspended", request.url));
   }
 
   if (!isPublicRoute(request)) {
