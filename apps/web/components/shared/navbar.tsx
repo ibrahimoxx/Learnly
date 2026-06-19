@@ -132,6 +132,7 @@ export function Navbar() {
   const deferredPrompt = useInstallStore((state) => state.deferredPrompt);
   const isInstalled = useInstallStore((state) => state.isInstalled);
   const setDeferredPrompt = useInstallStore((state) => state.setDeferredPrompt);
+  const setInstalled = useInstallStore((state) => state.setInstalled);
   const cartCount = mounted ? items.length : 0;
   const showInstallButton = !isInstalled;
 
