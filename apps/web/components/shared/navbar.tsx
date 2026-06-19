@@ -163,6 +163,17 @@ export function Navbar() {
   }
 
   async function handleInstall() {
+    const nav = navigator as Navigator & {
+      getInstalledRelatedApps?: () => Promise<unknown[]>;
+    };
+    if (nav.getInstalledRelatedApps) {
+      const related = await nav.getInstalledRelatedApps().catch(() => []);
+      if (related.length > 0) {
+        setInstalled(true);
+        toast.info("Learnly is already installed.");
+        return;
+      }
+    }
     if (!deferredPrompt) {
       toast.info("Open your browser menu and choose \"Install app\" to add Learnly.");
       return;
@@ -171,6 +182,7 @@ export function Navbar() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === "accepted") {
       setDeferredPrompt(null);
+      setInstalled(true);
     }
   }
 
