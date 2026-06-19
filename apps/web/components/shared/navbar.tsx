@@ -223,9 +223,11 @@ export function Navbar() {
               onClick={handleInstall}
               aria-label="Install app"
               title="Install app"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
+              className="hover-lift flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold text-white shadow-[var(--shadow-brand)] transition-transform"
+              style={{ background: "var(--gradient-brand)" }}
             >
-              <Download className="h-5 w-5" />
+              <Download className="h-4 w-4" />
+              Install
             </button>
           )}
           <Link
@@ -308,9 +310,11 @@ export function Navbar() {
                   onClick={handleInstall}
                   aria-label="Install app"
                   title="Install app"
-                  className="relative flex h-9 w-9 items-center justify-center rounded-full text-[--color-text-secondary] transition-colors hover:bg-[--color-primary-subtle] hover:text-[--brand-800]"
+                  className="hover-lift flex h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold text-white shadow-[var(--shadow-brand)] transition-transform"
+                  style={{ background: "var(--gradient-brand)" }}
                 >
-                  <Download className="h-5 w-5" />
+                  <Download className="h-4 w-4" />
+                  Install
                 </button>
               )}
               {signedIn ? (
