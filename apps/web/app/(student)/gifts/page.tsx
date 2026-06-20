@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { BookOpen, Gift, Inbox, Send } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import type { GiftListRead, GiftRead } from "@/types";
 
 const emptyGifts: GiftListRead = { sent: [], received: [] };
@@ -70,7 +71,7 @@ function MultiGiftCard({ gift, isSent }: { gift: GiftRead; isSent: boolean }) {
             <div className="thumbnail-fallback flex h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
               {course.image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={course.image_url} alt={course.title} className="h-full w-full object-cover" />
+                <img src={normalizeYtThumbnail(course.image_url)} alt={course.title} className="h-full w-full object-cover" />
               ) : (
                 <BookOpen className="h-6 w-6 text-white/80" />
               )}
