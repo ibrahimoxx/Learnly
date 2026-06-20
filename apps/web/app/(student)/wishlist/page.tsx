@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Heart, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import type { WishlistItem } from "@/types";
 
 export default function WishlistPage() {
@@ -87,7 +88,7 @@ export default function WishlistPage() {
               <div className="thumbnail-fallback flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
                 {item.course_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.course_image_url} alt={item.course_title} className="h-full w-full object-cover" />
+                  <img src={normalizeYtThumbnail(item.course_image_url ?? "")} alt={item.course_title} className="h-full w-full object-cover" />
                 ) : (
                   <BookOpen className="h-8 w-8 text-white/80" />
                 )}

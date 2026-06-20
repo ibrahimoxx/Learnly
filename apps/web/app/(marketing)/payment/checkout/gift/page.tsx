@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import type { Course } from "@/types";
 
 function formatPrice(cents: number): string {
@@ -186,7 +187,7 @@ function MultiGiftContent({ courseIds }: { courseIds: string[] }) {
           {payableCourses.map((course) => (
             <div key={course.id} className="flex items-center gap-4">
               <div className="thumbnail-fallback relative h-14 w-24 shrink-0 overflow-hidden rounded-[--radius-sm]">
-                {course.image_url && <Image src={course.image_url} alt={course.title} fill className="object-cover" />}
+                {course.image_url && <Image src={normalizeYtThumbnail(course.image_url)} alt={course.title} fill className="object-cover" />}
               </div>
               <p className="line-clamp-2 flex-1 text-sm font-bold text-[--color-text-primary]">{course.title}</p>
               <span className="text-sm font-extrabold text-[--color-text-secondary]">
@@ -359,7 +360,7 @@ function GiftContent() {
       <div className="premium-card animate-fade-up mt-6 rounded-[--radius-lg] p-6">
         <div className="flex items-center gap-4">
           <div className="thumbnail-fallback relative h-16 w-28 shrink-0 overflow-hidden rounded-[--radius-sm]">
-            {course.image_url && <Image src={course.image_url} alt={course.title} fill className="object-cover" />}
+            {course.image_url && <Image src={normalizeYtThumbnail(course.image_url)} alt={course.title} fill className="object-cover" />}
           </div>
           <p className="line-clamp-2 text-sm font-bold text-[--color-text-primary]">{course.title}</p>
         </div>
