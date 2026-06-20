@@ -126,7 +126,7 @@ function GiftSection({ items, kind }: GiftSectionProps) {
               <div className="thumbnail-fallback flex h-20 w-32 shrink-0 items-center justify-center overflow-hidden rounded-[--radius-sm]">
                 {gift.course.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={gift.course.image_url} alt={gift.course.title} className="h-full w-full object-cover" />
+                  <img src={normalizeYtThumbnail(gift.course.image_url)} alt={gift.course.title} className="h-full w-full object-cover" />
                 ) : (
                   <BookOpen className="h-8 w-8 text-white/80" />
                 )}
