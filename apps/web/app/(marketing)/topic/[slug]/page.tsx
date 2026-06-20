@@ -7,6 +7,7 @@ import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import { CourseCard } from "@/components/features/courses/course-card";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import { getViewerEnrollmentCourseIds } from "@/lib/server/enrollments";
 import type { Category, CategoryWithCount, Course, CourseListResponse } from "@/types";
 
@@ -163,7 +164,7 @@ export default async function TopicPage({ params }: Props) {
                         >
                           {course.image_url ? (
                             <Image
-                              src={course.image_url}
+                              src={normalizeYtThumbnail(course.image_url)}
                               alt={course.title}
                               fill
                               className="object-cover transition-transform duration-500 group-hover:scale-105"
