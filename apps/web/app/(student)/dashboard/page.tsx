@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import { RecommendationsSection } from "@/components/features/courses/recommendations-section";
 import type { Enrollment, GamificationStats, LearningPathDetail } from "@/types";
 
@@ -230,7 +231,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
         <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-[--brand-700] via-[--brand-600] to-[--color-primary]">
           {enrollment.course_image_url ? (
             <Image
-              src={enrollment.course_image_url}
+              src={normalizeYtThumbnail(enrollment.course_image_url ?? "")}
               alt={enrollment.course_title ?? "Course"}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
