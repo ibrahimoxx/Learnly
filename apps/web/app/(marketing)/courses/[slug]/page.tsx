@@ -20,6 +20,7 @@ import { RecommendationsSection } from "@/components/features/courses/recommenda
 import { apiFetch } from "@/lib/api";
 import { getViewerEnrollments } from "@/lib/server/enrollments";
 import { hasEnrollmentForCourse } from "@/lib/server/enrollment-course-ids";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import type { Course, Enrollment, Section, Lesson } from "@/types";
 import { Suspense } from "react";
 
@@ -362,7 +363,7 @@ export default async function CourseDetailPage({ params }: Props) {
                 {course.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={course.image_url}
+                    src={normalizeYtThumbnail(course.image_url)}
                     alt={course.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />

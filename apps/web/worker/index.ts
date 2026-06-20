@@ -1,3 +1,4 @@
+import { CacheableResponsePlugin } from "workbox-cacheable-response";
 import { clientsClaim } from "workbox-core";
 import { ExpirationPlugin } from "workbox-expiration";
 import { matchPrecache, precacheAndRoute, cleanupOutdatedCaches } from "workbox-precaching";
@@ -47,7 +48,7 @@ const runtimeRoutes: RuntimeRoute[] = [
     options: { cacheName: "static-font-assets", maxEntries: 4, maxAgeSeconds: 604800 },
   },
   {
-    urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,
+    urlPattern: ({ sameOrigin, url }) => sameOrigin && /\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i.test(url.pathname),
     handler: "StaleWhileRevalidate",
     options: { cacheName: "static-image-assets", maxEntries: 64, maxAgeSeconds: 2592000 },
   },
@@ -62,22 +63,22 @@ const runtimeRoutes: RuntimeRoute[] = [
     options: { cacheName: "next-image", maxEntries: 64, maxAgeSeconds: 86400 },
   },
   {
-    urlPattern: /\.(?:mp3|wav|ogg)$/i,
+    urlPattern: ({ sameOrigin, url }) => sameOrigin && /\.(?:mp3|wav|ogg)$/i.test(url.pathname),
     handler: "CacheFirst",
     options: { cacheName: "static-audio-assets", maxEntries: 32, maxAgeSeconds: 86400, rangeRequests: true },
   },
   {
-    urlPattern: /\.(?:mp4|webm)$/i,
+    urlPattern: ({ sameOrigin, url }) => sameOrigin && /\.(?:mp4|webm)$/i.test(url.pathname),
     handler: "CacheFirst",
     options: { cacheName: "static-video-assets", maxEntries: 32, maxAgeSeconds: 86400, rangeRequests: true },
   },
   {
-    urlPattern: /\.(?:js)$/i,
+    urlPattern: ({ sameOrigin, url }) => sameOrigin && /\.(?:js)$/i.test(url.pathname),
     handler: "StaleWhileRevalidate",
     options: { cacheName: "static-js-assets", maxEntries: 48, maxAgeSeconds: 86400 },
   },
   {
-    urlPattern: /\.(?:css|less)$/i,
+    urlPattern: ({ sameOrigin, url }) => sameOrigin && /\.(?:css|less)$/i.test(url.pathname),
     handler: "StaleWhileRevalidate",
     options: { cacheName: "static-style-assets", maxEntries: 32, maxAgeSeconds: 86400 },
   },
@@ -125,7 +126,7 @@ const runtimeRoutes: RuntimeRoute[] = [
 ];
 
 function createPlugins(config: StrategyConfig) {
-  const plugins = [];
+  const plugins = [new CacheableResponsePlugin({ statuses: [0, 200] })];
 
   if (config.rangeRequests) {
     plugins.push(new RangeRequestsPlugin());
@@ -166,7 +167,14 @@ clientsClaim();
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
-registerRoute("/", new NetworkFirst({ cacheName: "start-url" }), "GET");
+registerRoute(
+  "/",
+  new NetworkFirst({
+    cacheName: "start-url",
+    plugins: [new CacheableResponsePlugin({ statuses: [0, 200] })],
+  }),
+  "GET"
+);
 
 for (const route of runtimeRoutes) {
   registerRoute(route.urlPattern, createStrategy(route), route.method);

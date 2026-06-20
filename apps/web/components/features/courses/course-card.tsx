@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Users, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import { StarRating } from "./star-rating";
 import { AddToCartButton } from "./add-to-cart-button";
 import { WishlistButton } from "./wishlist-button";
@@ -26,6 +27,7 @@ const levelLabels: Record<string, string> = {
 export function CourseCard({ course, isOwned = false }: CourseCardProps) {
   const revealRef = useScrollReveal();
   const [wishlisted, setWishlisted] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const price = isOwned ? "Owned" : course.is_free ? "Free" : `$${(course.price_in_cents / 100).toFixed(2)}`;
 
   return (
@@ -68,12 +70,13 @@ export function CourseCard({ course, isOwned = false }: CourseCardProps) {
           <Link href={`/courses/${course.slug}`} className="block">
             {/* Thumbnail */}
             <div className="thumbnail-fallback sheen-overlay relative aspect-video w-full overflow-hidden">
-              {course.image_url ? (
+              {course.image_url && !imageFailed ? (
                 <Image
-                  src={course.image_url}
+                  src={normalizeYtThumbnail(course.image_url)}
                   alt={course.title}
                   fill
                   unoptimized
+                  onError={() => setImageFailed(true)}
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import { Star, Users, Sparkles } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import type { Course, Enrollment } from "@/types";
 
 export function RecommendationsSection({ currentCourseId = "" }: { currentCourseId?: string }) {
@@ -67,7 +68,7 @@ export function RecommendationsSection({ currentCourseId = "" }: { currentCourse
               <div className="relative h-auto w-28 shrink-0 overflow-hidden bg-linear-to-br from-[--brand-700] via-[--brand-600] to-[--color-primary] sm:w-32">
                 {course.image_url ? (
                   <Image
-                    src={course.image_url}
+                    src={normalizeYtThumbnail(course.image_url)}
                     alt={course.title}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"

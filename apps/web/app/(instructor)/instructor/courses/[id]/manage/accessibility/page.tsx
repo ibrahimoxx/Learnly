@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/api";
+import { normalizeYtThumbnail } from "@/lib/utils";
 import type { Course } from "@/types";
 
 export default function CourseAccessibilityPage() {
@@ -69,7 +70,7 @@ export default function CourseAccessibilityPage() {
         {course?.image_url && (
           <div className="mt-4 overflow-hidden rounded-[--radius-md] border border-[--color-border]">
             <Image
-              src={course.image_url}
+              src={normalizeYtThumbnail(course.image_url)}
               alt={altText || "Course thumbnail preview"}
               width={400}
               height={225}
