@@ -9,7 +9,9 @@
 
 # AI & Claude artifacts — never expose AI tooling to public
 CLAUDE.md
+agents.md
 .claude/
+.codex/
 tasks/
 tasks/todo.md
 tasks/lessons.md

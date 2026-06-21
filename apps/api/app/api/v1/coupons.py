@@ -32,6 +32,16 @@ async def create_coupon(
     if user.role not in ("instructor", "admin"):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Instructors only")
 
+    if not body.course_id and user.role != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Instructors must specify a course")
+
+    if body.discount_type == "percent" and body.discount_value > 50:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Percent discount cannot exceed 50%",
+        )
+
+    course: Course | None = None
     if body.course_id:
         course_res = await db.execute(
             select(Course).where(Course.id == uuid.UUID(body.course_id))
@@ -41,6 +51,13 @@ async def create_coupon(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
         if course.instructor_id != user.id and user.role != "admin":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your course")
+        if body.discount_type == "fixed":
+            max_fixed = course.price_in_cents // 2
+            if body.discount_value > max_fixed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Fixed discount cannot exceed 50% of course price (max: ${max_fixed / 100:.2f})",
+                )
 
     existing = await db.execute(select(Coupon).where(Coupon.code == body.code.upper()))
     if existing.scalar_one_or_none():
@@ -118,6 +135,8 @@ async def validate_coupon(
     if not coupon or not coupon.is_active:
         return invalid("Invalid or expired coupon code")
     if coupon.course_id and coupon.course_id != course.id:
+        return invalid("Coupon not valid for this course")
+    if not coupon.course_id and coupon.created_by != course.instructor_id:
         return invalid("Coupon not valid for this course")
     if coupon.expires_at and coupon.expires_at < datetime.now(timezone.utc):
         return invalid("Coupon has expired")

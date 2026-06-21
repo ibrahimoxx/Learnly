@@ -6,12 +6,28 @@ import Image from "next/image";
 import { ShoppingCart, Trash2, Tag, ShieldCheck, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { apiFetch } from "@/lib/api";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { getCartCourseIdsToRemove } from "./cart-reconcile";
 
 interface Props {
   enrolledCourseIds: string[];
 }
+
+interface CouponValidateResult {
+  valid: boolean;
+  discount_type: string;
+  discount_value: number;
+  original_price_cents: number;
+  discounted_price_cents: number;
+  message: string;
+}
+
+type CouponState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "success"; result: CouponValidateResult }
+  | { status: "error"; message: string };
 
 function formatPrice(cents: number): string {
   return cents === 0 ? "Free" : `$${(cents / 100).toFixed(2)}`;
@@ -22,6 +38,10 @@ export function CartClient({ enrolledCourseIds }: Props) {
   const [mounted, setMounted] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [couponState, setCouponState] = useState<CouponState>({ status: "idle" });
+
+  const selectedItems = items.filter((item) => selectedIds.has(item.courseId));
+  const soloItem = selectedItems.length === 1 ? selectedItems[0] : undefined;
 
   useEffect(() => setMounted(true), []);
 
@@ -33,6 +53,10 @@ export function CartClient({ enrolledCourseIds }: Props) {
   useEffect(() => {
     setSelectedIds(new Set(items.map((item) => item.courseId)));
   }, [items]);
+
+  useEffect(() => {
+    setCouponState({ status: "idle" });
+  }, [soloItem?.courseId]);
 
   function toggleSelected(courseId: string) {
     setSelectedIds((prev) => {
@@ -46,15 +70,36 @@ export function CartClient({ enrolledCourseIds }: Props) {
     });
   }
 
+  async function applyCoupon() {
+    if (!soloItem) return;
+    const code = couponCode.trim();
+    if (!code) return;
+    setCouponState({ status: "loading" });
+    try {
+      const result = await apiFetch<CouponValidateResult>("/api/v1/coupons/validate", {
+        method: "POST",
+        body: JSON.stringify({ code, course_id: soloItem.courseId }),
+      });
+      if (result.valid) {
+        setCouponState({ status: "success", result });
+      } else {
+        setCouponState({ status: "error", message: result.message || "Coupon is not valid for this course" });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Could not validate coupon";
+      setCouponState({ status: "error", message });
+    }
+  }
+
   if (!mounted) {
     return <div className="premium-shell mx-auto max-w-5xl px-4 py-16 sm:px-6" />;
   }
 
-  const selectedItems = items.filter((item) => selectedIds.has(item.courseId));
   const subtotal = selectedItems.reduce((sum, item) => sum + item.priceInCents, 0);
-  const soloItem = selectedItems.length === 1 ? selectedItems[0] : undefined;
+  const appliedCoupon =
+    soloItem && couponState.status === "success" && couponState.result.valid ? couponCode.trim() : null;
   const checkoutHref = soloItem
-    ? `/payment/checkout?courseId=${soloItem.courseId}`
+    ? `/payment/checkout?courseId=${soloItem.courseId}${appliedCoupon ? `&coupon=${encodeURIComponent(appliedCoupon)}` : ""}`
     : `/payment/checkout?courseIds=${selectedItems.map((item) => item.courseId).join(",")}`;
   const noneSelected = selectedItems.length === 0;
 
@@ -153,31 +198,59 @@ export function CartClient({ enrolledCourseIds }: Props) {
         <div className="premium-card animate-fade-up h-fit rounded-[--radius-lg] p-6">
           <h2 className="font-heading text-lg font-black text-[--color-text-primary]">Total</h2>
 
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center gap-1.5">
-              <Tag className="h-3.5 w-3.5 text-[--color-text-muted]" />
-              <Input
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Coupon code"
-                className="h-9 text-xs uppercase"
-              />
-              <button className="rounded-[--radius-sm] border border-[--color-border] px-3 py-2 text-xs font-semibold text-[--color-text-secondary] transition-colors hover:bg-[--color-surface]">
-                Apply
-              </button>
+          {soloItem && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center gap-1.5">
+                <Tag className="h-3.5 w-3.5 text-[--color-text-muted]" />
+                <Input
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Coupon code"
+                  className="h-9 text-xs uppercase"
+                  disabled={couponState.status === "loading"}
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  disabled={!couponCode.trim() || couponState.status === "loading"}
+                  className="rounded-[--radius-sm] border border-[--color-border] px-3 py-2 text-xs font-semibold text-[--color-text-secondary] transition-colors hover:bg-[--color-surface] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {couponState.status === "loading" ? "Checking…" : "Apply"}
+                </button>
+              </div>
+              {couponState.status === "success" ? (
+                <p className="flex items-center gap-1 text-xs font-semibold text-[--color-success]">
+                  <Check className="h-3.5 w-3.5" />
+                  {couponState.result.message || "Coupon applied"}
+                </p>
+              ) : couponState.status === "error" ? (
+                <p className="text-xs font-semibold text-[--color-error]">{couponState.message}</p>
+              ) : (
+                <p className="text-xs text-[--color-text-muted]">
+                  Coupons apply at checkout for individual courses.
+                </p>
+              )}
             </div>
-            <p className="text-xs text-[--color-text-muted]">
-              Coupons apply at checkout for individual courses.
-            </p>
-          </div>
+          )}
 
           <div className="mt-4 flex items-baseline justify-between border-t border-[--color-border] pt-4">
             <span className="text-sm font-bold text-[--color-text-secondary]">
               Subtotal · {selectedItems.length} of {items.length} selected
             </span>
-            <span className="font-heading text-2xl font-black text-[--color-text-primary]">
-              {formatPrice(subtotal)}
-            </span>
+            {soloItem && couponState.status === "success" && couponState.result.valid ? (
+              <span className="flex items-baseline gap-2">
+                <span className="text-sm font-bold text-[--color-text-muted] line-through">
+                  {formatPrice(couponState.result.original_price_cents)}
+                </span>
+                <span className="font-heading text-2xl font-black text-[--color-text-primary]">
+                  {formatPrice(couponState.result.discounted_price_cents)}
+                </span>
+              </span>
+            ) : (
+              <span className="font-heading text-2xl font-black text-[--color-text-primary]">
+                {formatPrice(subtotal)}
+              </span>
+            )}
           </div>
 
           {noneSelected ? (

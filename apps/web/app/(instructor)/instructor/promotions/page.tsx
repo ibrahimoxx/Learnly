@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { Tag, Plus, X } from "lucide-react";
+import { Tag, Plus, X, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,17 +26,25 @@ interface Course {
   title: string;
 }
 
+const COUPON_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function generateCouponCode(): string {
+  const arr = new Uint8Array(8);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, (b) => COUPON_CHARS[b % COUPON_CHARS.length]).join("");
+}
+
 export default function PromotionsPage() {
   const { getToken } = useAuth();
   const [coupons, setCoupons] = useState<CouponRead[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(generateCouponCode);
   const [discountType, setDiscountType] = useState<"percent" | "fixed">("percent");
   const [discountValue, setDiscountValue] = useState("");
   const [maxUses, setMaxUses] = useState("");
-  const [selectedCourse, setSelectedCourse] = useState<string>("__global__");
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [creating, setCreating] = useState(false);
 
   const load = useCallback(async () => {
@@ -52,6 +60,7 @@ export default function PromotionsPage() {
       ]);
       setCoupons(couponsData.filter((c) => c.is_active));
       setCourses(coursesData);
+      setSelectedCourse((prev) => prev || coursesData[0]?.id || "");
     } catch {
       toast.error("Failed to load promotions.");
     } finally {
@@ -62,7 +71,7 @@ export default function PromotionsPage() {
   useEffect(() => { load(); }, [load]);
 
   async function createCoupon() {
-    if (!code.trim() || !discountValue) return;
+    if (!code.trim() || !discountValue || !selectedCourse) return;
     const token = await getToken();
     setCreating(true);
     try {
@@ -70,7 +79,7 @@ export default function PromotionsPage() {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          course_id: selectedCourse === "__global__" ? null : selectedCourse,
+          course_id: selectedCourse,
           code: code.trim().toUpperCase(),
           discount_type: discountType,
           discount_value: discountType === "percent"
@@ -80,11 +89,18 @@ export default function PromotionsPage() {
         }),
       });
       setCoupons((prev) => [created, ...prev]);
-      setCode(""); setDiscountValue(""); setMaxUses("");
+      setCode(generateCouponCode()); setDiscountValue(""); setMaxUses("");
       toast.success(`Coupon ${created.code} created.`);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed";
-      toast.error(msg.includes("409") ? "Code already exists" : "Failed to create coupon");
+      const raw = err instanceof Error ? err.message : "Failed";
+      let detail = "Failed to create coupon";
+      if (raw.includes("409")) {
+        detail = "Code already exists — try regenerating";
+      } else {
+        const match = raw.match(/"detail"\s*:\s*"([^"]+)"/);
+        if (match) detail = match[1];
+      }
+      toast.error(detail);
     } finally {
       setCreating(false);
     }
@@ -119,7 +135,17 @@ export default function PromotionsPage() {
       <div className="premium-card rounded-[--radius-lg] p-6 space-y-4">
         <h2 className="font-semibold text-[--color-text-primary]">Create coupon</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Input placeholder="Code (e.g. SAVE20)" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} />
+          <div className="flex items-center gap-1.5">
+            <Input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} className="font-mono uppercase" />
+            <button
+              type="button"
+              onClick={() => setCode(generateCouponCode())}
+              title="Generate new code"
+              className="shrink-0 rounded-[--radius-sm] border border-[--color-border] p-2 text-[--color-text-muted] hover:bg-[--color-surface] hover:text-[--color-text-primary] transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+          </div>
           <select
             value={discountType}
             onChange={(e) => setDiscountType(e.target.value as "percent" | "fixed")}
@@ -129,26 +155,49 @@ export default function PromotionsPage() {
             <option value="fixed">$ Fixed</option>
           </select>
           <Input
-            placeholder={discountType === "percent" ? "e.g. 20" : "e.g. 5.00"}
+            placeholder={
+              discountType === "fixed" && !selectedCourse
+                ? "Select course first"
+                : discountType === "percent"
+                ? "1 – 50"
+                : "e.g. 5.00"
+            }
             value={discountValue}
             onChange={(e) => setDiscountValue(e.target.value)}
-            type="number" min="1"
+            type="number"
+            min="1"
+            max={discountType === "percent" ? 50 : undefined}
+            disabled={discountType === "fixed" && !selectedCourse}
+            className={discountType === "fixed" && !selectedCourse ? "opacity-40 cursor-not-allowed" : ""}
           />
         </div>
+        {discountType === "fixed" && (
+          <p className="text-xs text-[--color-text-muted]">
+            Fixed discount must stay under 50% of the course price.
+          </p>
+        )}
+        {discountType === "percent" && (
+          <p className="text-xs text-[--color-text-muted]">
+            Maximum 50% off.
+          </p>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <select
             value={selectedCourse}
             onChange={(e) => setSelectedCourse(e.target.value)}
             className="rounded-[--radius-sm] border border-[--color-border] bg-[--color-surface-raised] px-3 py-2 text-sm text-[--color-text-primary] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
-            <option value="__global__">All courses (global)</option>
-            {courses.map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
+            {courses.length === 0 ? (
+              <option value="" disabled>No courses yet</option>
+            ) : (
+              courses.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))
+            )}
           </select>
           <Input placeholder="Max uses (optional)" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} type="number" min="1" />
         </div>
-        <Button onClick={createCoupon} disabled={creating || !code || !discountValue} size="sm">
+        <Button onClick={createCoupon} disabled={creating || !code || !discountValue || !selectedCourse} size="sm">
           <Plus className="h-4 w-4" />
           {creating ? "Creating…" : "Create coupon"}
         </Button>

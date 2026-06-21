@@ -21,6 +21,15 @@ interface CheckoutSessionResponse {
   session_id: string;
 }
 
+interface CouponValidateResult {
+  valid: boolean;
+  discount_type: string;
+  discount_value: number;
+  original_price_cents: number;
+  discounted_price_cents: number;
+  message: string;
+}
+
 function TrustNotice() {
   return (
     <div className="mt-6 space-y-3 border-t border-[--color-border] pt-4 text-xs text-[--color-text-muted]">
@@ -69,6 +78,8 @@ function OrderSummaryCard({
   priceInCents,
   onPay,
   paying,
+  discountedPriceCents,
+  couponMessage,
 }: {
   courseId: string;
   title: string;
@@ -76,6 +87,8 @@ function OrderSummaryCard({
   priceInCents: number;
   onPay: () => void;
   paying: boolean;
+  discountedPriceCents?: number;
+  couponMessage?: string;
 }) {
   return (
     <div className="premium-card animate-fade-up rounded-[--radius-lg] p-6">
@@ -90,13 +103,31 @@ function OrderSummaryCard({
 
       <div className="mt-4 flex items-baseline justify-between border-t border-[--color-border] pt-4">
         <span className="text-sm font-bold text-[--color-text-secondary]">Total due today</span>
-        <span className="font-heading text-2xl font-black text-[--color-text-primary]">
-          {formatPrice(priceInCents)}
-        </span>
+        {discountedPriceCents !== undefined ? (
+          <span className="flex items-baseline gap-2">
+            <span className="text-sm font-bold text-[--color-text-muted] line-through">
+              {formatPrice(priceInCents)}
+            </span>
+            <span className="font-heading text-2xl font-black text-[--color-text-primary]">
+              {formatPrice(discountedPriceCents)}
+            </span>
+          </span>
+        ) : (
+          <span className="font-heading text-2xl font-black text-[--color-text-primary]">
+            {formatPrice(priceInCents)}
+          </span>
+        )}
       </div>
+      {couponMessage && (
+        <p className="mt-1 text-right text-xs font-semibold text-[--color-success]">{couponMessage}</p>
+      )}
 
       <div className="mt-5">
-        <PayButton label={`Pay ${formatPrice(priceInCents)}`} onClick={onPay} loading={paying} />
+        <PayButton
+          label={`Pay ${formatPrice(discountedPriceCents ?? priceInCents)}`}
+          onClick={onPay}
+          loading={paying}
+        />
       </div>
 
       <Link
@@ -249,8 +280,14 @@ function CheckoutContent() {
   const router = useRouter();
   const courseId = searchParams.get("courseId");
   const courseIdsParam = searchParams.get("courseIds");
+  const couponParam = searchParams.get("coupon");
   const { getToken } = useAuth();
   const { items } = useCartStore();
+
+  const requestedIds = courseIdsParam ? new Set(courseIdsParam.split(",").filter(Boolean)) : null;
+  const filteredItems = requestedIds ? items.filter((item) => requestedIds.has(item.courseId)) : items;
+  const checkoutItems = filteredItems.length > 0 ? filteredItems : items;
+  const singleCourseId = courseId ?? (checkoutItems.length === 1 ? checkoutItems[0]?.courseId : undefined);
 
   const [mounted, setMounted] = useState(false);
   const [course, setCourse] = useState<Course | null>(null);
@@ -258,6 +295,7 @@ function CheckoutContent() {
   const [loadingCourse, setLoadingCourse] = useState(Boolean(courseId));
   const [payingId, setPayingId] = useState<string | null>(null);
   const [payingMulti, setPayingMulti] = useState(false);
+  const [couponInfo, setCouponInfo] = useState<CouponValidateResult | null>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -280,6 +318,27 @@ function CheckoutContent() {
     };
   }, [courseId]);
 
+  useEffect(() => {
+    if (!couponParam || !singleCourseId) {
+      setCouponInfo(null);
+      return;
+    }
+    let cancelled = false;
+    apiFetch<CouponValidateResult>("/api/v1/coupons/validate", {
+      method: "POST",
+      body: JSON.stringify({ code: couponParam, course_id: singleCourseId }),
+    })
+      .then((result) => {
+        if (!cancelled) setCouponInfo(result.valid ? result : null);
+      })
+      .catch(() => {
+        if (!cancelled) setCouponInfo(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [couponParam, singleCourseId]);
+
   async function pay(targetCourseId: string) {
     setPayingId(targetCourseId);
     try {
@@ -287,7 +346,10 @@ function CheckoutContent() {
       const { checkout_url } = await apiFetch<CheckoutSessionResponse>("/api/v1/checkout/sessions", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ course_id: targetCourseId }),
+        body: JSON.stringify({
+          course_id: targetCourseId,
+          ...(couponInfo && targetCourseId === singleCourseId ? { coupon_code: couponParam } : {}),
+        }),
       });
       window.location.href = checkout_url;
     } catch (err: unknown) {
@@ -347,6 +409,8 @@ function CheckoutContent() {
             priceInCents={course.price_in_cents}
             onPay={() => pay(course.id)}
             paying={payingId === course.id}
+            discountedPriceCents={couponInfo && course.id === singleCourseId ? couponInfo.discounted_price_cents : undefined}
+            couponMessage={couponInfo && course.id === singleCourseId ? couponInfo.message : undefined}
           />
         </div>
       </div>
@@ -355,10 +419,6 @@ function CheckoutContent() {
 
   // Cart-based checkout
   if (items.length === 0) return <EmptyState />;
-
-  const requestedIds = courseIdsParam ? new Set(courseIdsParam.split(",").filter(Boolean)) : null;
-  const filteredItems = requestedIds ? items.filter((item) => requestedIds.has(item.courseId)) : items;
-  const checkoutItems = filteredItems.length > 0 ? filteredItems : items;
 
   if (checkoutItems.length === 1 && checkoutItems[0]) {
     const item = checkoutItems[0];
@@ -375,6 +435,8 @@ function CheckoutContent() {
             priceInCents={item.priceInCents}
             onPay={() => pay(item.courseId)}
             paying={payingId === item.courseId}
+            discountedPriceCents={couponInfo && item.courseId === singleCourseId ? couponInfo.discounted_price_cents : undefined}
+            couponMessage={couponInfo && item.courseId === singleCourseId ? couponInfo.message : undefined}
           />
         </div>
       </div>
