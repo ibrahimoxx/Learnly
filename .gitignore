@@ -29,6 +29,8 @@ generated/
 ai-output/
 ai_output/
 scripts/generated/
+debug_cookies.py
+screenshot_instructor.py
 
 # Seed data — nothing commits, ever
 seed-data/
