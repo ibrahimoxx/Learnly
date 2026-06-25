@@ -86,7 +86,7 @@ export function QuizPlayer({ lessonId, token: _serverToken, onComplete }: Props)
         attempt_number: result.attempt_number,
       });
       setAttempt(result);
-      onComplete?.();
+      if (result.passed) onComplete?.();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Submission failed.");
     } finally {
