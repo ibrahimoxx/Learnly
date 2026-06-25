@@ -5,6 +5,7 @@ from decimal import Decimal
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.auth import get_current_user
 from app.db.session import get_db
@@ -84,7 +85,13 @@ async def list_instructor_courses(
     total_result = await db.execute(select(func.count()).select_from(base_query.subquery()))
     total = total_result.scalar_one()
 
-    query = base_query.order_by(Course.created_at.desc()).offset((page - 1) * limit).limit(limit)
+    query = (
+        base_query
+        .options(selectinload(Course.category))
+        .order_by(Course.created_at.desc())
+        .offset((page - 1) * limit)
+        .limit(limit)
+    )
     result = await db.execute(query)
     courses = result.scalars().all()
 
