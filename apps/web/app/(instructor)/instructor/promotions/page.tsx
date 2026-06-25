@@ -98,7 +98,7 @@ export default function PromotionsPage() {
         detail = "Code already exists — try regenerating";
       } else {
         const match = raw.match(/"detail"\s*:\s*"([^"]+)"/);
-        if (match) detail = match[1];
+        if (match?.[1]) detail = match[1];
       }
       toast.error(detail);
     } finally {
