@@ -33,7 +33,7 @@ async def _run_gamification_quiz(user_id: str) -> None:
     async with AsyncSessionLocal() as db:
         await process_quiz_pass(uuid.UUID(user_id), db)
 
-PASS_THRESHOLD = 0.7
+PASS_THRESHOLD = 0.75
 
 
 async def _get_lesson_course(lesson_id: uuid.UUID, db: AsyncSession) -> tuple[Lesson, Course]:
