@@ -14,6 +14,7 @@ type StrategyConfig = {
   maxAgeSeconds?: number;
   networkTimeoutSeconds?: number;
   rangeRequests?: boolean;
+  opaqueOk?: boolean;
 };
 
 type RuntimeRoute = {
@@ -35,12 +36,12 @@ const runtimeRoutes: RuntimeRoute[] = [
   {
     urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
     handler: "CacheFirst",
-    options: { cacheName: "google-fonts-webfonts", maxEntries: 4, maxAgeSeconds: 31536000 },
+    options: { cacheName: "google-fonts-webfonts", maxEntries: 4, maxAgeSeconds: 31536000, opaqueOk: true },
   },
   {
     urlPattern: /^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,
     handler: "StaleWhileRevalidate",
-    options: { cacheName: "google-fonts-stylesheets", maxEntries: 4, maxAgeSeconds: 604800 },
+    options: { cacheName: "google-fonts-stylesheets", maxEntries: 4, maxAgeSeconds: 604800, opaqueOk: true },
   },
   {
     urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,
@@ -121,12 +122,14 @@ const runtimeRoutes: RuntimeRoute[] = [
   {
     urlPattern: ({ sameOrigin }) => !sameOrigin,
     handler: "NetworkFirst",
+    // No status 0 (opaque) — opaque image responses cannot be rendered by browsers
     options: { cacheName: "cross-origin", maxEntries: 32, maxAgeSeconds: 3600, networkTimeoutSeconds: 10 },
   },
 ];
 
-function createPlugins(config: StrategyConfig) {
-  const plugins = [new CacheableResponsePlugin({ statuses: [0, 200] })];
+function createPlugins(config: StrategyConfig & { opaqueOk?: boolean }) {
+  const statuses = config.opaqueOk ? [0, 200] : [200];
+  const plugins = [new CacheableResponsePlugin({ statuses })];
 
   if (config.rangeRequests) {
     plugins.push(new RangeRequestsPlugin());
