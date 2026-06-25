@@ -35,6 +35,9 @@ screenshot_instructor.py
 # Seed data — nothing commits, ever
 seed-data/
 
+# PFA presentation files — never commit
+ppt PFA/
+
 # OS & editor
 .DS_Store
 Thumbs.db
