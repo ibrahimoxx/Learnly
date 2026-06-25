@@ -236,6 +236,23 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
     is_gift_to_other = is_gift == "true" and bool(recipient_user_id) and recipient_user_id != user_id
     batch_id = uuid.uuid4() if is_gift_to_other and len(course_id_list) > 1 else None
 
+    # Use Stripe's actual charged amount (reflects coupons/discounts), not the original price.
+    # For multi-course, prorate by original price ratio.
+    stripe_total = int(_get(session, "amount_total") or 0)
+    currency = str(_get(session, "currency") or "eur")
+
+    # Pre-load all courses to compute proration denominator
+    valid_course_uuids: list[uuid.UUID] = []
+    for cid in course_id_list:
+        try:
+            valid_course_uuids.append(uuid.UUID(cid))
+        except (ValueError, AttributeError, TypeError):
+            pass
+
+    courses_result = await db.execute(select(Course).where(Course.id.in_(valid_course_uuids)))
+    courses_map: dict[uuid.UUID, Course] = {c.id: c for c in courses_result.scalars().all()}
+    original_total = sum(c.price_in_cents for c in courses_map.values()) or 1  # avoid div/0
+
     fulfilled: list[tuple[Course, Enrollment]] = []
     for course_id_str in course_id_list:
         try:
@@ -252,16 +269,21 @@ async def _fulfill_checkout(db: AsyncSession, session: object) -> None:
         if existing.scalar_one_or_none():
             continue
 
-        course_result = await db.execute(select(Course).where(Course.id == course_uuid))
-        course = course_result.scalar_one_or_none()
+        course = courses_map.get(course_uuid)
         if not course:
             continue
+
+        # Prorate the actual Stripe total by each course's share of the original total
+        if len(valid_course_uuids) == 1:
+            amount_paid = stripe_total
+        else:
+            amount_paid = round(stripe_total * course.price_in_cents / original_total)
 
         enrollment = Enrollment(
             student_id=uuid.UUID(enroll_student_id),
             course_id=course_uuid,
-            amount_paid_cents=course.price_in_cents,
-            currency=str(_get(session, "currency") or "usd"),
+            amount_paid_cents=amount_paid,
+            currency=currency,
         )
         db.add(enrollment)
         course.enrollment_count = (course.enrollment_count or 0) + 1

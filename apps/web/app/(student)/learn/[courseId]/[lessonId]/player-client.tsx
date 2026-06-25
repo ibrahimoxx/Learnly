@@ -328,7 +328,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                 completedIds={completedIds}
               />
             ) : activeTab === "notes" ? (
-              <NotesTab lessonId={currentLesson.id} token={_serverToken} progressRef={progressRef} />
+              <NotesTab lessonId={currentLesson.id} getToken={getAuthToken} progressRef={progressRef} />
             ) : activeTab === "qa" ? (
               <QATab lessonId={currentLesson.id} token={_serverToken} />
             ) : (
@@ -571,7 +571,7 @@ export function PlayerClient({ enrollment, sectionsWithLessons, currentLesson, t
                   completedIds={completedIds}
                 />
               ) : mobileTab === "notes" ? (
-                <NotesTab lessonId={currentLesson.id} token={_serverToken} progressRef={progressRef} />
+                <NotesTab lessonId={currentLesson.id} getToken={getAuthToken} progressRef={progressRef} />
               ) : mobileTab === "qa" ? (
                 <QATab lessonId={currentLesson.id} token={_serverToken} />
               ) : (
@@ -985,7 +985,7 @@ function formatTimestamp(seconds: number | null): string | null {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: string; progressRef: React.RefObject<number> }) {
+function NotesTab({ lessonId, getToken, progressRef }: { lessonId: string; getToken: () => Promise<string>; progressRef: React.RefObject<number> }) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
   const [newNote, setNewNote] = useState("");
@@ -995,19 +995,22 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
 
   useEffect(() => {
     setLoading(true);
-    apiFetch<Note[]>(`/api/v1/lessons/${lessonId}/notes`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(setNotes).catch(() => setNotes([])).finally(() => setLoading(false));
-  }, [lessonId, token]);
+    getToken().then(tok =>
+      apiFetch<Note[]>(`/api/v1/lessons/${lessonId}/notes`, { headers: { Authorization: `Bearer ${tok}` } })
+        .then(setNotes).catch(() => setNotes([]))
+    ).finally(() => setLoading(false));
+  }, [lessonId, getToken]);
 
   async function submitNote(e: React.FormEvent) {
     e.preventDefault();
     if (!newNote.trim()) return;
     setSubmitting(true);
     try {
+      const tok = await getToken();
       const note = await apiFetch<Note>(`/api/v1/lessons/${lessonId}/notes`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newNote.trim(), timestamp_seconds: Math.floor(progressRef.current) }),
+        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newNote.trim(), timestamp_seconds: Math.floor(progressRef.current ?? 0) }),
       });
       setNotes((prev) => [...prev, note]);
       setNewNote("");
@@ -1018,9 +1021,10 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
   async function saveEdit(noteId: string) {
     if (!editText.trim()) return;
     try {
+      const tok = await getToken();
       const updated = await apiFetch<Note>(`/api/v1/notes/${noteId}`, {
         method: "PATCH",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
         body: JSON.stringify({ content: editText.trim() }),
       });
       setNotes((prev) => prev.map((n) => (n.id === noteId ? updated : n)));
@@ -1030,7 +1034,8 @@ function NotesTab({ lessonId, token, progressRef }: { lessonId: string; token: s
 
   async function deleteNote(noteId: string) {
     try {
-      await apiFetch(`/api/v1/notes/${noteId}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+      const tok = await getToken();
+      await apiFetch(`/api/v1/notes/${noteId}`, { method: "DELETE", headers: { Authorization: `Bearer ${tok}` } });
       setNotes((prev) => prev.filter((n) => n.id !== noteId));
     } catch { toast.error("Failed to delete note."); }
   }

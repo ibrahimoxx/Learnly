@@ -33,7 +33,9 @@ interface CouponResult {
 function getAffiliateCookie(): string | undefined {
   if (typeof document === "undefined") return undefined;
   const match = document.cookie.match(/(?:^|;\s*)affiliate_ref=([^;]+)/);
-  return match ? match[1] : undefined;
+  if (match?.[1]) return match[1];
+  // Fallback: localStorage survives Clerk login redirects
+  try { return localStorage.getItem("affiliate_ref") ?? undefined; } catch { return undefined; }
 }
 
 export function EnrollButton({ courseId, courseSlug, isFree, priceInCents, isEnrolled }: Props) {

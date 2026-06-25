@@ -15,6 +15,8 @@ export default function AffiliateTracker() {
 
     const secure = window.location.protocol === "https:" ? "; Secure" : "";
     document.cookie = `affiliate_ref=${sanitized}; path=/; max-age=2592000; SameSite=Lax${secure}`;
+    // localStorage backup survives Clerk OAuth redirects that may drop query params
+    try { localStorage.setItem("affiliate_ref", sanitized); } catch { /* private browsing */ }
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
     fetch(`${apiUrl}/api/v1/affiliate/track/${sanitized}`, { method: "POST" }).catch(() => undefined);
