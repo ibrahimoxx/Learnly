@@ -146,14 +146,14 @@ function CurriculumSkeleton() {
 
 export default async function CourseDetailPage({ params }: Props) {
   const { slug } = await params;
-  const [course, t] = await Promise.all([
+  const [course, t, enrollments] = await Promise.all([
     getCourse(slug),
     getTranslations("course"),
+    getViewerEnrollments(),
   ]);
 
   if (!course || course.status !== "published") notFound();
 
-  const enrollments: Enrollment[] = await getViewerEnrollments();
   const isEnrolled = hasEnrollmentForCourse(enrollments, course.id, course.slug);
 
   const price = isEnrolled ? "Owned" : course.is_free ? t("free") : `$${(course.price_in_cents / 100).toFixed(2)}`;
