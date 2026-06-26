@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { Award, BookOpen } from "lucide-react";
+import { Award, BookOpen, Download } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import type { Enrollment } from "@/types";
 
@@ -46,6 +46,21 @@ export default function CertificatesPage() {
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
+  }
+
+  async function downloadCertificate(enrollmentId: string, courseTitle: string) {
+    const token = await getToken();
+    const res = await fetch(`${API}/api/v1/enrollments/${enrollmentId}/certificate`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${courseTitle.replace(/[^a-z0-9]+/gi, "-")}-certificate.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -122,6 +137,7 @@ export default function CertificatesPage() {
                 key={enrollment.id}
                 enrollment={enrollment}
                 onView={() => viewCertificate(enrollment.id)}
+                onDownload={() => downloadCertificate(enrollment.id, enrollment.course_title ?? "course")}
               />
             ))}
           </div>
@@ -133,7 +149,15 @@ export default function CertificatesPage() {
 
 /* ── Certificate preview card ── */
 
-function CertCard({ enrollment, onView }: { enrollment: Enrollment; onView: () => void }) {
+function CertCard({
+  enrollment,
+  onView,
+  onDownload,
+}: {
+  enrollment: Enrollment;
+  onView: () => void;
+  onDownload: () => void;
+}) {
   const completedDate = enrollment.completed_at
     ? new Date(enrollment.completed_at).toLocaleDateString("en-US", { month: "long", year: "numeric" })
     : null;
@@ -242,6 +266,14 @@ function CertCard({ enrollment, onView }: { enrollment: Enrollment; onView: () =
             style={{ color: "#0056d2" }}
           >
             View certificate
+          </button>
+          <button
+            onClick={onDownload}
+            className="inline-flex items-center gap-1 text-xs font-semibold transition-opacity hover:opacity-75"
+            style={{ color: "#0056d2" }}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Download
           </button>
         </div>
 
