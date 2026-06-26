@@ -22,6 +22,7 @@ from app.schemas.checkout import (
     CheckoutSessionRead,
     GiftCheckoutSessionCreate,
 )
+from app.api.v1.webhooks import _fulfill_checkout
 
 log = structlog.get_logger()
 router = APIRouter(prefix="/checkout", tags=["checkout"])
@@ -294,3 +295,29 @@ async def create_gift_checkout_session(
         course_ids=[str(cid) for cid in course_ids],
     )
     return CheckoutSessionRead(checkout_url=session.url, session_id=session.id)
+
+
+@router.get("/sessions/{session_id}/confirm")
+async def confirm_checkout_session(
+    session_id: str,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Fallback fulfillment for the success page — in case the Stripe webhook
+    hasn't reached this server (e.g. `stripe listen` not running locally).
+    Idempotent: safe to call even if the webhook already fulfilled the order."""
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+    except STRIPE_ERROR_TYPES as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Checkout session not found") from exc
+
+    metadata = session.get("metadata") or {}
+    session_user_id = metadata.get("user_id")
+    if session_user_id != str(user.id):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your checkout session")
+
+    if session.get("payment_status") != "paid":
+        return {"fulfilled": False, "reason": "payment not completed"}
+
+    await _fulfill_checkout(db, session)
+    return {"fulfilled": True}
