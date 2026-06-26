@@ -18,7 +18,7 @@ export default function AffiliateTracker() {
     // localStorage backup survives Clerk OAuth redirects that may drop query params
     try { localStorage.setItem("affiliate_ref", sanitized); } catch { /* private browsing */ }
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
     fetch(`${apiUrl}/api/v1/affiliate/track/${sanitized}`, { method: "POST" }).catch(() => undefined);
   }, [searchParams]);
 

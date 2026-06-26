@@ -15,7 +15,24 @@ export const publicRoutes = [
   "/manifest.json",
   "/icons(.*)",
   "/swe-worker(.*)",
+  // Public marketing/informational pages — visible without login
+  "/about",
+  "/blog(.*)",
+  "/careers",
+  "/cookies",
+  "/help(.*)",
+  "/paths(.*)",
+  "/pricing",
+  "/privacy",
+  "/teach(.*)",
+  "/terms",
+  "/topic(.*)",
 ];
+
+// Public instructor profile page (/user/[id]) — excludes /user/edit-profile/*
+// which is a separate, private route under the (student) group.
+const isPublicUserProfile = (pathname: string) =>
+  pathname.startsWith("/user/") && !pathname.startsWith("/user/edit-profile");
 
 const isPublicRoute = createRouteMatcher(publicRoutes);
 
@@ -61,7 +78,7 @@ export default clerkMiddleware(async (auth, request) => {
     return NextResponse.redirect(new URL("/account-suspended", request.url));
   }
 
-  if (!isPublicRoute(request)) {
+  if (!isPublicRoute(request) && !isPublicUserProfile(request.nextUrl.pathname)) {
     await auth.protect();
   }
 

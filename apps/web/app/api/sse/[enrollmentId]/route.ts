@@ -12,7 +12,7 @@ export async function GET(
   const token = await getToken();
   if (!token) return new Response("Unauthorized", { status: 401 });
 
-  const apiUrl = process.env.API_URL ?? "http://localhost:8000";
+  const apiUrl = process.env.API_URL ?? "http://127.0.0.1:8000";
   let upstream: Awaited<ReturnType<typeof undiciFetch>>;
   try {
     upstream = await undiciFetch(

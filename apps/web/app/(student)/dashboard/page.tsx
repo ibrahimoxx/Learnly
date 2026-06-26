@@ -211,7 +211,7 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
   async function downloadCertificate() {
     const token = await getToken();
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/enrollments/${enrollment.id}/certificate`,
+      `${process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000"}/api/v1/enrollments/${enrollment.id}/certificate`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!res.ok) return;
